@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\common\wrapper_glfw.cpp" />
     <ClCompile Include="application.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -148,6 +149,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaderFrag.frag" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\common\wrapper_glfw.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
