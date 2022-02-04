@@ -18,14 +18,20 @@
     <ClCompile Include="application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="shaderVert.vert">
+    <ClCompile Include="..\..\common\wrapper_glfw.cpp">
       <Filter>Source Files</Filter>
-    </Text>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaderFrag.frag">
+    <ClInclude Include="..\..\common\wrapper_glfw.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\shaders\shaderFrag.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\shaders\shaderVert.vert">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
