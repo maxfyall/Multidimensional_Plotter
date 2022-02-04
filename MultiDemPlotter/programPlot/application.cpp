@@ -65,7 +65,24 @@ void init(GLWrapper* glw)
 
 void display()
 {
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_DEPTH_TEST);
+
+	glUseProgram(program);
+
+	stack<mat4> model;
+	model.push(mat4(1.0));
+
+	mat4 projection = perspective(radians(30.f), aspect_ratio, 0.1f, 100.0f);
+
+	mat4 view = lookAt(
+		vec3(0,0,4),
+		vec3(0,0,0),
+		vec3(0,1,0)
+	);
 }
 
 /*
