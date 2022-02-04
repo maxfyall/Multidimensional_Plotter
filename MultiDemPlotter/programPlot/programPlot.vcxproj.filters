@@ -23,18 +23,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="shaderVert.vert">
-      <Filter>Source Files</Filter>
-    </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shaderFrag.frag">
-      <Filter>Source Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\common\wrapper_glfw.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\shaders\shaderFrag.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\shaders\shaderVert.vert">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

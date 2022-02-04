@@ -211,6 +211,9 @@ GLuint GLWrapper::LoadShader(const char *vertex_path, const char *fragment_path)
 	GLint result = GL_FALSE;
 	int logLength;
 
+	cout << "Shaders Loaded... " << endl;
+	cout << "Building" << endl;
+
 	vertShader = BuildShader(GL_VERTEX_SHADER, vertShaderStr);
 	fragShader = BuildShader(GL_FRAGMENT_SHADER, fragShaderStr);
 

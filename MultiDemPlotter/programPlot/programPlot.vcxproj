@@ -145,13 +145,11 @@
     <ClCompile Include="application.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="shaderVert.vert" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shaderFrag.frag" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\common\wrapper_glfw.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\shaders\shaderFrag.frag" />
+    <None Include="..\..\shaders\shaderVert.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
