@@ -58,7 +58,7 @@ GLWrapper::GLWrapper(int width, int height, const char *title) {
 	}
 
 	/* Can set the Window title at a later time if you wish*/
-	glfwSetWindowTitle(window, "Max Fyall - Clock Face"); // changed title :))
+	glfwSetWindowTitle(window, "Multidimensional Plotter");
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, true);
 }

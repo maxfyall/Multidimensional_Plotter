@@ -28,6 +28,8 @@
 GLuint program;
 GLuint vArrayObj;
 
+GLuint modelID, viewID, projectionID;
+
 GLfloat aspect_ratio;
 
 // include namespaces to avoid std:: etc...
@@ -60,6 +62,10 @@ void init(GLWrapper* glw)
 		cin.ignore();
 		exit(0); // exit program
 	}
+
+	modelID = glGetUniformLocation(program, "model");
+	viewID = glGetUniformLocation(program, "view");
+	projectionID = glGetUniformLocation(program, "projection");
 
 }
 
