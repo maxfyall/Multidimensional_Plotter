@@ -20,6 +20,8 @@
 #include <iostream>
 #include <stack>
 
+#include "cube.h"
+
 /* Include the GLM maths library for GLM functions along with matrix extensions	*/
 #include <glm/glm.hpp>
 #include "glm/gtc/matrix_transform.hpp"
@@ -29,6 +31,8 @@ GLuint program;
 GLuint vArrayObj;
 
 GLuint modelID, viewID, projectionID;
+
+Cube theCube;
 
 GLfloat aspect_ratio;
 
@@ -67,6 +71,8 @@ void init(GLWrapper* glw)
 	viewID = glGetUniformLocation(program, "view");
 	projectionID = glGetUniformLocation(program, "projection");
 
+	theCube.makeCube();
+
 }
 
 void display()
@@ -89,6 +95,18 @@ void display()
 		vec3(0,0,0),
 		vec3(0,1,0)
 	);
+
+	glUniformMatrix4fv(viewID, 1, GL_FALSE, &view[0][0]);
+	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projection[0][0]);
+
+	model.push(model.top()); 
+	{
+		model.top() = translate(model.top(), vec3(0, 0, 0));
+		model.top() = scale(model.top(), vec3(1, 1, 1));
+
+		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
+		theCube.drawCube(0);
+	}
 }
 
 /*

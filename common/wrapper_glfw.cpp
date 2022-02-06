@@ -139,6 +139,11 @@ void GLWrapper::setKeyCallback(void(*func)(GLFWwindow* window, int key, int scan
 	glfwSetKeyCallback(window, func);
 }
 
+//void GLWrapper::setMouseCallback() 
+//{
+//	
+//}
+
 
 /* Build shaders from strings containing shader source code */
 GLuint GLWrapper::BuildShader(GLenum eShaderType, const string &shaderText)
