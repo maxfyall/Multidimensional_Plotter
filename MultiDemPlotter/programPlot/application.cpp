@@ -32,13 +32,24 @@ GLuint vArrayObj;
 
 GLuint modelID, viewID, projectionID;
 
+bool firstMouse = true;
+float yaw = -90.0f;
+float pitch = 0.0f;
+float lastX = 1024.f / 2.0;
+float lastY = 768.f / 2.0;
+float fov = 30.f;
+
+glm::vec3 cameraPos = glm::vec3(0, 0, 3);
+glm::vec3 cameraFront = glm::vec3(0, 0, -1);
+glm::vec3 cameraUp = glm::vec3(0, 1, 0);
+
 Cube theCube;
 
 GLfloat aspect_ratio;
 
 // include namespaces to avoid std:: etc...
-using namespace std;
-using namespace glm;
+//using namespace std;
+//using namespace glm;
 
 /*
 *  Initialising Function, called before rendering loop to initialise variables and creating objects
@@ -57,13 +68,13 @@ void init(GLWrapper* glw)
 		// set program variable to loaded shaders
 		program = glw->LoadShader("../../shaders/shaderVert.vert", "../../shaders/shaderFrag.frag");
 	}
-	catch (exception& e) // catch any exceptions
+	catch (std::exception& e) // catch any exceptions
 	{
 		// print exception found
-		cout << "Exception found: " << e.what() << endl;
+		std::cout << "Exception found: " << e.what() << std::endl;
 
 		// ignore any input
-		cin.ignore();
+		std::cin.ignore();
 		exit(0); // exit program
 	}
 
@@ -85,24 +96,20 @@ void display()
 
 	glUseProgram(program);
 
-	stack<mat4> model;
-	model.push(mat4(1.0));
+	std::stack<glm::mat4> model;
+	model.push(glm::mat4(1.0));
 
-	mat4 projection = perspective(radians(30.f), aspect_ratio, 0.1f, 100.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(fov), aspect_ratio, 0.1f, 100.0f);
 
-	mat4 view = lookAt(
-		vec3(0,0,4),
-		vec3(0,0,0),
-		vec3(0,1,0)
-	);
+	glm::mat4 view = glm::lookAt(cameraPos, cameraPos+cameraFront, cameraUp);
 
 	glUniformMatrix4fv(viewID, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projection[0][0]);
 
 	model.push(model.top()); 
 	{
-		model.top() = translate(model.top(), vec3(0, 0, 0));
-		model.top() = scale(model.top(), vec3(1, 1, 1));
+		model.top() = glm::translate(model.top(), glm::vec3(0, 0, 0));
+		model.top() = glm::scale(model.top(), glm::vec3(1, 1, 1));
 
 		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
 		theCube.drawCube(0);
@@ -126,9 +133,48 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 	// close application window with ESC
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 	{
-		cout << "ESC PRESSED - TERMINATING" << endl;
+		std::cout << "ESC PRESSED - TERMINATING" << std::endl;
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
+}
+
+static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn) 
+{
+	float xpos = static_cast<float>(xposIn);
+	float ypos = static_cast<float>(yposIn);
+
+	if (firstMouse) 
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	float sensitivity = 0.01f;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
+
+	glm::vec3 front;
+
+	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	front.y = sin(glm::radians(pitch));
+	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+	cameraFront = glm::normalize(front);
+
 }
 
 
@@ -147,6 +193,7 @@ int main(int argc, char* argv[])
 
 	glw->setRenderer(display);
 	glw->setKeyCallback(keyCallback);
+	glw->setMouseCallback(mouseCallback);
 	glw->setReshapeCallback(reshape);
 
 	glw->DisplayVersion();

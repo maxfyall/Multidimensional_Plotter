@@ -61,6 +61,7 @@ GLWrapper::GLWrapper(int width, int height, const char *title) {
 	glfwSetWindowTitle(window, "Multidimensional Plotter");
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, true);
+	glfwSetInputMode(window, GLFW_CURSOR, true);
 }
 
 
@@ -139,10 +140,10 @@ void GLWrapper::setKeyCallback(void(*func)(GLFWwindow* window, int key, int scan
 	glfwSetKeyCallback(window, func);
 }
 
-//void GLWrapper::setMouseCallback() 
-//{
-//	
-//}
+void GLWrapper::setMouseCallback(void (*func)(GLFWwindow* window, double xpos, double ypos)) 
+{
+	glfwSetCursorPosCallback(window, func);
+}
 
 
 /* Build shaders from strings containing shader source code */
