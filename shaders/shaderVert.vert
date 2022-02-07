@@ -8,7 +8,11 @@ layout(location = 2) in vec3 normal;
 
 uniform mat4 model, view, projection;
 
+out vec4 fragColour;
+
 void main()
 {
+	fragColour = colour;
+
 	gl_Position = (projection* view * model) * position;
 }
