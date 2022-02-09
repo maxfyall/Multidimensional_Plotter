@@ -1,2 +1,13 @@
 ﻿  application.cpp
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(181,27): warning C4244: '+=': conversion from 'double' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(182,27): warning C4244: '+=': conversion from 'double' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(184,38): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
   programPlot.vcxproj -> C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\Debug\programPlot.exe

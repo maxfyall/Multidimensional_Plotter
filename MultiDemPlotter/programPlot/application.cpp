@@ -110,18 +110,12 @@ void display()
 		glm::vec3(0,1,0)
 	);
 
-
 	glUniformMatrix4fv(viewID, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projection[0][0]);
 
-	view = glm::rotate(view, -glm::radians(cameraFront.x), glm::vec3(1, 0, 0));
-	view = glm::rotate(view, -glm::radians(cameraFront.y), glm::vec3(0, 1, 0));
-	view = glm::rotate(view, -glm::radians(cameraFront.z), glm::vec3(0, 0, 1));
-
-
-	/*model.top() = glm::rotate(model.top(), -glm::radians(cameraFront.x), glm::vec3(1, 0, 0));
-	model.top() = glm::rotate(model.top(), -glm::radians(cameraFront.y), glm::vec3(0, 1, 0));
-	model.top() = glm::rotate(model.top(), -glm::radians(cameraFront.z), glm::vec3(0, 0, 1));*/
+	model.top() = glm::rotate(model.top(), -glm::radians(pitch), glm::vec3(1, 0.0f, 0.0f));
+	model.top() = glm::rotate(model.top(), -glm::radians(pitch), glm::vec3(0.0f, 1, 0.0f));
+	//model.top() = glm::rotate(model.top(), -glm::radians(pitch), glm::vec3(0.0f, 0.0f, cameraFront.z));
 
 
 	model.push(model.top()); 
@@ -179,31 +173,37 @@ static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 			firstMouse = false;
 		}
 
-		float xoffset = xpos - lastX;
-		float yoffset = lastY - ypos;
+		double xoffset = xpos-lastX;
+		double yoffset = lastY-ypos;
 		lastX = xpos;
 		lastY = ypos;
 
-		float sensitivity = 1.0f;
-		xoffset *= sensitivity;
-		yoffset *= sensitivity;
+		cameraFront.x += xoffset;
+		cameraFront.y += yoffset;
 
-		yaw += xoffset;
-		pitch += yoffset;
+		pitch += (xoffset + yoffset) * 0.1f;
 
-		if (pitch > 89.0f)
-			pitch = 89.0f;
-		if (pitch < -89.0f)
-			pitch = -89.0f;
 
-		glm::vec3 front;
-
-		front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-		front.y = sin(glm::radians(pitch));
-		front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-
-		cameraFront = front;
-
+		//float sensitivity = 1.0f;
+		//xoffset *= sensitivity;
+		//yoffset *= sensitivity;
+		//
+		//yaw += xoffset;
+		//pitch += yoffset;
+		//
+		//if (pitch > 89.0f)
+		//	pitch = 89.0f;
+		//if (pitch < -89.0f)
+		//	pitch = -89.0f;
+		//
+		//glm::vec3 front;
+		//
+		//front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		//front.y = sin(glm::radians(pitch));
+		//front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+		//
+		//cameraFront = front;
+		//
 		//cameraFront = glm::normalize(front);
 
 	}
