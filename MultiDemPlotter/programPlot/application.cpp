@@ -40,13 +40,19 @@ float lastX = 1024.f / 2.0;
 float lastY = 768.f / 2.0;
 float fov = 30.f;
 
-glm::vec3 cameraPos = glm::vec3(0, 0, 3);
-glm::vec3 cameraFront = glm::vec3(0, 0, -1);
-glm::vec3 cameraUp = glm::vec3(0, 1, 0);
-
 Cube theCube;
 
 GLfloat aspect_ratio;
+
+GLfloat vertexPositionsAxes[] =
+{
+	0.0f, 1.0f, 0.f, 1.0f,
+	0.0f, -1.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 0.0f, 1.0f,
+	-1.0f, 0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 1.0f, 1.0f,
+	0.0f, 0.0f, -1.0f, 1.0f,
+};
 
 // include namespaces to avoid std:: etc...
 //using namespace std;
@@ -102,8 +108,6 @@ void display()
 
 	glm::mat4 projection = glm::perspective(glm::radians(fov), aspect_ratio, 0.1f, 100.0f);
 
-//	glm::mat4 view = glm::lookAt(cameraPos, cameraPos+cameraFront, cameraUp);
-
 	glm::mat4 view = glm::lookAt(
 		glm::vec3(0,0,4), 
 		glm::vec3(0,0,0), 
@@ -113,10 +117,8 @@ void display()
 	glUniformMatrix4fv(viewID, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projection[0][0]);
 
-	model.top() = glm::rotate(model.top(), -glm::radians(pitch), glm::vec3(1, 0.0f, 0.0f));
-	model.top() = glm::rotate(model.top(), -glm::radians(pitch), glm::vec3(0.0f, 1, 0.0f));
-	//model.top() = glm::rotate(model.top(), -glm::radians(pitch), glm::vec3(0.0f, 0.0f, cameraFront.z));
-
+	model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
+	model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1, 0.0f));
 
 	model.push(model.top()); 
 	{
@@ -124,7 +126,7 @@ void display()
 		model.top() = glm::translate(model.top(), glm::vec3(0, 0, 0));
 
 		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
-		theCube.drawCube(0);
+		theCube.drawCube(1);
 	}
 }
 
@@ -157,7 +159,7 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 }
 
 /*
-*  Mouse Callback function aquired from Learn OpenGL
+*  Mouse Callback function aquired from Learn OpenGL and StackOverflow
 */
 static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn) 
 {
@@ -178,33 +180,8 @@ static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 		lastX = xpos;
 		lastY = ypos;
 
-		cameraFront.x += xoffset;
-		cameraFront.y += yoffset;
-
-		pitch += (xoffset + yoffset) * 0.1f;
-
-
-		//float sensitivity = 1.0f;
-		//xoffset *= sensitivity;
-		//yoffset *= sensitivity;
-		//
-		//yaw += xoffset;
-		//pitch += yoffset;
-		//
-		//if (pitch > 89.0f)
-		//	pitch = 89.0f;
-		//if (pitch < -89.0f)
-		//	pitch = -89.0f;
-		//
-		//glm::vec3 front;
-		//
-		//front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-		//front.y = sin(glm::radians(pitch));
-		//front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-		//
-		//cameraFront = front;
-		//
-		//cameraFront = glm::normalize(front);
+		pitch += xoffset * 0.1f;
+		yaw += yoffset * 0.1f;
 
 	}
 
