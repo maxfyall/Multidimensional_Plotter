@@ -29,6 +29,10 @@
 
 GLuint program;
 GLuint vArrayObj;
+GLuint xAxesBufferObject;
+GLuint yAxesBufferObject;
+GLuint zAxesBufferObject;
+
 
 GLuint modelID, viewID, projectionID;
 
@@ -44,14 +48,22 @@ Cube theCube;
 
 GLfloat aspect_ratio;
 
-GLfloat vertexPositionsAxes[] =
+GLfloat xAxesVertex[] =
 {
-	0.0f, 1.0f, 0.f, 1.0f,
-	0.0f, -1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 0.0f, 1.0f,
-	-1.0f, 0.0f, 0.0f, 1.0f,
-	0.0f, 0.0f, 1.0f, 1.0f,
-	0.0f, 0.0f, -1.0f, 1.0f,
+	1.0f, 0.0f, 0.0f, 
+	-1.0f, 0.0f, 0.0f
+};
+
+GLfloat yAxesVertex[]
+{
+	0.0f, 1.0f, 0.f, 
+	0.0f, -1.0f, 0.0f
+};
+
+GLfloat zAxesVertex[]
+{
+	0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, -1.0f
 };
 
 // include namespaces to avoid std:: etc...
@@ -91,6 +103,21 @@ void init(GLWrapper* glw)
 
 	theCube.makeCube();
 
+	glGenBuffers(1, &xAxesBufferObject);
+	glBindBuffer(GL_ARRAY_BUFFER, xAxesBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(xAxesVertex), xAxesVertex, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glGenBuffers(1, &yAxesBufferObject);
+	glBindBuffer(GL_ARRAY_BUFFER, yAxesBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(yAxesVertex), yAxesVertex, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glGenBuffers(1, &zAxesBufferObject);
+	glBindBuffer(GL_ARRAY_BUFFER, zAxesBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(zAxesVertex), zAxesVertex, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 }
 
 void display()
@@ -109,10 +136,13 @@ void display()
 	glm::mat4 projection = glm::perspective(glm::radians(fov), aspect_ratio, 0.1f, 100.0f);
 
 	glm::mat4 view = glm::lookAt(
-		glm::vec3(0,0,4), 
-		glm::vec3(0,0,0), 
-		glm::vec3(0,1,0)
+		glm::vec3(0, 0, 4), 
+		glm::vec3(0, 0, 0), 
+		glm::vec3(0, 1, 0)
 	);
+
+	//view = glm::rotate(view, -glm::radians(yaw), glm::vec3(1, 0, 0));
+	//view = glm::rotate(view, -glm::radians(pitch), glm::vec3(0, 1, 0));
 
 	glUniformMatrix4fv(viewID, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projection[0][0]);
@@ -123,11 +153,33 @@ void display()
 	model.push(model.top()); 
 	{
 		model.top() = glm::scale(model.top(), glm::vec3(1, 1, 1));
-		model.top() = glm::translate(model.top(), glm::vec3(0, 0, 0));
+		//model.top() = glm::translate(model.top(), glm::vec3(1, 0, 0));
+		//model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
+		//model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1, 0.0f));
+
 
 		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
-		theCube.drawCube(1);
+		//theCube.drawCube(0);
+		glBindBuffer(GL_ARRAY_BUFFER, xAxesBufferObject);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glPointSize(3.0f);
+		glDrawArrays(GL_LINES, 0, 2);
+		glBindBuffer(GL_ARRAY_BUFFER, yAxesBufferObject);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glPointSize(3.0f);
+		glDrawArrays(GL_LINES, 0, 2);
+		glBindBuffer(GL_ARRAY_BUFFER, zAxesBufferObject);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glPointSize(3.0f);
+		glDrawArrays(GL_LINES, 0, 2);
+		
 	}
+	model.pop();
+
+
 }
 
 /*
