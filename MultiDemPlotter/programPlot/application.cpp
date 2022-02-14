@@ -19,6 +19,9 @@
 /* Include standard C++ libraries (Improves code readability) */
 #include <iostream>
 #include <stack>
+#include <fstream>
+#include <string>
+
 
 #include "cube.h"
 
@@ -29,9 +32,9 @@
 
 GLuint program;
 GLuint vArrayObj;
-GLuint xAxesBufferObject;
-GLuint yAxesBufferObject;
-GLuint zAxesBufferObject;
+GLuint xAxesBufferObject, xColourBuffer;
+GLuint yAxesBufferObject, yColourBuffer;
+GLuint zAxesBufferObject, zColourBuffer;
 
 
 GLuint modelID, viewID, projectionID;
@@ -50,8 +53,13 @@ GLfloat aspect_ratio;
 
 GLfloat xAxesVertex[] =
 {
-	1.0f, 0.0f, 0.0f, 
-	-1.0f, 0.0f, 0.0f
+	1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f
+};
+
+GLfloat xAxesColour[]
+{
+	1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 0.0f, 1.0f
 };
 
 GLfloat yAxesVertex[]
@@ -60,11 +68,26 @@ GLfloat yAxesVertex[]
 	0.0f, -1.0f, 0.0f
 };
 
+GLfloat yAxesColour[]
+{
+	0.0f, 1.0f, 0.0f, 1.0f,
+	0.0f, 1.0f, 0.0f, 1.0f
+};
+
 GLfloat zAxesVertex[]
 {
 	0.0f, 0.0f, 1.0f,
 	0.0f, 0.0f, -1.0f
 };
+
+GLfloat zAxesColour[]
+{
+	0.0f, 0.0f, 1.0f, 1.0f,
+	0.0f, 0.0f, 1.0f, 1.0f
+};
+
+void read3DData(const char *filePath);
+
 
 // include namespaces to avoid std:: etc...
 //using namespace std;
@@ -101,11 +124,16 @@ void init(GLWrapper* glw)
 	viewID = glGetUniformLocation(program, "view");
 	projectionID = glGetUniformLocation(program, "projection");
 
-	theCube.makeCube();
+	//theCube.makeCube();
 
 	glGenBuffers(1, &xAxesBufferObject);
 	glBindBuffer(GL_ARRAY_BUFFER, xAxesBufferObject);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(xAxesVertex), xAxesVertex, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glGenBuffers(1, &xColourBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, xColourBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(xAxesColour), xAxesColour, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glGenBuffers(1, &yAxesBufferObject);
@@ -113,9 +141,19 @@ void init(GLWrapper* glw)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(yAxesVertex), yAxesVertex, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	glGenBuffers(1, &yColourBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, yColourBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(yAxesColour), yAxesColour, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	glGenBuffers(1, &zAxesBufferObject);
 	glBindBuffer(GL_ARRAY_BUFFER, zAxesBufferObject);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(zAxesVertex), zAxesVertex, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glGenBuffers(1, &zColourBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, zColourBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(zAxesColour), zAxesColour, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 }
@@ -136,44 +174,60 @@ void display()
 	glm::mat4 projection = glm::perspective(glm::radians(fov), aspect_ratio, 0.1f, 100.0f);
 
 	glm::mat4 view = glm::lookAt(
-		glm::vec3(0, 0, 4), 
+		glm::vec3(2, 1, 4), 
 		glm::vec3(0, 0, 0), 
 		glm::vec3(0, 1, 0)
 	);
 
 	//view = glm::rotate(view, -glm::radians(yaw), glm::vec3(1, 0, 0));
-	//view = glm::rotate(view, -glm::radians(pitch), glm::vec3(0, 1, 0));
+	//view = glm::rotate(view, glm::radians(20.0f), glm::vec3(1, 0, 0));
 
 	glUniformMatrix4fv(viewID, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projection[0][0]);
 
-	model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-	model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1, 0.0f));
-
 	model.push(model.top()); 
 	{
+
 		model.top() = glm::scale(model.top(), glm::vec3(1, 1, 1));
+
 		//model.top() = glm::translate(model.top(), glm::vec3(1, 0, 0));
-		//model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-		//model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1, 0.0f));
-
-
+		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
+		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+		
+		glLineWidth(3.0f);
 		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
-		//theCube.drawCube(0);
 		glBindBuffer(GL_ARRAY_BUFFER, xAxesBufferObject);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glPointSize(3.0f);
+
+		glBindBuffer(GL_ARRAY_BUFFER, xColourBuffer);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
 		glDrawArrays(GL_LINES, 0, 2);
+
 		glBindBuffer(GL_ARRAY_BUFFER, yAxesBufferObject);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glPointSize(3.0f);
+
+		glBindBuffer(GL_ARRAY_BUFFER, yColourBuffer);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
 		glDrawArrays(GL_LINES, 0, 2);
+
 		glBindBuffer(GL_ARRAY_BUFFER, zAxesBufferObject);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, zColourBuffer);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
 		glPointSize(3.0f);
+
 		glDrawArrays(GL_LINES, 0, 2);
 		
 	}
@@ -249,6 +303,11 @@ static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 		fov = 1.0f;
 	if (fov > 30.f)
 		fov = 30.f;
+}
+
+void read3DData(const char *filePath) 
+{
+
 }
 
 
