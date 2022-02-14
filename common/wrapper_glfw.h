@@ -38,6 +38,8 @@ public:
 	void setReshapeCallback(void(*f)(GLFWwindow* window, int w, int h));
 	void setKeyCallback(void(*f)(GLFWwindow* window, int key, int scancode, int action, int mods));
 	void setErrorCallback(void(*f)(int error, const char* description));
+	void setMouseCallback(void(*f)(GLFWwindow* window, double xpos, double ypos));
+	void setScrollCallback(void(*f)(GLFWwindow* window, double xoffset, double yoffset));
 
 	/* Shader load and build support functions */
 	GLuint LoadShader(const char *vertex_path, const char *fragment_path);

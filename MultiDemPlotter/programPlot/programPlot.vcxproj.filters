@@ -21,9 +21,15 @@
     <ClCompile Include="..\..\common\wrapper_glfw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\common\cube.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\wrapper_glfw.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\cube.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

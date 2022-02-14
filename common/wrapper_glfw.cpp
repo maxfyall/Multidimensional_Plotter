@@ -58,9 +58,10 @@ GLWrapper::GLWrapper(int width, int height, const char *title) {
 	}
 
 	/* Can set the Window title at a later time if you wish*/
-	glfwSetWindowTitle(window, "Max Fyall - Clock Face"); // changed title :))
+	glfwSetWindowTitle(window, "Multidimensional Plotter");
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, true);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 
@@ -137,6 +138,16 @@ void GLWrapper::setReshapeCallback(void(*func)(GLFWwindow* window, int w, int h)
 void GLWrapper::setKeyCallback(void(*func)(GLFWwindow* window, int key, int scancode, int action, int mods))
 {
 	glfwSetKeyCallback(window, func);
+}
+
+void GLWrapper::setMouseCallback(void (*func)(GLFWwindow* window, double xpos, double ypos)) 
+{
+	glfwSetCursorPosCallback(window, func);
+}
+
+void GLWrapper::setScrollCallback(void (*func)(GLFWwindow* window, double xoffset, double yoffset)) 
+{
+	glfwSetScrollCallback(window, func);
 }
 
 
