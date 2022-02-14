@@ -21,6 +21,10 @@
 #include <stack>
 #include <fstream>
 #include <string>
+#include <iterator>
+#include <sstream>
+#include <algorithm>
+#include <vector>
 
 
 #include "cube.h"
@@ -86,6 +90,8 @@ GLfloat zAxesColour[]
 	0.0f, 0.0f, 1.0f, 1.0f
 };
 
+GLfloat plotPositions[];
+
 void read3DData(const char *filePath);
 
 
@@ -119,6 +125,8 @@ void init(GLWrapper* glw)
 		std::cin.ignore();
 		exit(0); // exit program
 	}
+
+	read3DData("../../testData/test3DData.txt");
 
 	modelID = glGetUniformLocation(program, "model");
 	viewID = glGetUniformLocation(program, "view");
@@ -307,7 +315,44 @@ static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 
 void read3DData(const char *filePath) 
 {
+	std::string data;
 
+	std::ifstream filestream(filePath);
+
+	if (!filestream.is_open()) 
+	{
+		std::cout << "Could not read data file: " << filePath << ". File does not exist. " << std::endl;
+	}
+
+	std::string line;
+	while (!filestream.eof()) 
+	{
+		getline(filestream, line);
+		data.append(line);
+	}
+
+	filestream.close();
+
+	std::vector<char> vertexPositions(data.begin(), data.end());
+
+	//std::istringstream ss(data);
+
+	//std::copy(
+	//	std::istream_iterator<float> (ss),
+	//	std::istream_iterator<float> ( ),
+	//	temp
+	//);
+
+	for (int i = 0; i < vertexPositions.size(); i++) 
+	{
+		if (vertexPositions[i] != ' ')
+		{
+			std::cout << vertexPositions[i] << std::endl;
+		}
+		
+	}
+
+	//std::cout << sizeof(temp) << std::endl;
 }
 
 
