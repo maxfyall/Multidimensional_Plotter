@@ -315,7 +315,7 @@ static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 
 void read3DData(const char *filePath) 
 {
-	std::string data;
+	std::vector<std::string> vertexPositions;
 
 	std::ifstream filestream(filePath);
 
@@ -328,31 +328,32 @@ void read3DData(const char *filePath)
 	while (!filestream.eof()) 
 	{
 		getline(filestream, line);
-		data.append(line);
+		vertexPositions.push_back(line);
 	}
 
 	filestream.close();
 
-	std::vector<char> vertexPositions(data.begin(), data.end());
-
-	//std::istringstream ss(data);
-
-	//std::copy(
-	//	std::istream_iterator<float> (ss),
-	//	std::istream_iterator<float> ( ),
-	//	temp
-	//);
+	std::vector<float> plotPos;
 
 	for (int i = 0; i < vertexPositions.size(); i++) 
 	{
-		if (vertexPositions[i] != ' ')
-		{
-			std::cout << vertexPositions[i] << std::endl;
-		}
-		
-	}
+		std::cout << "Old String:  " << vertexPositions[i] << std::endl;
 
-	//std::cout << sizeof(temp) << std::endl;
+		// https://www.tutorialspoint.com/how-to-remove-certain-characters-from-a-string-in-cplusplus
+
+		vertexPositions[i].erase(remove(vertexPositions[i].begin(), vertexPositions[i].end(), ' '), vertexPositions[i].end());
+
+		std::cout << "New String : "<< vertexPositions[i] << std::endl;
+
+		std::string temp;
+
+		for (int j = 0; j < 3; j++)
+		{
+			temp = vertexPositions[i].at(j);
+			std::cout << temp << std::endl;
+			plotPos.push_back(std::stof(temp));
+		}
+	}
 }
 
 
