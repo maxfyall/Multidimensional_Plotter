@@ -92,12 +92,7 @@ GLfloat zAxesColour[]
 
 GLfloat plotPositions[];
 
-void read3DData(const char *filePath);
-
-
-// include namespaces to avoid std:: etc...
-//using namespace std;
-//using namespace glm;
+std::vector<float> read3DData(const char *filePath);
 
 /*
 *  Initialising Function, called before rendering loop to initialise variables and creating objects
@@ -126,7 +121,12 @@ void init(GLWrapper* glw)
 		exit(0); // exit program
 	}
 
-	read3DData("../../testData/test3DData.txt");
+	std::vector<float> temp = read3DData("../../testData/test3DData.txt");
+
+	for (int i = 0; i < temp.size(); i++)
+	{
+		std::cout << temp[i];
+	}
 
 	modelID = glGetUniformLocation(program, "model");
 	viewID = glGetUniformLocation(program, "view");
@@ -313,7 +313,7 @@ static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 		fov = 30.f;
 }
 
-void read3DData(const char *filePath) 
+std::vector<float> read3DData(const char *filePath) 
 {
 	std::vector<std::string> vertexPositions;
 
@@ -354,6 +354,8 @@ void read3DData(const char *filePath)
 			plotPos.push_back(std::stof(temp));
 		}
 	}
+
+	return plotPos;
 }
 
 
