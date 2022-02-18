@@ -39,7 +39,7 @@ GLuint vArrayObj;
 GLuint xAxesBufferObject, xColourBuffer;
 GLuint yAxesBufferObject, yColourBuffer;
 GLuint zAxesBufferObject, zColourBuffer;
-
+GLuint plotBufferObject;
 
 GLuint modelID, viewID, projectionID;
 
@@ -49,7 +49,9 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 float lastX = 1024.f / 2.0;
 float lastY = 768.f / 2.0;
-float fov = 30.f;
+float fov = 90.f;
+
+int size;
 
 Cube theCube;
 
@@ -57,12 +59,13 @@ GLfloat aspect_ratio;
 
 GLfloat xAxesVertex[] =
 {
-	1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f
+	1.0f, 0.0f, 0.0f, 
+	-1.0f, 0.0f, 0.0f
 };
 
 GLfloat xAxesColour[]
 {
-	1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 0.0f, 1.0f, 
 	1.0f, 0.0f, 0.0f, 1.0f
 };
 
@@ -90,7 +93,8 @@ GLfloat zAxesColour[]
 	0.0f, 0.0f, 1.0f, 1.0f
 };
 
-GLfloat plotPositions[];
+GLfloat plotPositions[23];
+
 
 std::vector<float> read3DData(const char *filePath);
 
@@ -123,10 +127,30 @@ void init(GLWrapper* glw)
 
 	std::vector<float> temp = read3DData("../../testData/test3DData.txt");
 
+	//const int x = temp.size();
+	//size = temp.size();
+
+	//std::cout << " Array Size " << x << std::endl;
+
+	//GLfloat* plotPositions = new GLfloat[x];
+
+	std::cout << "Byte Size Vector " << sizeof(temp) << std::endl;
+	std::cout << "Byte Size Array " << sizeof(plotPositions) << std::endl;
+
+	std::copy(temp.begin(), temp.end(), plotPositions);
+
+	std::cout << "Array:";
+
 	for (int i = 0; i < temp.size(); i++)
 	{
-		std::cout << temp[i];
+		std::cout << plotPositions[i];
 	}
+
+	std::cout << std::endl;
+
+	std::cout << sizeof(plotPositions) << std::endl;
+	std::cout << sizeof(xAxesVertex) << std::endl;
+
 
 	modelID = glGetUniformLocation(program, "model");
 	viewID = glGetUniformLocation(program, "view");
@@ -164,6 +188,11 @@ void init(GLWrapper* glw)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(zAxesColour), zAxesColour, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	glGenBuffers(1, &plotBufferObject);
+	glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(plotPositions), plotPositions, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 }
 
 void display()
@@ -182,13 +211,19 @@ void display()
 	glm::mat4 projection = glm::perspective(glm::radians(fov), aspect_ratio, 0.1f, 100.0f);
 
 	glm::mat4 view = glm::lookAt(
-		glm::vec3(2, 1, 4), 
+		glm::vec3(0, 0, 4), 
 		glm::vec3(0, 0, 0), 
 		glm::vec3(0, 1, 0)
 	);
 
 	//view = glm::rotate(view, -glm::radians(yaw), glm::vec3(1, 0, 0));
 	//view = glm::rotate(view, glm::radians(20.0f), glm::vec3(1, 0, 0));
+
+	//model.top() = glm::scale(model.top(), glm::vec3(0.5, 0.5, 0.5));
+
+	model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
+	model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+
 
 	glUniformMatrix4fv(viewID, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projection[0][0]);
@@ -199,8 +234,8 @@ void display()
 		model.top() = glm::scale(model.top(), glm::vec3(1, 1, 1));
 
 		//model.top() = glm::translate(model.top(), glm::vec3(1, 0, 0));
-		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+		//model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
+		//model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
 		
 		glLineWidth(3.0f);
 		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
@@ -238,6 +273,24 @@ void display()
 
 		glDrawArrays(GL_LINES, 0, 2);
 		
+	}
+	model.pop();
+
+	model.push(model.top());
+	{
+
+		//model.top() = glm::scale(model.top(), glm::vec3(0.1, 0.1, 0.1));
+		//model.top() = glm::translate(model.top(), glm::vec3(-1, -1, -1));
+
+		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
+
+		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+		glPointSize(20.0f);
+		glDrawArrays(GL_POINTS, 0, 7);
+
 	}
 	model.pop();
 
