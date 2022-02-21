@@ -138,8 +138,7 @@ void init(GLWrapper* glw)
 
 	GLfloat* plotPositions = new GLfloat[x];
 
-	std::cout << "Byte Size Vector " << sizeof(temp) << std::endl;
-	std::cout << "Byte Size Array " << sizeof(plotPositions) << std::endl;
+	std::cout << x << std::endl;
 
 	std::copy(temp.begin(), temp.end(), plotPositions);
 
@@ -151,10 +150,6 @@ void init(GLWrapper* glw)
 	}
 
 	std::cout << std::endl;
-
-	std::cout << sizeof(plotPositions) << std::endl;
-	std::cout << sizeof(xAxesVertex) << std::endl;
-
 
 	modelID = glGetUniformLocation(program, "model");
 	colourModeID = glGetUniformLocation(program, "colourMode");
@@ -299,7 +294,7 @@ void display()
 		colourMode = 1;
 		glUniform1ui(colourModeID, colourMode);
 		glPointSize(10.0f);
-		glDrawArrays(GL_POINTS, 0, 7);
+		glDrawArrays(GL_POINTS, 0, size/3);
 		colourMode = 0;
 		glUniform1ui(colourModeID, colourMode);
 
@@ -412,18 +407,19 @@ std::vector<float> read3DData(const char *filePath)
 
 		vertexPositions[i].erase(remove(vertexPositions[i].begin(), vertexPositions[i].end(), ' '), vertexPositions[i].end());
 
-		//std::cout << "New String : "<< vertexPositions[i] << std::endl;
+		std::cout << "New String : "<< vertexPositions[i] << std::endl;
 
 		std::string temp;
 
-		for (int j = 0; j < 3; j++)
+		for (int j = 0; j < vertexPositions[i].length(); j++)
 		{
 			temp = vertexPositions[i].at(j);
 			std::cout << temp << std::endl;
 
 			if (temp == "-") 
 			{
-				
+				temp = temp + vertexPositions[i].at(j + 1);
+				j++;
 			}
 
 			if (std::stof(temp) > largest)
