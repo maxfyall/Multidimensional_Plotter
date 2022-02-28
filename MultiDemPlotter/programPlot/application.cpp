@@ -228,6 +228,8 @@ void display()
 	glUniformMatrix4fv(viewID, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projection[0][0]);
 
+	//model.top() = glm::scale(model.top(), glm::vec3(0.5, 0.5, 0.5));
+
 	model.push(model.top()); 
 	{
 
@@ -237,12 +239,11 @@ void display()
 		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
 		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
 		
-		glLineWidth(3.0f);
+		glLineWidth(5.0f);
 		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
 		glBindBuffer(GL_ARRAY_BUFFER, xAxesBufferObject);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		glPointSize(3.0f);
 
 		glBindBuffer(GL_ARRAY_BUFFER, xColourBuffer);
 		glEnableVertexAttribArray(1);
@@ -253,7 +254,6 @@ void display()
 		glBindBuffer(GL_ARRAY_BUFFER, yAxesBufferObject);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		glPointSize(3.0f);
 
 		glBindBuffer(GL_ARRAY_BUFFER, yColourBuffer);
 		glEnableVertexAttribArray(1);
@@ -269,7 +269,6 @@ void display()
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-		glPointSize(3.0f);
 
 		glDrawArrays(GL_LINES, 0, 2);
 		
@@ -386,6 +385,8 @@ std::vector<float> read3DData(const char *filePath)
 	if (!filestream.is_open()) 
 	{
 		std::cout << "Could not read data file: " << filePath << ". File does not exist. " << std::endl;
+		std::vector<float> empty;
+		return empty;
 	}
 
 	std::string line;
