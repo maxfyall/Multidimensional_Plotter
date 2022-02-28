@@ -21,6 +21,10 @@
 #include <stack>
 #include <fstream>
 #include <string>
+#include <iterator>
+#include <sstream>
+#include <algorithm>
+#include <vector>
 
 
 #include "cube.h"
@@ -35,9 +39,9 @@ GLuint vArrayObj;
 GLuint xAxesBufferObject, xColourBuffer;
 GLuint yAxesBufferObject, yColourBuffer;
 GLuint zAxesBufferObject, zColourBuffer;
+GLuint plotBufferObject;
 
-
-GLuint modelID, viewID, projectionID;
+GLuint modelID, viewID, projectionID, colourModeID;
 
 bool firstMouse = true;
 bool moveScene = false;
@@ -45,27 +49,21 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 float lastX = 1024.f / 2.0;
 float lastY = 768.f / 2.0;
-float fov = 30.f;
+float fov = 90.f;
+
+int size;
+
+GLfloat largest;
+GLuint colourMode;
 
 Cube theCube;
 
 GLfloat aspect_ratio;
 
-GLfloat xAxesVertex[] =
-{
-	1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f
-};
-
 GLfloat xAxesColour[]
 {
-	1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 0.0f, 1.0f, 
 	1.0f, 0.0f, 0.0f, 1.0f
-};
-
-GLfloat yAxesVertex[]
-{
-	0.0f, 1.0f, 0.f, 
-	0.0f, -1.0f, 0.0f
 };
 
 GLfloat yAxesColour[]
@@ -74,24 +72,16 @@ GLfloat yAxesColour[]
 	0.0f, 1.0f, 0.0f, 1.0f
 };
 
-GLfloat zAxesVertex[]
-{
-	0.0f, 0.0f, 1.0f,
-	0.0f, 0.0f, -1.0f
-};
-
 GLfloat zAxesColour[]
 {
 	0.0f, 0.0f, 1.0f, 1.0f,
 	0.0f, 0.0f, 1.0f, 1.0f
 };
 
-void read3DData(const char *filePath);
+//GLfloat plotPositions[23];
 
 
-// include namespaces to avoid std:: etc...
-//using namespace std;
-//using namespace glm;
+std::vector<float> read3DData(const char *filePath);
 
 /*
 *  Initialising Function, called before rendering loop to initialise variables and creating objects
@@ -120,11 +110,51 @@ void init(GLWrapper* glw)
 		exit(0); // exit program
 	}
 
+	std::vector<float> temp = read3DData("../../testData/test3DData.txt");
+
+	std::cout << "Largest Value: " << largest << std::endl;
+
+	GLfloat xAxesVertex[] =
+	{
+		largest + 1, 0.0f, 0.0f,
+		-(largest + 1), 0.0f, 0.0f
+	};
+
+	GLfloat yAxesVertex[]
+	{
+		0.0f, (largest+1.f), 0.f,
+		0.0f, -(largest + 1.f), 0.0f
+	};
+
+	GLfloat zAxesVertex[]
+	{
+		0.0f, 0.0f, (largest + 1.f),
+		0.0f, 0.0f, -(largest + 1.f)
+	};
+
+
+	const int x = temp.size();
+	size = temp.size();
+
+	GLfloat* plotPositions = new GLfloat[x];
+
+	std::cout << x << std::endl;
+
+	std::copy(temp.begin(), temp.end(), plotPositions);
+
+	std::cout << "Array:";
+
+	for (int i = 0; i < temp.size(); i++)
+	{
+		std::cout << plotPositions[i];
+	}
+
+	std::cout << std::endl;
+
 	modelID = glGetUniformLocation(program, "model");
+	colourModeID = glGetUniformLocation(program, "colourMode");
 	viewID = glGetUniformLocation(program, "view");
 	projectionID = glGetUniformLocation(program, "projection");
-
-	//theCube.makeCube();
 
 	glGenBuffers(1, &xAxesBufferObject);
 	glBindBuffer(GL_ARRAY_BUFFER, xAxesBufferObject);
@@ -156,6 +186,13 @@ void init(GLWrapper* glw)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(zAxesColour), zAxesColour, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	glGenBuffers(1, &plotBufferObject);
+	glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*x , plotPositions, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	delete[] plotPositions;
+
 }
 
 void display()
@@ -174,7 +211,7 @@ void display()
 	glm::mat4 projection = glm::perspective(glm::radians(fov), aspect_ratio, 0.1f, 100.0f);
 
 	glm::mat4 view = glm::lookAt(
-		glm::vec3(2, 1, 4), 
+		glm::vec3(0, 0, 4), 
 		glm::vec3(0, 0, 0), 
 		glm::vec3(0, 1, 0)
 	);
@@ -182,6 +219,12 @@ void display()
 	//view = glm::rotate(view, -glm::radians(yaw), glm::vec3(1, 0, 0));
 	//view = glm::rotate(view, glm::radians(20.0f), glm::vec3(1, 0, 0));
 
+	//model.top() = glm::scale(model.top(), glm::vec3(0.5, 0.5, 0.5));
+
+	//model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
+	//model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	glUniform1ui(colourModeID, colourMode);
 	glUniformMatrix4fv(viewID, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projection[0][0]);
 
@@ -230,6 +273,31 @@ void display()
 
 		glDrawArrays(GL_LINES, 0, 2);
 		
+	}
+	model.pop();
+
+	model.push(model.top());
+	{
+
+		//model.top() = glm::scale(model.top(), glm::vec3(0.1, 0.1, 0.1));
+		//model.top() = glm::translate(model.top(), glm::vec3(-1, -1, -1));
+
+		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
+		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
+
+		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+		colourMode = 1;
+		glUniform1ui(colourModeID, colourMode);
+		glPointSize(10.0f);
+		glDrawArrays(GL_POINTS, 0, size/3);
+		colourMode = 0;
+		glUniform1ui(colourModeID, colourMode);
+
 	}
 	model.pop();
 
@@ -301,13 +369,70 @@ static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	fov -= (float)yoffset;
 	if (fov < 1.0f)
 		fov = 1.0f;
-	if (fov > 30.f)
-		fov = 30.f;
+	if (fov > 180.f)
+		fov = 180.f;
 }
 
-void read3DData(const char *filePath) 
+/*
+*  Read vertex positions from file returns vector of floats to be copied into dynamic array, 
+*  Also finds the largest value for creating 3-D axes to fit points provided
+*/
+std::vector<float> read3DData(const char *filePath) 
 {
+	std::vector<std::string> vertexPositions;
 
+	std::ifstream filestream(filePath);
+
+	if (!filestream.is_open()) 
+	{
+		std::cout << "Could not read data file: " << filePath << ". File does not exist. " << std::endl;
+	}
+
+	std::string line;
+	while (!filestream.eof()) 
+	{
+		getline(filestream, line);
+		vertexPositions.push_back(line);
+	}
+
+	filestream.close();
+
+	std::vector<float> plotPos;
+
+	for (int i = 0; i < vertexPositions.size(); i++) 
+	{
+		//std::cout << "Old String:  " << vertexPositions[i] << std::endl;
+
+		// https://www.tutorialspoint.com/how-to-remove-certain-characters-from-a-string-in-cplusplus
+
+		vertexPositions[i].erase(remove(vertexPositions[i].begin(), vertexPositions[i].end(), ' '), vertexPositions[i].end());
+
+		std::cout << "New String : "<< vertexPositions[i] << std::endl;
+
+		std::string temp;
+
+		for (int j = 0; j < vertexPositions[i].length(); j++)
+		{
+			temp = vertexPositions[i].at(j);
+			std::cout << temp << std::endl;
+
+			if (temp == "-") 
+			{
+				temp = temp + vertexPositions[i].at(j + 1);
+				j++;
+			}
+
+			if (std::stof(temp) > largest)
+			{
+				largest = std::stof(temp);
+				//std::cout << "New Value : " << largest << std::endl;
+			}
+
+			plotPos.push_back(std::stof(temp));
+		}
+	}
+
+	return plotPos;
 }
 
 
