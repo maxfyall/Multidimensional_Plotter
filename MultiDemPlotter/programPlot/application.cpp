@@ -49,7 +49,7 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 float lastX = 1024.f / 2.0;
 float lastY = 768.f / 2.0;
-float fov = 90.f;
+float fov = 30.f;
 
 int size;
 
@@ -365,6 +365,7 @@ static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 */
 static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) 
 {
+	// need to edit to a scale value variable to prevent aliasing effects
 	fov -= (float)yoffset;
 	if (fov < 1.0f)
 		fov = 1.0f;
@@ -400,36 +401,91 @@ std::vector<float> read3DData(const char *filePath)
 
 	std::vector<float> plotPos;
 
+	// start loop to add data to data structure
 	for (int i = 0; i < vertexPositions.size(); i++) 
 	{
 		//std::cout << "Old String:  " << vertexPositions[i] << std::endl;
 
 		// https://www.tutorialspoint.com/how-to-remove-certain-characters-from-a-string-in-cplusplus
 
-		vertexPositions[i].erase(remove(vertexPositions[i].begin(), vertexPositions[i].end(), ' '), vertexPositions[i].end());
+		//vertexPositions[i].erase(remove(vertexPositions[i].begin(), vertexPositions[i].end(), ' '), vertexPositions[i].end());
 
 		std::cout << "New String : "<< vertexPositions[i] << std::endl;
 
 		std::string temp;
+		std::string value;
 
-		for (int j = 0; j < vertexPositions[i].length(); j++)
+		//for (int j = 0; j < vertexPositions[i].length(); j++)
+		//{
+		int j = 0;
+
+		while (j <= vertexPositions[i].length())
 		{
 			temp = vertexPositions[i].at(j);
+
+			std::cout << "NEXT STRING ELEMENT: " << temp << std::endl;
 			std::cout << temp << std::endl;
 
-			if (temp == "-") 
+			// are we dealing with a negative number?
+			if (temp == "-")
 			{
-				temp = temp + vertexPositions[i].at(j + 1);
+				while (vertexPositions[i].at(j) != ' ')
+				{
+					value = value + vertexPositions[i].at(j);
+					j++;
+					if (j == vertexPositions[i].length())
+					{
+						break;
+					}
+				}
+
+				plotPos.push_back(std::stof(value));
+				std::cout << "Added Negative Number " << value << std::endl;
+				j++;
+			}
+			// are we dealing with a decimal number
+			else if (vertexPositions[i].at(j + 1) == '.')
+			{
+					//temp = temp + vertexPositions[i].at(j+1);
+				while (vertexPositions[i].at(j) != ' ')
+				{
+					value = value + vertexPositions[i].at(j);
+					j++;
+					if (j == vertexPositions[i].length())
+					{
+						break;
+					}
+				}
+
+					plotPos.push_back(std::stof(value));
+					std::cout << "Added Decimal Number " << value << std::endl;
+					j++;
+			}
+			else if (temp == " ") 
+			{
+				j++;
+			}
+			else
+			{
+				value = temp;
+				std::cout << "Added Number " << value << std::endl;
+				plotPos.push_back(std::stof(value));
 				j++;
 			}
 
-			if (std::stof(temp) > largest)
+			if (value != "")
 			{
-				largest = std::stof(temp);
-				//std::cout << "New Value : " << largest << std::endl;
+				if (std::stof(value) > largest)
+				{
+					largest = std::stof(value);
+				}
 			}
 
-			plotPos.push_back(std::stof(temp));
+			value.clear();
+			temp.clear();
+			
+			
+		//}
 		}
 	}
 
