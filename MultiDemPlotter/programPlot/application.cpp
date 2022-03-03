@@ -146,7 +146,7 @@ void init(GLWrapper* glw)
 
 	for (int i = 0; i < temp.size(); i++)
 	{
-		std::cout << plotPositions[i];
+		std::cout << plotPositions[i] << " ";
 	}
 
 	std::cout << std::endl;
@@ -404,8 +404,6 @@ std::vector<float> read3DData(const char *filePath)
 	// start loop to add data to data structure
 	for (int i = 0; i < vertexPositions.size(); i++) 
 	{
-		//std::cout << "Old String:  " << vertexPositions[i] << std::endl;
-
 		// https://www.tutorialspoint.com/how-to-remove-certain-characters-from-a-string-in-cplusplus
 
 		//vertexPositions[i].erase(remove(vertexPositions[i].begin(), vertexPositions[i].end(), ' '), vertexPositions[i].end());
@@ -415,16 +413,16 @@ std::vector<float> read3DData(const char *filePath)
 		std::string temp;
 		std::string value;
 
-		//for (int j = 0; j < vertexPositions[i].length(); j++)
-		//{
 		int j = 0;
 
-		while (j <= vertexPositions[i].length())
+		while (j <= vertexPositions[i].length()-1)
 		{
+			std::cout << vertexPositions[i].length() << std::endl;
 			temp = vertexPositions[i].at(j);
 
 			std::cout << "NEXT STRING ELEMENT: " << temp << std::endl;
-			std::cout << temp << std::endl;
+
+			std::cout << "Counter: "<< j << std::endl;
 
 			// are we dealing with a negative number?
 			if (temp == "-")
@@ -443,25 +441,39 @@ std::vector<float> read3DData(const char *filePath)
 				std::cout << "Added Negative Number " << value << std::endl;
 				j++;
 			}
-			// are we dealing with a decimal number
-			else if (vertexPositions[i].at(j + 1) == '.')
+			else if (j != vertexPositions[i].length()-1)
 			{
-					//temp = temp + vertexPositions[i].at(j+1);
-				while (vertexPositions[i].at(j) != ' ')
+				// are we dealing with a decimal number
+				if (vertexPositions[i].at(j + 1) == '.')
 				{
-					value = value + vertexPositions[i].at(j);
-					j++;
-					if (j == vertexPositions[i].length())
+					//temp = temp + vertexPositions[i].at(j+1);
+					while (vertexPositions[i].at(j) != ' ')
 					{
-						break;
+						value = value + vertexPositions[i].at(j);
+						j++;
+						if (j == vertexPositions[i].length())
+						{
+							break;
+						}
 					}
-				}
 
 					plotPos.push_back(std::stof(value));
 					std::cout << "Added Decimal Number " << value << std::endl;
 					j++;
+				}
+				else if (temp == " ")
+				{
+					j++;
+				}
+				else
+				{
+					value = temp;
+					std::cout << "Added Number " << value << std::endl;
+					plotPos.push_back(std::stof(value));
+					j++;
+				}
 			}
-			else if (temp == " ") 
+			else if (temp == " ")
 			{
 				j++;
 			}
@@ -472,6 +484,7 @@ std::vector<float> read3DData(const char *filePath)
 				plotPos.push_back(std::stof(value));
 				j++;
 			}
+		
 
 			if (value != "")
 			{
@@ -484,8 +497,6 @@ std::vector<float> read3DData(const char *filePath)
 			value.clear();
 			temp.clear();
 			
-			
-		//}
 		}
 	}
 
