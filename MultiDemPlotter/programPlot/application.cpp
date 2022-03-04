@@ -49,7 +49,8 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 float lastX = 1024.f / 2.0;
 float lastY = 768.f / 2.0;
-float fov = 30.f;
+float fov = 45.f;
+float scaler = 0.5f;
 
 int size;
 
@@ -110,7 +111,7 @@ void init(GLWrapper* glw)
 		exit(0); // exit program
 	}
 
-	std::vector<float> temp = read3DData("../../testData/test3DData.txt");
+	std::vector<float> vertexPos = read3DData("../../testData/test3DData.txt");
 
 	std::cout << "Largest Value: " << largest << std::endl;
 
@@ -133,23 +134,16 @@ void init(GLWrapper* glw)
 	};
 
 
-	const int x = temp.size();
-	size = temp.size();
+	size = vertexPos.size();
 
-	GLfloat* plotPositions = new GLfloat[x];
-
-	std::cout << x << std::endl;
-
-	std::copy(temp.begin(), temp.end(), plotPositions);
-
-	std::cout << "Array:";
-
-	for (int i = 0; i < temp.size(); i++)
+	for (int i = 0; i < vertexPos.size(); i++)
 	{
-		std::cout << plotPositions[i] << " ";
+		std::cout << vertexPos[i] << " ";
 	}
 
 	std::cout << std::endl;
+
+	std::cout << vertexPos.size() << std::endl;
 
 	modelID = glGetUniformLocation(program, "model");
 	colourModeID = glGetUniformLocation(program, "colourMode");
@@ -188,10 +182,10 @@ void init(GLWrapper* glw)
 
 	glGenBuffers(1, &plotBufferObject);
 	glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*x , plotPositions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float) , &vertexPos.front() , GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	delete[] plotPositions;
+	//delete[] plotPositions;
 
 }
 
@@ -219,8 +213,6 @@ void display()
 	//view = glm::rotate(view, -glm::radians(yaw), glm::vec3(1, 0, 0));
 	//view = glm::rotate(view, glm::radians(20.0f), glm::vec3(1, 0, 0));
 
-	//model.top() = glm::scale(model.top(), glm::vec3(0.5, 0.5, 0.5));
-
 	//model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
 	//model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
 
@@ -228,7 +220,7 @@ void display()
 	glUniformMatrix4fv(viewID, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projection[0][0]);
 
-	//model.top() = glm::scale(model.top(), glm::vec3(0.5, 0.5, 0.5));
+	model.top() = glm::scale(model.top(), glm::vec3(scaler, scaler, scaler));
 
 	model.push(model.top()); 
 	{
@@ -287,8 +279,8 @@ void display()
 		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
 
 		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
-		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(0);
 
 		colourMode = 1;
 		glUniform1ui(colourModeID, colourMode);
@@ -328,7 +320,8 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 	{
 		std::cout << " MOUSE 1 " << std::endl;
 		moveScene = !moveScene;
-	} 
+	}
+
 }
 
 /*
@@ -367,10 +360,10 @@ static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	// need to edit to a scale value variable to prevent aliasing effects
 	fov -= (float)yoffset;
-	if (fov < 1.0f)
-		fov = 1.0f;
-	if (fov > 180.f)
-		fov = 180.f;
+	if (fov < 1.f)
+		fov = 1.f;
+	if (fov > 45.f)
+		fov = 45.f;
 }
 
 /*
@@ -418,6 +411,13 @@ std::vector<float> read3DData(const char *filePath)
 		while (j <= vertexPositions[i].length()-1)
 		{
 			std::cout << vertexPositions[i].length() << std::endl;
+
+			if (vertexPositions[i].empty()) 
+			{
+				std::cout << "EMPTY LINE: BREAKING FROM WHILE LOOP" << std::endl;
+				break;
+			}
+
 			temp = vertexPositions[i].at(j);
 
 			std::cout << "NEXT STRING ELEMENT: " << temp << std::endl;
@@ -461,6 +461,7 @@ std::vector<float> read3DData(const char *filePath)
 					std::cout << "Added Decimal Number " << value << std::endl;
 					j++;
 				}
+				
 				else if (temp == " ")
 				{
 					j++;
@@ -473,6 +474,7 @@ std::vector<float> read3DData(const char *filePath)
 					j++;
 				}
 			}
+		
 			else if (temp == " ")
 			{
 				j++;
