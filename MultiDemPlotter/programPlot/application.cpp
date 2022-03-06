@@ -61,6 +61,8 @@ Cube theCube;
 
 GLfloat aspect_ratio;
 
+std::vector<float> vertexPos;
+
 GLfloat xAxesColour[]
 {
 	1.0f, 0.0f, 0.0f, 1.0f, 
@@ -111,7 +113,9 @@ void init(GLWrapper* glw)
 		exit(0); // exit program
 	}
 
-	std::vector<float> vertexPos = read3DData("../../testData/test3DData.txt");
+	// read in data to a float vector
+
+	vertexPos = read3DData("../../testData/test3DData.txt");
 
 	std::cout << "Largest Value: " << largest << std::endl;
 
@@ -322,6 +326,12 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 		moveScene = !moveScene;
 	}
 
+	if (key == 'M' && action == GLFW_PRESS)
+	{
+		std::cout << "CLEAR THE GRAPH" << std::endl;
+
+	}
+
 }
 
 /*
@@ -395,109 +405,132 @@ std::vector<float> read3DData(const char *filePath)
 	std::vector<float> plotPos;
 
 	// start loop to add data to data structure
-	for (int i = 0; i < vertexPositions.size(); i++) 
+	//for (int i = 0; i < vertexPositions.size(); i++) 
+	//{
+	//	// https://www.tutorialspoint.com/how-to-remove-certain-characters-from-a-string-in-cplusplus
+
+	//	//vertexPositions[i].erase(remove(vertexPositions[i].begin(), vertexPositions[i].end(), ' '), vertexPositions[i].end());
+
+	//	std::cout << "New String : "<< vertexPositions[i] << std::endl;
+
+	//	std::string temp;
+	//	std::string value;
+
+	//	int j = 0;
+
+	//	while (j <= vertexPositions[i].length()-1)
+	//	{
+	//		std::cout << vertexPositions[i].length() << std::endl;
+
+	//		if (vertexPositions[i].empty()) 
+	//		{
+	//			std::cout << "EMPTY LINE: BREAKING FROM WHILE LOOP" << std::endl;
+	//			break;
+	//		}
+
+	//		temp = vertexPositions[i].at(j);
+
+	//		std::cout << "NEXT STRING ELEMENT: " << temp << std::endl;
+
+	//		std::cout << "Counter: "<< j << std::endl;
+
+	//		// are we dealing with a negative number?
+	//		if (temp == "-")
+	//		{
+	//			while (vertexPositions[i].at(j) != ' ')
+	//			{
+	//				value = value + vertexPositions[i].at(j);
+	//				j++;
+	//				if (j == vertexPositions[i].length())
+	//				{
+	//					break;
+	//				}
+	//			}
+
+	//			plotPos.push_back(std::stof(value));
+	//			std::cout << "Added Negative Number " << value << std::endl;
+	//			j++;
+	//		}
+	//		else if (j != vertexPositions[i].length()-1)
+	//		{
+	//			// are we dealing with a decimal number
+	//			if (vertexPositions[i].at(j + 1) == '.')
+	//			{
+	//				//temp = temp + vertexPositions[i].at(j+1);
+	//				while (vertexPositions[i].at(j) != ' ')
+	//				{
+	//					value = value + vertexPositions[i].at(j);
+	//					j++;
+	//					if (j == vertexPositions[i].length())
+	//					{
+	//						break;
+	//					}
+	//				}
+
+	//				plotPos.push_back(std::stof(value));
+	//				std::cout << "Added Decimal Number " << value << std::endl;
+	//				j++;
+	//			}
+	//			
+	//			else if (temp == " ")
+	//			{
+	//				j++;
+	//			}
+	//			else
+	//			{
+	//				value = temp;
+	//				std::cout << "Added Number " << value << std::endl;
+	//				plotPos.push_back(std::stof(value));
+	//				j++;
+	//			}
+	//		}
+	//	
+	//		else if (temp == " ")
+	//		{
+	//			j++;
+	//		}
+	//		else
+	//		{
+	//			value = temp;
+	//			std::cout << "Added Number " << value << std::endl;
+	//			plotPos.push_back(std::stof(value));
+	//			j++;
+	//		}
+	//	
+
+	//		if (value != "")
+	//		{
+	//			if (std::stof(value) > largest)
+	//			{
+	//				largest = std::stof(value);
+	//			}
+	//		}
+
+	//		value.clear();
+	//		temp.clear();
+	//		
+	//	}
+	//}
+
+	// https://www.geeksforgeeks.org/how-to-split-a-string-in-cc-python-and-java/
+
+	for (int i = 0; i < vertexPositions.size(); i++)
 	{
-		// https://www.tutorialspoint.com/how-to-remove-certain-characters-from-a-string-in-cplusplus
+		std::string temp = vertexPositions[i];
+		std::string num;
 
-		//vertexPositions[i].erase(remove(vertexPositions[i].begin(), vertexPositions[i].end(), ' '), vertexPositions[i].end());
+		std::stringstream ss(temp);
 
-		std::cout << "New String : "<< vertexPositions[i] << std::endl;
-
-		std::string temp;
-		std::string value;
-
-		int j = 0;
-
-		while (j <= vertexPositions[i].length()-1)
+		while (ss >> num)
 		{
-			std::cout << vertexPositions[i].length() << std::endl;
-
-			if (vertexPositions[i].empty()) 
-			{
-				std::cout << "EMPTY LINE: BREAKING FROM WHILE LOOP" << std::endl;
-				break;
-			}
-
-			temp = vertexPositions[i].at(j);
-
-			std::cout << "NEXT STRING ELEMENT: " << temp << std::endl;
-
-			std::cout << "Counter: "<< j << std::endl;
-
-			// are we dealing with a negative number?
-			if (temp == "-")
-			{
-				while (vertexPositions[i].at(j) != ' ')
-				{
-					value = value + vertexPositions[i].at(j);
-					j++;
-					if (j == vertexPositions[i].length())
-					{
-						break;
-					}
-				}
-
-				plotPos.push_back(std::stof(value));
-				std::cout << "Added Negative Number " << value << std::endl;
-				j++;
-			}
-			else if (j != vertexPositions[i].length()-1)
-			{
-				// are we dealing with a decimal number
-				if (vertexPositions[i].at(j + 1) == '.')
-				{
-					//temp = temp + vertexPositions[i].at(j+1);
-					while (vertexPositions[i].at(j) != ' ')
-					{
-						value = value + vertexPositions[i].at(j);
-						j++;
-						if (j == vertexPositions[i].length())
-						{
-							break;
-						}
-					}
-
-					plotPos.push_back(std::stof(value));
-					std::cout << "Added Decimal Number " << value << std::endl;
-					j++;
-				}
+			std::cout << num << std::endl;
 				
-				else if (temp == " ")
-				{
-					j++;
-				}
-				else
-				{
-					value = temp;
-					std::cout << "Added Number " << value << std::endl;
-					plotPos.push_back(std::stof(value));
-					j++;
-				}
-			}
-		
-			else if (temp == " ")
-			{
-				j++;
-			}
-			else
-			{
-				value = temp;
-				std::cout << "Added Number " << value << std::endl;
-				plotPos.push_back(std::stof(value));
-				j++;
-			}
-		
+			plotPos.push_back(std::stof(num));
 
-			if (value != "")
+			if (std::stof(num) > largest)
 			{
-				if (std::stof(value) > largest)
-				{
-					largest = std::stof(value);
-				}
+				largest = std::stof(num);
 			}
-
-			value.clear();
-			temp.clear();
 			
 		}
 	}

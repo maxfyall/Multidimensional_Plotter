@@ -1,7 +1,6 @@
 ﻿  application.cpp
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(139,20): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(349,26): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(350,24): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(398,20): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(411,12): warning C4018: '<=': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(143,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(359,26): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(360,24): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(517,20): warning C4018: '<': signed/unsigned mismatch
   programPlot.vcxproj -> C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\Debug\programPlot.exe
