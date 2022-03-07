@@ -295,8 +295,6 @@ void display()
 
 	}
 	model.pop();
-
-
 }
 
 /*

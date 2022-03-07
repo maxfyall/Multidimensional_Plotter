@@ -72,7 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\include;..\..\common</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\include;..\..\common;..\..\imgui</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;..\..\lib\win32</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -143,6 +143,12 @@
   <ItemGroup>
     <ClCompile Include="..\..\common\cube.cpp" />
     <ClCompile Include="..\..\common\wrapper_glfw.cpp" />
+    <ClCompile Include="..\..\imgui\imgui.cpp" />
+    <ClCompile Include="..\..\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\..\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\..\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\..\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\..\imgui\imgui_widgets.cpp" />
     <ClCompile Include="application.cpp" />
   </ItemGroup>
   <ItemGroup>

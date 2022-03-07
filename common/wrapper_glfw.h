@@ -7,6 +7,11 @@ Iain Martin August 2014
 
 #include <string>
 
+/* Include header files for imgui */
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 /* Inlcude GL_Load and GLFW */
 #include <glload/gl_4_0.h>
 #include <glload/gl_load.h>
