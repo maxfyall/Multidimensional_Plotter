@@ -119,6 +119,17 @@ int GLWrapper::eventLoop()
 
 		renderer();
 
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		ImGui::Begin("Testing ImgUI Windows");
+		ImGui::Text("This is an ImGui window");
+		ImGui::End();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
