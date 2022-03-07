@@ -295,6 +295,13 @@ void display()
 
 	}
 	model.pop();
+
+	ImGui::Begin("MULTIDIMENSIONAL PLOTTER");
+	ImGui::Text("This is an ImGui window");
+	ImGui::End();
+
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 /*

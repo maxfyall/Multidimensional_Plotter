@@ -61,7 +61,7 @@ GLWrapper::GLWrapper(int width, int height, const char *title) {
 	glfwSetWindowTitle(window, "Multidimensional Plotter");
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, true);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
 
@@ -112,18 +112,12 @@ int GLWrapper::eventLoop()
 	while (!glfwWindowShouldClose(window))
 	{
 		// Call function to draw your graphics
-		renderer();
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::Begin("Testing ImgUI Windows");
-		ImGui::Text("This is an ImGui window");
-		ImGui::End();
-
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		renderer();
 
 		// Swap buffers
 		glfwSwapBuffers(window);
