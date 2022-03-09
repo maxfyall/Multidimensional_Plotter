@@ -186,7 +186,7 @@ void init(GLWrapper* glw)
 
 	glGenBuffers(1, &plotBufferObject);
 	glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float) , &vertexPos.front() , GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float) , &vertexPos.front() , GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	//delete[] plotPositions;
@@ -289,7 +289,12 @@ void display()
 		colourMode = 1;
 		glUniform1ui(colourModeID, colourMode);
 		glPointSize(10.0f);
-		glDrawArrays(GL_POINTS, 0, size/3);
+
+		if (size/3 >= 1)
+		{
+			glDrawArrays(GL_POINTS, 0, size / 3);
+		}
+
 		colourMode = 0;
 		glUniform1ui(colourModeID, colourMode);
 
@@ -329,12 +334,29 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 	{
 		std::cout << " MOUSE 1 " << std::endl;
 		moveScene = !moveScene;
+		if (moveScene)
+		{
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
+		else
+		{
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
+
 	}
 
 	if (key == 'M' && action == GLFW_PRESS)
 	{
 		std::cout << "CLEAR THE GRAPH" << std::endl;
+		vertexPos.clear();
+		vertexPos.push_back(0);
+		
+		size = vertexPos.size();
 
+		glGenBuffers(1, &plotBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
+		glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 }
@@ -540,7 +562,16 @@ std::vector<float> read3DData(const char *filePath)
 		}
 	}
 
-	return plotPos;
+	if (plotPos.empty())
+	{
+		std::vector<float> check;
+		check.push_back(0);
+		return check;
+	}
+	else
+	{
+		return plotPos;
+	}
 }
 
 
