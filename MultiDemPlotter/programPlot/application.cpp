@@ -3,6 +3,9 @@
 	Multidimensional Plotter
 */
 
+#define UNICODE
+#pragma comment(lib, "user32.lib")
+
 /* Static Library Links */
 #ifdef _DEBUG
 #pragma comment(lib, "glfw3D.lib")
@@ -25,6 +28,8 @@
 #include <sstream>
 #include <algorithm>
 #include <vector>
+#include <windows.h>
+#include <commdlg.h>
 
 
 #include "axes.h"
@@ -53,6 +58,7 @@ float fov = 45.f;
 float scaler = 0.5f;
 
 int size;
+bool clear;
 
 GLfloat largest;
 GLuint colourMode;
@@ -194,6 +200,10 @@ void display()
 		{
 			glDrawArrays(GL_POINTS, 0, size / 3);
 		}
+		else if (size / 2) 
+		{
+			glDrawArrays(GL_POINTS, 0, size / 2);
+		}
 
 		colourMode = 0;
 		glUniform1ui(colourModeID, colourMode);
@@ -202,7 +212,46 @@ void display()
 	model.pop();
 
 	ImGui::Begin("MULTIDIMENSIONAL PLOTTER");
+	
 	ImGui::Text("This is an ImGui window");
+
+	if (ImGui::Button("Open")) 
+	{
+		//https://www.youtube.com/watch?v=-iMGhSlvIR0
+		//https://docs.microsoft.com/en-us/answers/questions/483237/a-value-of-type-34const-char-34-cannot-be-assigned.html
+
+		OPENFILENAME ofn;
+
+		wchar_t file_name[MAX_PATH];
+		const wchar_t spec[] = L"All files\0 *.*\0";
+
+		ZeroMemory(&ofn, sizeof(OPENFILENAME));
+
+		ofn.lStructSize = sizeof(OPENFILENAME);
+		ofn.hwndOwner = GetFocus();
+		ofn.lpstrFile = file_name;
+		ofn.lpstrFile[0] = '\0';
+		ofn.nMaxFile = MAX_PATH;
+		ofn.lpstrFilter = spec;
+		ofn.nFilterIndex = 1;
+		
+		GetOpenFileName(&ofn);
+	}
+
+	if (ImGui::Button("Clear Graph"))
+	{
+		std::cout << "CLEAR THE GRAPH" << std::endl;
+		vertexPos.clear();
+		vertexPos.push_back(0);
+
+		size = vertexPos.size();
+
+		glGenBuffers(1, &plotBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
+		glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	}
 	ImGui::End();
 
 	ImGui::Render();
@@ -243,20 +292,6 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
 
-	}
-
-	if (key == 'M' && action == GLFW_PRESS)
-	{
-		std::cout << "CLEAR THE GRAPH" << std::endl;
-		vertexPos.clear();
-		vertexPos.push_back(0);
-
-		size = vertexPos.size();
-
-		glGenBuffers(1, &plotBufferObject);
-		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
-		glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 }
@@ -330,114 +365,6 @@ std::vector<float> read3DData(const char* filePath)
 	filestream.close();
 
 	std::vector<float> plotPos;
-
-	// start loop to add data to data structure
-	//for (int i = 0; i < vertexPositions.size(); i++) 
-	//{
-	//	// https://www.tutorialspoint.com/how-to-remove-certain-characters-from-a-string-in-cplusplus
-
-	//	//vertexPositions[i].erase(remove(vertexPositions[i].begin(), vertexPositions[i].end(), ' '), vertexPositions[i].end());
-
-	//	std::cout << "New String : "<< vertexPositions[i] << std::endl;
-
-	//	std::string temp;
-	//	std::string value;
-
-	//	int j = 0;
-
-	//	while (j <= vertexPositions[i].length()-1)
-	//	{
-	//		std::cout << vertexPositions[i].length() << std::endl;
-
-	//		if (vertexPositions[i].empty()) 
-	//		{
-	//			std::cout << "EMPTY LINE: BREAKING FROM WHILE LOOP" << std::endl;
-	//			break;
-	//		}
-
-	//		temp = vertexPositions[i].at(j);
-
-	//		std::cout << "NEXT STRING ELEMENT: " << temp << std::endl;
-
-	//		std::cout << "Counter: "<< j << std::endl;
-
-	//		// are we dealing with a negative number?
-	//		if (temp == "-")
-	//		{
-	//			while (vertexPositions[i].at(j) != ' ')
-	//			{
-	//				value = value + vertexPositions[i].at(j);
-	//				j++;
-	//				if (j == vertexPositions[i].length())
-	//				{
-	//					break;
-	//				}
-	//			}
-
-	//			plotPos.push_back(std::stof(value));
-	//			std::cout << "Added Negative Number " << value << std::endl;
-	//			j++;
-	//		}
-	//		else if (j != vertexPositions[i].length()-1)
-	//		{
-	//			// are we dealing with a decimal number
-	//			if (vertexPositions[i].at(j + 1) == '.')
-	//			{
-	//				//temp = temp + vertexPositions[i].at(j+1);
-	//				while (vertexPositions[i].at(j) != ' ')
-	//				{
-	//					value = value + vertexPositions[i].at(j);
-	//					j++;
-	//					if (j == vertexPositions[i].length())
-	//					{
-	//						break;
-	//					}
-	//				}
-
-	//				plotPos.push_back(std::stof(value));
-	//				std::cout << "Added Decimal Number " << value << std::endl;
-	//				j++;
-	//			}
-	//			
-	//			else if (temp == " ")
-	//			{
-	//				j++;
-	//			}
-	//			else
-	//			{
-	//				value = temp;
-	//				std::cout << "Added Number " << value << std::endl;
-	//				plotPos.push_back(std::stof(value));
-	//				j++;
-	//			}
-	//		}
-	//	
-	//		else if (temp == " ")
-	//		{
-	//			j++;
-	//		}
-	//		else
-	//		{
-	//			value = temp;
-	//			std::cout << "Added Number " << value << std::endl;
-	//			plotPos.push_back(std::stof(value));
-	//			j++;
-	//		}
-	//	
-
-	//		if (value != "")
-	//		{
-	//			if (std::stof(value) > largest)
-	//			{
-	//				largest = std::stof(value);
-	//			}
-	//		}
-
-	//		value.clear();
-	//		temp.clear();
-	//		
-	//	}
-	//}
 
 	// https://www.geeksforgeeks.org/how-to-split-a-string-in-cc-python-and-java/
 
