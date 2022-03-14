@@ -27,7 +27,7 @@
 #include <vector>
 
 
-#include "cube.h"
+#include "axes.h"
 
 /* Include the GLM maths library for GLM functions along with matrix extensions	*/
 #include <glm/glm.hpp>
@@ -57,34 +57,13 @@ int size;
 GLfloat largest;
 GLuint colourMode;
 
-Cube theCube;
+ThreeDAxes newAxes;
 
 GLfloat aspect_ratio;
 
 std::vector<float> vertexPos;
 
-GLfloat xAxesColour[]
-{
-	1.0f, 0.0f, 0.0f, 1.0f, 
-	1.0f, 0.0f, 0.0f, 1.0f
-};
-
-GLfloat yAxesColour[]
-{
-	0.0f, 1.0f, 0.0f, 1.0f,
-	0.0f, 1.0f, 0.0f, 1.0f
-};
-
-GLfloat zAxesColour[]
-{
-	0.0f, 0.0f, 1.0f, 1.0f,
-	0.0f, 0.0f, 1.0f, 1.0f
-};
-
-//GLfloat plotPositions[23];
-
-
-std::vector<float> read3DData(const char *filePath);
+std::vector<float> read3DData(const char* filePath);
 
 /*
 *  Initialising Function, called before rendering loop to initialise variables and creating objects
@@ -93,7 +72,7 @@ void init(GLWrapper* glw)
 {
 	// define the aspect ratio used in the perspective call in display
 	aspect_ratio = 1024.f / 768.f;
-	
+
 	glGenVertexArrays(1, &vArrayObj); // generate index (name) for one vertex array object
 	glBindVertexArray(vArrayObj); // create the vertex array object and make it current
 
@@ -119,24 +98,8 @@ void init(GLWrapper* glw)
 
 	std::cout << "Largest Value: " << largest << std::endl;
 
-	GLfloat xAxesVertex[] =
-	{
-		largest + 1, 0.0f, 0.0f,
-		-(largest + 1), 0.0f, 0.0f
-	};
-
-	GLfloat yAxesVertex[]
-	{
-		0.0f, (largest+1.f), 0.f,
-		0.0f, -(largest + 1.f), 0.0f
-	};
-
-	GLfloat zAxesVertex[]
-	{
-		0.0f, 0.0f, (largest + 1.f),
-		0.0f, 0.0f, -(largest + 1.f)
-	};
-
+	// create axes with the largest number from data set.
+	newAxes.makeAxes(largest);
 
 	size = vertexPos.size();
 
@@ -154,42 +117,10 @@ void init(GLWrapper* glw)
 	viewID = glGetUniformLocation(program, "view");
 	projectionID = glGetUniformLocation(program, "projection");
 
-	glGenBuffers(1, &xAxesBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, xAxesBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(xAxesVertex), xAxesVertex, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &xColourBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, xColourBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(xAxesColour), xAxesColour, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &yAxesBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, yAxesBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(yAxesVertex), yAxesVertex, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &yColourBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, yColourBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(yAxesColour), yAxesColour, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &zAxesBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, zAxesBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(zAxesVertex), zAxesVertex, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &zColourBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, zColourBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(zAxesColour), zAxesColour, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 	glGenBuffers(1, &plotBufferObject);
 	glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float) , &vertexPos.front() , GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &vertexPos.front(), GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	//delete[] plotPositions;
 
 }
 
@@ -209,8 +140,8 @@ void display()
 	glm::mat4 projection = glm::perspective(glm::radians(fov), aspect_ratio, 0.1f, 100.0f);
 
 	glm::mat4 view = glm::lookAt(
-		glm::vec3(0, 0, 4), 
-		glm::vec3(0, 0, 0), 
+		glm::vec3(0, 0, 4),
+		glm::vec3(0, 0, 0),
 		glm::vec3(0, 1, 0)
 	);
 
@@ -226,7 +157,7 @@ void display()
 
 	model.top() = glm::scale(model.top(), glm::vec3(scaler, scaler, scaler));
 
-	model.push(model.top()); 
+	model.push(model.top());
 	{
 
 		model.top() = glm::scale(model.top(), glm::vec3(1, 1, 1));
@@ -234,40 +165,9 @@ void display()
 		//model.top() = glm::translate(model.top(), glm::vec3(1, 0, 0));
 		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
 		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
-		
-		glLineWidth(5.0f);
-		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
-		glBindBuffer(GL_ARRAY_BUFFER, xAxesBufferObject);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-		glBindBuffer(GL_ARRAY_BUFFER, xColourBuffer);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+		newAxes.drawAxes();
 
-		glDrawArrays(GL_LINES, 0, 2);
-
-		glBindBuffer(GL_ARRAY_BUFFER, yAxesBufferObject);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-		glBindBuffer(GL_ARRAY_BUFFER, yColourBuffer);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-		glDrawArrays(GL_LINES, 0, 2);
-
-		glBindBuffer(GL_ARRAY_BUFFER, zAxesBufferObject);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-		glBindBuffer(GL_ARRAY_BUFFER, zColourBuffer);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-
-		glDrawArrays(GL_LINES, 0, 2);
-		
 	}
 	model.pop();
 
@@ -290,7 +190,7 @@ void display()
 		glUniform1ui(colourModeID, colourMode);
 		glPointSize(10.0f);
 
-		if (size/3 >= 1)
+		if (size / 3 >= 1)
 		{
 			glDrawArrays(GL_POINTS, 0, size / 3);
 		}
@@ -350,7 +250,7 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 		std::cout << "CLEAR THE GRAPH" << std::endl;
 		vertexPos.clear();
 		vertexPos.push_back(0);
-		
+
 		size = vertexPos.size();
 
 		glGenBuffers(1, &plotBufferObject);
@@ -364,9 +264,9 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 /*
 *  Mouse Callback function aquired from Learn OpenGL and StackOverflow
 */
-static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn) 
+static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 {
-	if (moveScene) 
+	if (moveScene)
 	{
 		float xpos = static_cast<float>(xposIn);
 		float ypos = static_cast<float>(yposIn);
@@ -378,8 +278,8 @@ static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 			firstMouse = false;
 		}
 
-		double xoffset = xpos-lastX;
-		double yoffset = lastY-ypos;
+		double xoffset = xpos - lastX;
+		double yoffset = lastY - ypos;
 		lastX = xpos;
 		lastY = ypos;
 
@@ -393,7 +293,7 @@ static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 /*
 *  Scroll Callback function acquired from Learn OpenGL
 */
-static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) 
+static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	// need to edit to a scale value variable to prevent aliasing effects
 	fov -= (float)yoffset;
@@ -404,16 +304,16 @@ static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 /*
-*  Read vertex positions from file returns vector of floats to be copied into dynamic array, 
+*  Read vertex positions from file returns vector of floats to be copied into dynamic array,
 *  Also finds the largest value for creating 3-D axes to fit points provided
 */
-std::vector<float> read3DData(const char *filePath) 
+std::vector<float> read3DData(const char* filePath)
 {
 	std::vector<std::string> vertexPositions;
 
 	std::ifstream filestream(filePath);
 
-	if (!filestream.is_open()) 
+	if (!filestream.is_open())
 	{
 		std::cout << "Could not read data file: " << filePath << ". File does not exist. " << std::endl;
 		std::vector<float> empty;
@@ -421,7 +321,7 @@ std::vector<float> read3DData(const char *filePath)
 	}
 
 	std::string line;
-	while (!filestream.eof()) 
+	while (!filestream.eof())
 	{
 		getline(filestream, line);
 		vertexPositions.push_back(line);
@@ -551,14 +451,14 @@ std::vector<float> read3DData(const char *filePath)
 		while (ss >> num)
 		{
 			std::cout << num << std::endl;
-				
+
 			plotPos.push_back(std::stof(num));
 
 			if (std::stof(num) > largest)
 			{
 				largest = std::stof(num);
 			}
-			
+
 		}
 	}
 

@@ -150,10 +150,12 @@
     <ClCompile Include="..\..\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\..\imgui\imgui_widgets.cpp" />
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="axes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\cube.h" />
     <ClInclude Include="..\..\common\wrapper_glfw.h" />
+    <ClInclude Include="axes.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\shaders\shaderFrag.frag" />
