@@ -69,7 +69,7 @@ GLfloat aspect_ratio;
 
 std::vector<float> vertexPos;
 
-std::vector<float> read3DData(const char* filePath);
+std::vector<float> read3DData(std::string filePath);
 
 /*
 *  Initialising Function, called before rendering loop to initialise variables and creating objects
@@ -217,13 +217,13 @@ void display()
 
 	if (ImGui::Button("Open")) 
 	{
-		//https://www.youtube.com/watch?v=-iMGhSlvIR0
-		//https://docs.microsoft.com/en-us/answers/questions/483237/a-value-of-type-34const-char-34-cannot-be-assigned.html
+		// https://www.youtube.com/watch?v=-iMGhSlvIR0
+		// https://docs.microsoft.com/en-us/answers/questions/483237/a-value-of-type-34const-char-34-cannot-be-assigned.html
 
 		OPENFILENAME ofn;
 
 		wchar_t file_name[MAX_PATH];
-		const wchar_t spec[] = L"All files\0 *.*\0";
+		const wchar_t spec[] = L"All files\0 *.*\0Text Files\0.txt\0CSV Files\0.csv\0";
 
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
 
@@ -236,6 +236,15 @@ void display()
 		ofn.nFilterIndex = 1;
 		
 		GetOpenFileName(&ofn);
+
+		std::wstring convert(ofn.lpstrFile);
+
+		std::string path(convert.begin(), convert.end());
+
+		std::cout << path << std::endl;
+
+		read3DData(path);
+
 	}
 
 	if (ImGui::Button("Clear Graph"))
@@ -342,7 +351,7 @@ static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 *  Read vertex positions from file returns vector of floats to be copied into dynamic array,
 *  Also finds the largest value for creating 3-D axes to fit points provided
 */
-std::vector<float> read3DData(const char* filePath)
+std::vector<float> read3DData(std::string filePath)
 {
 	std::vector<std::string> vertexPositions;
 
