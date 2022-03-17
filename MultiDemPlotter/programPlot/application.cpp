@@ -98,35 +98,13 @@ void init(GLWrapper* glw)
 		exit(0); // exit program
 	}
 
-	// read in data to a float vector
-
-	vertexPos = read3DData("../../testData/test3DData.txt");
-
-	std::cout << "Largest Value: " << largest << std::endl;
-
 	// create axes with the largest number from data set.
 	newAxes.makeAxes(largest);
-
-	size = vertexPos.size();
-
-	for (int i = 0; i < vertexPos.size(); i++)
-	{
-		std::cout << vertexPos[i] << " ";
-	}
-
-	std::cout << std::endl;
-
-	std::cout << vertexPos.size() << std::endl;
 
 	modelID = glGetUniformLocation(program, "model");
 	colourModeID = glGetUniformLocation(program, "colourMode");
 	viewID = glGetUniformLocation(program, "view");
 	projectionID = glGetUniformLocation(program, "projection");
-
-	glGenBuffers(1, &plotBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &vertexPos.front(), GL_DYNAMIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 }
 
@@ -215,7 +193,8 @@ void display()
 	
 	ImGui::Text("This is an ImGui window");
 
-	if (ImGui::Button("Open")) 
+	// Open a file to read in using windows.h api
+	if (ImGui::Button("Open File")) 
 	{
 		// https://www.youtube.com/watch?v=-iMGhSlvIR0
 		// https://docs.microsoft.com/en-us/answers/questions/483237/a-value-of-type-34const-char-34-cannot-be-assigned.html
@@ -223,7 +202,7 @@ void display()
 		OPENFILENAME ofn;
 
 		wchar_t file_name[MAX_PATH];
-		const wchar_t spec[] = L"All files\0 *.*\0Text Files\0.txt\0CSV Files\0.csv\0";
+		const wchar_t spec[] = L"Text Files\0*.TXT\0CSV Files\0*.CSV\0";
 
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
 
@@ -243,7 +222,19 @@ void display()
 
 		std::cout << path << std::endl;
 
-		read3DData(path);
+		if (!path.empty())
+		{
+			vertexPos = read3DData(path);
+
+			size = vertexPos.size();
+
+			newAxes.makeAxes(largest);
+
+			glGenBuffers(1, &plotBufferObject);
+			glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
+			glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
 
 	}
 
@@ -261,8 +252,8 @@ void display()
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	}
-	ImGui::End();
 
+	ImGui::End();
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
@@ -286,21 +277,6 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 	{
 		std::cout << "ESC PRESSED - TERMINATING" << std::endl;
 		glfwSetWindowShouldClose(window, GL_TRUE);
-	}
-
-	if (key == 'Q' && action == GLFW_PRESS)
-	{
-		std::cout << " MOUSE 1 " << std::endl;
-		moveScene = !moveScene;
-		if (moveScene)
-		{
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		}
-		else
-		{
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		}
-
 	}
 
 }
@@ -335,6 +311,25 @@ static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 }
 
 /*
+*	Mouse button callback aquired from GLFW help page https://www.glfw.org/docs/3.3/input_guide.html
+*/
+static void mouseButonCallback(GLFWwindow* window, int button, int action, int mods) 
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	{
+		moveScene = !moveScene;
+		if (moveScene)
+		{
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
+		else
+		{
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
+	}
+}
+
+/*
 *  Scroll Callback function acquired from Learn OpenGL
 */
 static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
@@ -345,6 +340,24 @@ static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 		fov = 1.f;
 	if (fov > 45.f)
 		fov = 45.f;
+}
+
+static void windowCloseCallback(GLFWwindow* window) 
+{
+	std::cout << "CLOSED?" << std::endl;
+
+	const int result = MessageBox(NULL, L"Are you sure you want to quit?", L"Exiting Program", MB_YESNOCANCEL);
+
+	switch (result)
+	{
+	case IDYES:
+		std::cout << "YES" << std::endl;
+		break;
+	case IDCANCEL:
+		std::cout << "CANCEL" << std::endl;
+		glfwSetWindowCloseCallback(window, GL_FALSE);
+		break;
+	}
 }
 
 /*
@@ -427,9 +440,10 @@ int main(int argc, char* argv[])
 	glw->setRenderer(display);
 	glw->setKeyCallback(keyCallback);
 	glw->setMouseCallback(mouseCallback);
+	glw->setMouseButtonCallback(mouseButonCallback);
 	glw->setScrollCallback(scrollCallback);
 	glw->setReshapeCallback(reshape);
-
+	glw->setWindowCloseCallback(windowCloseCallback);
 	glw->DisplayVersion();
 
 	init(glw);

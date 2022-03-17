@@ -160,9 +160,19 @@ void GLWrapper::setMouseCallback(void (*func)(GLFWwindow* window, double xpos, d
 	glfwSetCursorPosCallback(window, func);
 }
 
+void GLWrapper::setMouseButtonCallback(void (*func)(GLFWwindow* window, int button, int action, int mods)) 
+{
+	glfwSetMouseButtonCallback(window, func);
+}
+
 void GLWrapper::setScrollCallback(void (*func)(GLFWwindow* window, double xoffset, double yoffset)) 
 {
 	glfwSetScrollCallback(window, func);
+}
+
+void GLWrapper::setWindowCloseCallback(void(*func)(GLFWwindow* window)) 
+{
+	glfwSetWindowCloseCallback(window, func);
 }
 
 
