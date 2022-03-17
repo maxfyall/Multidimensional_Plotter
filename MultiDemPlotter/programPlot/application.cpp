@@ -3,6 +3,9 @@
 	Multidimensional Plotter
 */
 
+#define UNICODE
+#pragma comment(lib, "user32.lib")
+
 /* Static Library Links */
 #ifdef _DEBUG
 #pragma comment(lib, "glfw3D.lib")
@@ -25,9 +28,11 @@
 #include <sstream>
 #include <algorithm>
 #include <vector>
+#include <windows.h>
+#include <commdlg.h>
 
 
-#include "cube.h"
+#include "axes.h"
 
 /* Include the GLM maths library for GLM functions along with matrix extensions	*/
 #include <glm/glm.hpp>
@@ -49,39 +54,22 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 float lastX = 1024.f / 2.0;
 float lastY = 768.f / 2.0;
-float fov = 90.f;
+float fov = 45.f;
+float scaler = 0.5f;
 
 int size;
+bool clear;
 
 GLfloat largest;
 GLuint colourMode;
 
-Cube theCube;
+ThreeDAxes newAxes;
 
 GLfloat aspect_ratio;
 
-GLfloat xAxesColour[]
-{
-	1.0f, 0.0f, 0.0f, 1.0f, 
-	1.0f, 0.0f, 0.0f, 1.0f
-};
+std::vector<float> vertexPos;
 
-GLfloat yAxesColour[]
-{
-	0.0f, 1.0f, 0.0f, 1.0f,
-	0.0f, 1.0f, 0.0f, 1.0f
-};
-
-GLfloat zAxesColour[]
-{
-	0.0f, 0.0f, 1.0f, 1.0f,
-	0.0f, 0.0f, 1.0f, 1.0f
-};
-
-//GLfloat plotPositions[23];
-
-
-std::vector<float> read3DData(const char *filePath);
+std::vector<float> read3DData(std::string filePath);
 
 /*
 *  Initialising Function, called before rendering loop to initialise variables and creating objects
@@ -90,7 +78,7 @@ void init(GLWrapper* glw)
 {
 	// define the aspect ratio used in the perspective call in display
 	aspect_ratio = 1024.f / 768.f;
-	
+
 	glGenVertexArrays(1, &vArrayObj); // generate index (name) for one vertex array object
 	glBindVertexArray(vArrayObj); // create the vertex array object and make it current
 
@@ -110,88 +98,13 @@ void init(GLWrapper* glw)
 		exit(0); // exit program
 	}
 
-	std::vector<float> temp = read3DData("../../testData/test3DData.txt");
-
-	std::cout << "Largest Value: " << largest << std::endl;
-
-	GLfloat xAxesVertex[] =
-	{
-		largest + 1, 0.0f, 0.0f,
-		-(largest + 1), 0.0f, 0.0f
-	};
-
-	GLfloat yAxesVertex[]
-	{
-		0.0f, (largest+1.f), 0.f,
-		0.0f, -(largest + 1.f), 0.0f
-	};
-
-	GLfloat zAxesVertex[]
-	{
-		0.0f, 0.0f, (largest + 1.f),
-		0.0f, 0.0f, -(largest + 1.f)
-	};
-
-
-	const int x = temp.size();
-	size = temp.size();
-
-	GLfloat* plotPositions = new GLfloat[x];
-
-	std::cout << x << std::endl;
-
-	std::copy(temp.begin(), temp.end(), plotPositions);
-
-	std::cout << "Array:";
-
-	for (int i = 0; i < temp.size(); i++)
-	{
-		std::cout << plotPositions[i];
-	}
-
-	std::cout << std::endl;
+	// create axes with the largest number from data set.
+	newAxes.makeAxes(largest);
 
 	modelID = glGetUniformLocation(program, "model");
 	colourModeID = glGetUniformLocation(program, "colourMode");
 	viewID = glGetUniformLocation(program, "view");
 	projectionID = glGetUniformLocation(program, "projection");
-
-	glGenBuffers(1, &xAxesBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, xAxesBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(xAxesVertex), xAxesVertex, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &xColourBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, xColourBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(xAxesColour), xAxesColour, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &yAxesBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, yAxesBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(yAxesVertex), yAxesVertex, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &yColourBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, yColourBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(yAxesColour), yAxesColour, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &zAxesBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, zAxesBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(zAxesVertex), zAxesVertex, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &zColourBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, zColourBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(zAxesColour), zAxesColour, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &plotBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*x , plotPositions, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	delete[] plotPositions;
 
 }
 
@@ -211,15 +124,13 @@ void display()
 	glm::mat4 projection = glm::perspective(glm::radians(fov), aspect_ratio, 0.1f, 100.0f);
 
 	glm::mat4 view = glm::lookAt(
-		glm::vec3(0, 0, 4), 
-		glm::vec3(0, 0, 0), 
+		glm::vec3(0, 0, 4),
+		glm::vec3(0, 0, 0),
 		glm::vec3(0, 1, 0)
 	);
 
 	//view = glm::rotate(view, -glm::radians(yaw), glm::vec3(1, 0, 0));
 	//view = glm::rotate(view, glm::radians(20.0f), glm::vec3(1, 0, 0));
-
-	//model.top() = glm::scale(model.top(), glm::vec3(0.5, 0.5, 0.5));
 
 	//model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
 	//model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -228,7 +139,9 @@ void display()
 	glUniformMatrix4fv(viewID, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projection[0][0]);
 
-	model.push(model.top()); 
+	model.top() = glm::scale(model.top(), glm::vec3(scaler, scaler, scaler));
+
+	model.push(model.top());
 	{
 
 		model.top() = glm::scale(model.top(), glm::vec3(1, 1, 1));
@@ -236,43 +149,9 @@ void display()
 		//model.top() = glm::translate(model.top(), glm::vec3(1, 0, 0));
 		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
 		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
-		
-		glLineWidth(3.0f);
-		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
-		glBindBuffer(GL_ARRAY_BUFFER, xAxesBufferObject);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		glPointSize(3.0f);
 
-		glBindBuffer(GL_ARRAY_BUFFER, xColourBuffer);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+		newAxes.drawAxes();
 
-		glDrawArrays(GL_LINES, 0, 2);
-
-		glBindBuffer(GL_ARRAY_BUFFER, yAxesBufferObject);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		glPointSize(3.0f);
-
-		glBindBuffer(GL_ARRAY_BUFFER, yColourBuffer);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-		glDrawArrays(GL_LINES, 0, 2);
-
-		glBindBuffer(GL_ARRAY_BUFFER, zAxesBufferObject);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-		glBindBuffer(GL_ARRAY_BUFFER, zColourBuffer);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-		glPointSize(3.0f);
-
-		glDrawArrays(GL_LINES, 0, 2);
-		
 	}
 	model.pop();
 
@@ -288,20 +167,95 @@ void display()
 		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
 
 		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
-		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(0);
 
 		colourMode = 1;
 		glUniform1ui(colourModeID, colourMode);
 		glPointSize(10.0f);
-		glDrawArrays(GL_POINTS, 0, size/3);
+
+		if (size / 3 >= 1)
+		{
+			glDrawArrays(GL_POINTS, 0, size / 3);
+		}
+		else if (size / 2) 
+		{
+			glDrawArrays(GL_POINTS, 0, size / 2);
+		}
+
 		colourMode = 0;
 		glUniform1ui(colourModeID, colourMode);
 
 	}
 	model.pop();
 
+	ImGui::Begin("MULTIDIMENSIONAL PLOTTER");
+	
+	ImGui::Text("This is an ImGui window");
 
+	// Open a file to read in using windows.h api
+	if (ImGui::Button("Open File")) 
+	{
+		// https://www.youtube.com/watch?v=-iMGhSlvIR0
+		// https://docs.microsoft.com/en-us/answers/questions/483237/a-value-of-type-34const-char-34-cannot-be-assigned.html
+
+		OPENFILENAME ofn;
+
+		wchar_t file_name[MAX_PATH];
+		const wchar_t spec[] = L"Text Files\0*.TXT\0CSV Files\0*.CSV\0";
+
+		ZeroMemory(&ofn, sizeof(OPENFILENAME));
+
+		ofn.lStructSize = sizeof(OPENFILENAME);
+		ofn.hwndOwner = GetFocus();
+		ofn.lpstrFile = file_name;
+		ofn.lpstrFile[0] = '\0';
+		ofn.nMaxFile = MAX_PATH;
+		ofn.lpstrFilter = spec;
+		ofn.nFilterIndex = 1;
+		
+		GetOpenFileName(&ofn);
+
+		std::wstring convert(ofn.lpstrFile);
+
+		std::string path(convert.begin(), convert.end());
+
+		std::cout << path << std::endl;
+
+		if (!path.empty())
+		{
+			vertexPos = read3DData(path);
+
+			size = vertexPos.size();
+
+			newAxes.makeAxes(largest);
+
+			glGenBuffers(1, &plotBufferObject);
+			glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
+			glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
+
+	}
+
+	if (ImGui::Button("Clear Graph"))
+	{
+		std::cout << "CLEAR THE GRAPH" << std::endl;
+		vertexPos.clear();
+		vertexPos.push_back(0);
+
+		size = vertexPos.size();
+
+		glGenBuffers(1, &plotBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
+		glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	}
+
+	ImGui::End();
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 /*
@@ -325,19 +279,14 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 
-	if (key == 'Q' && action == GLFW_PRESS)
-	{
-		std::cout << " MOUSE 1 " << std::endl;
-		moveScene = !moveScene;
-	} 
 }
 
 /*
 *  Mouse Callback function aquired from Learn OpenGL and StackOverflow
 */
-static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn) 
+static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 {
-	if (moveScene) 
+	if (moveScene)
 	{
 		float xpos = static_cast<float>(xposIn);
 		float ypos = static_cast<float>(yposIn);
@@ -349,8 +298,8 @@ static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 			firstMouse = false;
 		}
 
-		double xoffset = xpos-lastX;
-		double yoffset = lastY-ypos;
+		double xoffset = xpos - lastX;
+		double yoffset = lastY - ypos;
 		lastX = xpos;
 		lastY = ypos;
 
@@ -362,34 +311,74 @@ static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 }
 
 /*
-*  Scroll Callback function acquired from Learn OpenGL
+*	Mouse button callback aquired from GLFW help page https://www.glfw.org/docs/3.3/input_guide.html
 */
-static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) 
+static void mouseButonCallback(GLFWwindow* window, int button, int action, int mods) 
 {
-	fov -= (float)yoffset;
-	if (fov < 1.0f)
-		fov = 1.0f;
-	if (fov > 180.f)
-		fov = 180.f;
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	{
+		moveScene = !moveScene;
+		if (moveScene)
+		{
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
+		else
+		{
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
+	}
 }
 
 /*
-*  Read vertex positions from file returns vector of floats to be copied into dynamic array, 
+*  Scroll Callback function acquired from Learn OpenGL
+*/
+static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	// need to edit to a scale value variable to prevent aliasing effects
+	fov -= (float)yoffset;
+	if (fov < 1.f)
+		fov = 1.f;
+	if (fov > 45.f)
+		fov = 45.f;
+}
+
+static void windowCloseCallback(GLFWwindow* window) 
+{
+	std::cout << "CLOSED?" << std::endl;
+
+	const int result = MessageBox(NULL, L"Are you sure you want to quit?", L"Exiting Program", MB_YESNOCANCEL);
+
+	switch (result)
+	{
+	case IDYES:
+		std::cout << "YES" << std::endl;
+		break;
+	case IDCANCEL:
+		std::cout << "CANCEL" << std::endl;
+		glfwSetWindowCloseCallback(window, GL_FALSE);
+		break;
+	}
+}
+
+/*
+*  Read vertex positions from file returns vector of floats to be copied into dynamic array,
 *  Also finds the largest value for creating 3-D axes to fit points provided
 */
-std::vector<float> read3DData(const char *filePath) 
+std::vector<float> read3DData(std::string filePath)
 {
 	std::vector<std::string> vertexPositions;
 
 	std::ifstream filestream(filePath);
 
-	if (!filestream.is_open()) 
+	if (!filestream.is_open())
 	{
 		std::cout << "Could not read data file: " << filePath << ". File does not exist. " << std::endl;
+		std::vector<float> empty;
+		return empty;
 	}
 
 	std::string line;
-	while (!filestream.eof()) 
+	while (!filestream.eof())
 	{
 		getline(filestream, line);
 		vertexPositions.push_back(line);
@@ -399,40 +388,39 @@ std::vector<float> read3DData(const char *filePath)
 
 	std::vector<float> plotPos;
 
-	for (int i = 0; i < vertexPositions.size(); i++) 
+	// https://www.geeksforgeeks.org/how-to-split-a-string-in-cc-python-and-java/
+
+	for (int i = 0; i < vertexPositions.size(); i++)
 	{
-		//std::cout << "Old String:  " << vertexPositions[i] << std::endl;
+		std::string temp = vertexPositions[i];
+		std::string num;
 
-		// https://www.tutorialspoint.com/how-to-remove-certain-characters-from-a-string-in-cplusplus
+		std::stringstream ss(temp);
 
-		vertexPositions[i].erase(remove(vertexPositions[i].begin(), vertexPositions[i].end(), ' '), vertexPositions[i].end());
-
-		std::cout << "New String : "<< vertexPositions[i] << std::endl;
-
-		std::string temp;
-
-		for (int j = 0; j < vertexPositions[i].length(); j++)
+		while (ss >> num)
 		{
-			temp = vertexPositions[i].at(j);
-			std::cout << temp << std::endl;
+			std::cout << num << std::endl;
 
-			if (temp == "-") 
+			plotPos.push_back(std::stof(num));
+
+			if (std::stof(num) > largest)
 			{
-				temp = temp + vertexPositions[i].at(j + 1);
-				j++;
+				largest = std::stof(num);
 			}
 
-			if (std::stof(temp) > largest)
-			{
-				largest = std::stof(temp);
-				//std::cout << "New Value : " << largest << std::endl;
-			}
-
-			plotPos.push_back(std::stof(temp));
 		}
 	}
 
-	return plotPos;
+	if (plotPos.empty())
+	{
+		std::vector<float> check;
+		check.push_back(0);
+		return check;
+	}
+	else
+	{
+		return plotPos;
+	}
 }
 
 
@@ -452,9 +440,10 @@ int main(int argc, char* argv[])
 	glw->setRenderer(display);
 	glw->setKeyCallback(keyCallback);
 	glw->setMouseCallback(mouseCallback);
+	glw->setMouseButtonCallback(mouseButonCallback);
 	glw->setScrollCallback(scrollCallback);
 	glw->setReshapeCallback(reshape);
-
+	glw->setWindowCloseCallback(windowCloseCallback);
 	glw->DisplayVersion();
 
 	init(glw);

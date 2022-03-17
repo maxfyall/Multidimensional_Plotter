@@ -61,7 +61,7 @@ GLWrapper::GLWrapper(int width, int height, const char *title) {
 	glfwSetWindowTitle(window, "Multidimensional Plotter");
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, true);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
 
@@ -102,9 +102,21 @@ and then starts the event loop which runs until the program ends
 int GLWrapper::eventLoop()
 {
 	// Main loop
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 440");
+
 	while (!glfwWindowShouldClose(window))
 	{
 		// Call function to draw your graphics
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		renderer();
 
 		// Swap buffers
@@ -112,6 +124,9 @@ int GLWrapper::eventLoop()
 		glfwPollEvents();
 	}
 
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 	glfwTerminate();
 	return 0;
 }
@@ -145,9 +160,19 @@ void GLWrapper::setMouseCallback(void (*func)(GLFWwindow* window, double xpos, d
 	glfwSetCursorPosCallback(window, func);
 }
 
+void GLWrapper::setMouseButtonCallback(void (*func)(GLFWwindow* window, int button, int action, int mods)) 
+{
+	glfwSetMouseButtonCallback(window, func);
+}
+
 void GLWrapper::setScrollCallback(void (*func)(GLFWwindow* window, double xoffset, double yoffset)) 
 {
 	glfwSetScrollCallback(window, func);
+}
+
+void GLWrapper::setWindowCloseCallback(void(*func)(GLFWwindow* window)) 
+{
+	glfwSetWindowCloseCallback(window, func);
 }
 
 
