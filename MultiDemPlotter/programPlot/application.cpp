@@ -61,6 +61,7 @@ int size;
 bool clear;
 
 GLfloat largest;
+GLfloat sizePoint;
 GLuint colourMode;
 
 ThreeDAxes newAxes;
@@ -100,6 +101,8 @@ void init(GLWrapper* glw)
 
 	// create axes with the largest number from data set.
 	newAxes.makeAxes(largest);
+
+	sizePoint = 10.0f;
 
 	modelID = glGetUniformLocation(program, "model");
 	colourModeID = glGetUniformLocation(program, "colourMode");
@@ -172,7 +175,7 @@ void display()
 
 		colourMode = 1;
 		glUniform1ui(colourModeID, colourMode);
-		glPointSize(10.0f);
+		glPointSize(sizePoint);
 
 		if (size / 3 >= 1)
 		{
@@ -191,7 +194,9 @@ void display()
 
 	ImGui::Begin("MULTIDIMENSIONAL PLOTTER");
 	
-	ImGui::Text("This is an ImGui window");
+	ImGui::Text("Welcome to Multidimensional Plotter");
+
+	ImGui::Dummy(ImVec2(0.0f, 10.f));
 
 	// Open a file to read in using windows.h api
 	if (ImGui::Button("Open File")) 
@@ -237,6 +242,12 @@ void display()
 		}
 
 	}
+
+	ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+	ImGui::SliderFloat("Point Size", &sizePoint, 5.0f, 20.f);
+
+	ImGui::Dummy(ImVec2(0.0f, 5.f));
 
 	if (ImGui::Button("Clear Graph"))
 	{
@@ -315,18 +326,27 @@ static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 */
 static void mouseButonCallback(GLFWwindow* window, int button, int action, int mods) 
 {
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	if (button == GLFW_MOUSE_BUTTON_MIDDLE)
 	{
-		moveScene = !moveScene;
+		if (action == GLFW_PRESS)
+		{
+			moveScene = true;
+		}
+		else if(action == GLFW_RELEASE)
+		{
+			moveScene = false;
+		}
+
 		if (moveScene)
 		{
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);			
 		}
 		else
 		{
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
 	}
+	
 }
 
 /*
@@ -340,24 +360,6 @@ static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 		fov = 1.f;
 	if (fov > 45.f)
 		fov = 45.f;
-}
-
-static void windowCloseCallback(GLFWwindow* window) 
-{
-	std::cout << "CLOSED?" << std::endl;
-
-	const int result = MessageBox(NULL, L"Are you sure you want to quit?", L"Exiting Program", MB_YESNOCANCEL);
-
-	switch (result)
-	{
-	case IDYES:
-		std::cout << "YES" << std::endl;
-		break;
-	case IDCANCEL:
-		std::cout << "CANCEL" << std::endl;
-		glfwSetWindowCloseCallback(window, GL_FALSE);
-		break;
-	}
 }
 
 /*
@@ -443,7 +445,6 @@ int main(int argc, char* argv[])
 	glw->setMouseButtonCallback(mouseButonCallback);
 	glw->setScrollCallback(scrollCallback);
 	glw->setReshapeCallback(reshape);
-	glw->setWindowCloseCallback(windowCloseCallback);
 	glw->DisplayVersion();
 
 	init(glw);

@@ -170,10 +170,6 @@ void GLWrapper::setScrollCallback(void (*func)(GLFWwindow* window, double xoffse
 	glfwSetScrollCallback(window, func);
 }
 
-void GLWrapper::setWindowCloseCallback(void(*func)(GLFWwindow* window)) 
-{
-	glfwSetWindowCloseCallback(window, func);
-}
 
 
 /* Build shaders from strings containing shader source code */
