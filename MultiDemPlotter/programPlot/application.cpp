@@ -63,10 +63,13 @@ bool clear;
 GLfloat largest;
 GLfloat sizePoint;
 GLuint colourMode;
+static int graphType = 0;
 
 ThreeDAxes newAxes;
 
 GLfloat aspect_ratio;
+
+static const char * graphs[] = { "Scatter Plot", "Line Graph", "Bar Chart"};
 
 std::vector<float> vertexPos;
 
@@ -167,8 +170,8 @@ void display()
 		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
 		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
 
+	
 		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
-
 		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(0);
@@ -177,17 +180,38 @@ void display()
 		glUniform1ui(colourModeID, colourMode);
 		glPointSize(sizePoint);
 
-		if (size / 3 >= 1)
+		if (graphType == 0)
 		{
-			glDrawArrays(GL_POINTS, 0, size / 3);
+			if (size / 3 >= 1)
+			{
+				glDrawArrays(GL_POINTS, 0, size / 3);
+			}
+			else if (size / 2)
+			{
+				glDrawArrays(GL_POINTS, 0, size / 2);
+			}
 		}
-		else if (size / 2) 
+		else if (graphType == 1) 
 		{
-			glDrawArrays(GL_POINTS, 0, size / 2);
+			if (size / 3 >= 1)
+			{
+				glDrawArrays(GL_LINE_LOOP, 0, size / 3);
+			}
+			else if (size / 2)
+			{
+				glDrawArrays(GL_LINE_LOOP, 0, size / 2);
+			}
+		}
+		else if (graphType == 2) 
+		{
+			// draw a bar graph
 		}
 
 		colourMode = 0;
 		glUniform1ui(colourModeID, colourMode);
+
+		
+		
 
 	}
 	model.pop();
@@ -242,6 +266,10 @@ void display()
 		}
 
 	}
+
+	ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+	ImGui::Combo("Graph", &graphType, graphs, IM_ARRAYSIZE(graphs));
 
 	ImGui::Dummy(ImVec2(0.0f, 5.f));
 
