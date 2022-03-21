@@ -5,6 +5,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 
+#include <iostream>
+
 class ThreeDAxes
 {
 public:
@@ -21,7 +23,12 @@ public:
 	GLuint zAxesBufferObject;
 	GLuint zColourBuffer;
 
+	GLuint labelXBO;
+	GLuint labelYBO;
+	GLuint labelZBO;
+
 	GLuint attribute_v_coord;
 	GLuint attribute_v_colours;
+	float numOfLines;
 
 };

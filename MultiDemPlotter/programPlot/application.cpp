@@ -33,6 +33,7 @@
 
 
 #include "axes.h"
+#include "cube.h"
 
 /* Include the GLM maths library for GLM functions along with matrix extensions	*/
 #include <glm/glm.hpp>
@@ -60,12 +61,14 @@ float scaler = 0.5f;
 int size;
 bool clear;
 
-GLfloat largest;
+float largest;
 GLfloat sizePoint;
 GLuint colourMode;
 static int graphType = 0;
+bool drawmode;
 
 ThreeDAxes newAxes;
+Cube testCube;
 
 GLfloat aspect_ratio;
 
@@ -74,6 +77,7 @@ static const char * graphs[] = { "Scatter Plot", "Line Graph", "Bar Chart"};
 std::vector<float> vertexPos;
 
 std::vector<float> read3DData(std::string filePath);
+void clearGraphVector();
 
 /*
 *  Initialising Function, called before rendering loop to initialise variables and creating objects
@@ -104,6 +108,7 @@ void init(GLWrapper* glw)
 
 	// create axes with the largest number from data set.
 	newAxes.makeAxes(largest);
+	testCube.makeCube();
 
 	sizePoint = 10.0f;
 
@@ -152,7 +157,6 @@ void display()
 
 		model.top() = glm::scale(model.top(), glm::vec3(1, 1, 1));
 
-		//model.top() = glm::translate(model.top(), glm::vec3(1, 0, 0));
 		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
 		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
 
@@ -195,11 +199,25 @@ void display()
 		{
 			if (size / 3 >= 1)
 			{
-				glDrawArrays(GL_LINE_LOOP, 0, size / 3);
+				if (!drawmode)
+				{
+					glDrawArrays(GL_LINE_STRIP, 0, size / 3);
+				}
+				else
+				{
+					glDrawArrays(GL_LINE_LOOP, 0, size / 3);
+				}
 			}
 			else if (size / 2)
 			{
-				glDrawArrays(GL_LINE_LOOP, 0, size / 2);
+				if (!drawmode)
+				{
+					glDrawArrays(GL_LINE_STRIP, 0, size / 3);
+				}
+				else
+				{
+					glDrawArrays(GL_LINE_LOOP, 0, size / 3);
+				}
 			}
 		}
 		else if (graphType == 2) 
@@ -210,12 +228,19 @@ void display()
 		colourMode = 0;
 		glUniform1ui(colourModeID, colourMode);
 
-		
-		
-
 	}
 	model.pop();
 
+	model.push(model.top());
+	{
+		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
+		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
+		testCube.drawCube(0);
+
+	}
+	model.pop();
 	ImGui::Begin("MULTIDIMENSIONAL PLOTTER");
 	
 	ImGui::Text("Welcome to Multidimensional Plotter");
@@ -269,27 +294,29 @@ void display()
 
 	ImGui::Dummy(ImVec2(0.0f, 5.f));
 
-	ImGui::Combo("Graph", &graphType, graphs, IM_ARRAYSIZE(graphs));
+	if (ImGui::Combo("Graph", &graphType, graphs, IM_ARRAYSIZE(graphs))) {
+		clearGraphVector();
+	}
 
 	ImGui::Dummy(ImVec2(0.0f, 5.f));
 
-	ImGui::SliderFloat("Point Size", &sizePoint, 5.0f, 20.f);
+	if (graphType == 0) {
 
+		ImGui::SliderFloat("Point Size", &sizePoint, 5.0f, 20.f);
+		ImGui::Dummy(ImVec2(0.0f, 5.f));
+	}
+
+	if (graphType == 1) {
+		ImGui::Checkbox("Line Loop", &drawmode);
+		ImGui::Dummy(ImVec2(0.0f, 5.f));
+	}
+
+	ImGui::SliderFloat("Graph Size", &scaler, 0.01f, 1.f);
 	ImGui::Dummy(ImVec2(0.0f, 5.f));
 
 	if (ImGui::Button("Clear Graph"))
 	{
-		std::cout << "CLEAR THE GRAPH" << std::endl;
-		vertexPos.clear();
-		vertexPos.push_back(0);
-
-		size = vertexPos.size();
-
-		glGenBuffers(1, &plotBufferObject);
-		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
-		glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+		clearGraphVector();
 	}
 
 	ImGui::End();
@@ -451,6 +478,20 @@ std::vector<float> read3DData(std::string filePath)
 	{
 		return plotPos;
 	}
+}
+
+void clearGraphVector() 
+{
+	std::cout << "CLEAR THE GRAPH" << std::endl;
+	vertexPos.clear();
+	vertexPos.push_back(0);
+
+	size = vertexPos.size();
+
+	glGenBuffers(1, &plotBufferObject);
+	glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 
