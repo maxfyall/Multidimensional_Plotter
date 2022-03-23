@@ -108,7 +108,6 @@ void init(GLWrapper* glw)
 
 	// create axes with the largest number from data set.
 	newAxes.makeAxes(largest);
-	testCube.makeCube();
 
 	sizePoint = 10.0f;
 
@@ -180,7 +179,7 @@ void display()
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(0);
 
-		colourMode = 1;
+		colourMode = 0;
 		glUniform1ui(colourModeID, colourMode);
 		glPointSize(sizePoint);
 
@@ -222,7 +221,14 @@ void display()
 		}
 		else if (graphType == 2) 
 		{
-			// draw a bar graph
+			if (!(vertexPos.size() == 1 && vertexPos[0] == 0))
+			{
+				for (int i = 0; i < vertexPos.size(); i++)
+				{
+					testCube.makeCube(vertexPos[i], i);
+					testCube.drawCube(0);
+				}
+			}
 		}
 
 		colourMode = 0;
@@ -231,16 +237,6 @@ void display()
 	}
 	model.pop();
 
-	model.push(model.top());
-	{
-		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
-
-		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
-		testCube.drawCube(0);
-
-	}
-	model.pop();
 	ImGui::Begin("MULTIDIMENSIONAL PLOTTER");
 	
 	ImGui::Text("Welcome to Multidimensional Plotter");
@@ -283,7 +279,7 @@ void display()
 			size = vertexPos.size();
 
 			newAxes.makeAxes(largest);
-
+			
 			glGenBuffers(1, &plotBufferObject);
 			glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
 			glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
@@ -296,6 +292,7 @@ void display()
 
 	if (ImGui::Combo("Graph", &graphType, graphs, IM_ARRAYSIZE(graphs))) {
 		clearGraphVector();
+		newAxes.clearLabels();
 	}
 
 	ImGui::Dummy(ImVec2(0.0f, 5.f));
@@ -317,6 +314,7 @@ void display()
 	if (ImGui::Button("Clear Graph"))
 	{
 		clearGraphVector();
+		newAxes.clearLabels();
 	}
 
 	ImGui::End();
@@ -487,6 +485,8 @@ void clearGraphVector()
 	vertexPos.push_back(0);
 
 	size = vertexPos.size();
+
+	largest = 0;
 
 	glGenBuffers(1, &plotBufferObject);
 	glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);

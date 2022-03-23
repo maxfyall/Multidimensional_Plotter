@@ -20,7 +20,6 @@ void main()
 	else if(colourMode == 0)
 	{
 		fragColour = colour;
-		//fragColour = vec4(1.0, 1.0, 1.0, 1.0);
 	}
 
 	gl_Position = (projection* view * model) * position;

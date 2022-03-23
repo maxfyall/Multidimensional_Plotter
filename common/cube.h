@@ -15,7 +15,7 @@ public:
 	Cube();
 	~Cube();
 
-	void makeCube();
+	void makeCube(float height, int move);
 	void drawCube(int drawmode);
 
 	// Define vertex buffer object names (e.g as globals)

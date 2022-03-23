@@ -27,65 +27,70 @@ Cube::~Cube()
 
 
 /* Make a cube from hard-coded vertex positions and normals  */
-void Cube::makeCube()
+void Cube::makeCube(float height, int move)
 {
 	/* Define vertices for a cube in 12 triangles */
+	if (height == 0)
+	{
+		height = height + 0.01;
+	}
+
 	GLfloat vertexPositions[] =
 	{
 
 		// bottom plane
-		-0.f, 0.2f, -0.f,
-		-0.f, -0.0f, -0.f,
-		0.2f, -0.0f, -0.f,
+		0.005f+move, 0.205f, 0.f,
+		0.005f+move, 0.005f, 0.f,
+		0.205f+move, 0.005f, 0.f,
 
-		0.2f, -0.f, -0.f,
-		0.2f, 0.2f, -0.f,
-		-0.0f, 0.2f, -0.f,
-	
+		0.205f+move, 0.005f, 0.f,
+		0.205f+move, 0.205f, 0.f,
+		0.005f+move, 0.205f, 0.f,
+			  
 		// right plane
-		0.2f, -0.0f, -0.f, // mod
-		0.2f, -0.f, 0.5f, // mod
-		0.2f, 0.2f, -0.f,
+		0.205f+move, 0.005f, 0.0f,
+		0.205f+move, 0.005f, height, // mod
+		0.205f+move, 0.205f, 0.f,
 
-		0.2f, -0.f, 0.5f, // mod
-		0.2f, 0.2f, 0.5f, // mod
-		0.2f, 0.2f, -0.f,
+		0.205f+move, 0.005f, height, // mod
+		0.205f+move, 0.205f, height, // mod
+		0.205f+move, 0.205f, 0.f,
 		
 		// top plane
-		0.2f, -0.f, 0.5f, // mod
-		-0.f, -0.f, 0.5f, // mod
-		0.2f, 0.2f, 0.5f, // mod
+		0.205f+move, 0.005f, height, // mod
+		0.005f+move, 0.005f, height, // mod
+		0.205f+move, 0.205f, height, // mod
 
-		-0.f, -0.f, 0.5f, //mod
-		-0.f, 0.2f, 0.5f, // mod
-		0.2f, 0.2f, 0.5f, // mod
+		0.005f+move, 0.005f, height, //mod
+		0.005f+move, 0.205f, height, // mod
+		0.205f+move, 0.205f, height, // mod
 	
 		// left plane
-		-0.f, -0.f, 0.5f, // mod
-		-0.f, -0.f, -0.f,
-		-0.f, 0.2f, 0.5f, // mod
+		0.005f+move, 0.005f, height, // mod
+		0.005f+move, 0.005f, 0.f,
+		0.005f+move, 0.205f, height, // mod
 
-		-0.f, -0.f, -0.f,
-		-0.f, 0.2f, -0.f,
-		-0.f, 0.2f, 0.5f, // mod
+		0.005f+move, 0.005f, 0.f,
+		0.005f+move, 0.205f, 0.f,
+		0.005f+move, 0.205f, height, // mod
 	
 		// front plane
-		-0.f, -0.f, 0.5f, // mod
-		0.2f, -0.f, 0.5f, // mod
-		0.2f, -0.f, -0.f,
+		0.005f+move, 0.005f, height, // mod
+		0.205f+move, 0.005f, height, // mod
+		0.205f+move, 0.005f, 0.f,
 
-		0.2f, -0.f, -0.f,
-		-0.f, -0.f, -0.f,
-		-0.f, -0.f, 0.5f, // mod
+		0.205f+move, 0.005f, 0.f,
+		0.005f+move, 0.005f, 0.f,
+		0.005f+move, 0.005f, height, // mod
 	
 		// back plane
-		-0.f, 0.2f, -0.f,
-		0.2f, 0.2f, -0.f,
-		0.2f, 0.2f, 0.5f, // mod
+		0.005f+move, 0.205f, 0.f,
+		0.205f+move, 0.205f, 0.f,
+		0.205f+move, 0.205f, height, // mod
 
-		0.2f, 0.2f, 0.5f, // mod
-		-0.f, 0.2f, 0.5f, // mod
-		-0.f, 0.2f, -0.f,
+		0.205f+move, 0.205f, height, // mod
+		0.005f+move, 0.205f, height, // mod
+		0.005f+move, 0.205f, 0.f,
 	};
 
 	/* Manually specified colours for our cube */

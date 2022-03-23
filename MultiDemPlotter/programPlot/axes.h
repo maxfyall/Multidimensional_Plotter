@@ -15,6 +15,11 @@ public:
 
 	void makeAxes(int boundaries);
 	void drawAxes();
+	void clearLabels();
+
+	std::vector<float> labelPosX;
+	std::vector<float> labelPosY;
+	std::vector<float> labelPosZ;
 
 	GLuint xAxesBufferObject;
 	GLuint xColourBuffer;
@@ -26,6 +31,8 @@ public:
 	GLuint labelXBO;
 	GLuint labelYBO;
 	GLuint labelZBO;
+
+	GLuint labelColourBuffer;
 
 	GLuint attribute_v_coord;
 	GLuint attribute_v_colours;
