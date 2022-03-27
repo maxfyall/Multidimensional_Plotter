@@ -32,6 +32,10 @@
 #include <commdlg.h>
 
 
+/* Tutorial used for installing freetype library https://www.youtube.com/watch?v=qW_8Dyq2asc */
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #include "axes.h"
 #include "cube.h"
 
@@ -40,6 +44,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
+/* GL unassigned integers used for buffer arrays and shader programs */
 GLuint program;
 GLuint vArrayObj;
 GLuint xAxesBufferObject, xColourBuffer;
@@ -57,6 +62,8 @@ float lastX = 1024.f / 2.0;
 float lastY = 768.f / 2.0;
 float fov = 45.f;
 float scaler = 0.5f;
+float camZ = 4;
+float camX = 0;
 
 int size;
 bool clear;
@@ -73,6 +80,11 @@ Cube testCube;
 GLfloat aspect_ratio;
 
 static const char * graphs[] = { "Scatter Plot", "Line Graph", "Bar Chart"};
+
+static char Xlabel[128] = "";
+static char Ylabel[128] = "";
+static char Zlabel[128] = "";
+
 
 std::vector<float> vertexPos;
 
@@ -134,8 +146,8 @@ void display()
 	glm::mat4 projection = glm::perspective(glm::radians(fov), aspect_ratio, 0.1f, 100.0f);
 
 	glm::mat4 view = glm::lookAt(
-		glm::vec3(0, 0, 4),
-		glm::vec3(0, 0, 0),
+		glm::vec3(0, 0, camZ),
+		glm::vec3(camX, 0, 0),
 		glm::vec3(0, 1, 0)
 	);
 
@@ -154,10 +166,13 @@ void display()
 	model.push(model.top());
 	{
 
-		model.top() = glm::scale(model.top(), glm::vec3(1, 1, 1));
+		//model.top() = glm::scale(model.top(), glm::vec3(1, 1, 1));
+
 
 		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
 		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
 
 		newAxes.drawAxes();
 
@@ -311,6 +326,15 @@ void display()
 	ImGui::SliderFloat("Graph Size", &scaler, 0.01f, 1.f);
 	ImGui::Dummy(ImVec2(0.0f, 5.f));
 
+	ImGui::InputText("X Axes Label", Xlabel, IM_ARRAYSIZE(Xlabel));
+	ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+	ImGui::InputText("Y Axes Label", Ylabel, IM_ARRAYSIZE(Ylabel));
+	ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+	ImGui::InputText("Z Axes Label", Ylabel, IM_ARRAYSIZE(Zlabel));
+	ImGui::Dummy(ImVec2(0.0f, 5.f));
+
 	if (ImGui::Button("Clear Graph"))
 	{
 		clearGraphVector();
@@ -341,6 +365,22 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 	{
 		std::cout << "ESC PRESSED - TERMINATING" << std::endl;
 		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+	if (key == GLFW_KEY_UP)
+	{
+		camZ -= 0.1f;
+	}
+	else if (key == GLFW_KEY_DOWN)
+	{
+		camZ += 0.1f;
+	}
+	else if (key == GLFW_KEY_RIGHT)
+	{
+		camX -= 0.1f;
+	}
+	else if (key == GLFW_KEY_LEFT)
+	{
+		camX += 0.1f;
 	}
 
 }
@@ -384,6 +424,7 @@ static void mouseButonCallback(GLFWwindow* window, int button, int action, int m
 		if (action == GLFW_PRESS)
 		{
 			moveScene = true;
+			firstMouse = true;
 		}
 		else if(action == GLFW_RELEASE)
 		{
@@ -478,6 +519,9 @@ std::vector<float> read3DData(std::string filePath)
 	}
 }
 
+/*
+* Clears the plot vector and creates new buffers to clear data on screen
+*/
 void clearGraphVector() 
 {
 	std::cout << "CLEAR THE GRAPH" << std::endl;
