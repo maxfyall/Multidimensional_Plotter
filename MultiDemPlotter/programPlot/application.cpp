@@ -15,6 +15,7 @@
 #pragma comment(lib, "glload.lib")
 #endif
 #pragma comment(lib, "opengl32.lib")
+#pragma comment(lib, "freetype.lib")
 
 /* Include GLFW wrapper class (Written by Dr. Iain Martin) for GLFW and OpenGL extensions */
 #include "wrapper_glfw.h"
@@ -116,6 +117,19 @@ void init(GLWrapper* glw)
 		// ignore any input
 		std::cin.ignore();
 		exit(0); // exit program
+	}
+
+	FT_Library ft;
+	if (FT_Init_FreeType(&ft))
+	{
+		std::cout << "ERROR::FREETYPE: Could not init Freetype Library" << std::endl;
+	}
+
+	FT_Face face;
+
+	if (FT_New_Face(ft, "../../fonts/arial.ttf", 0, &face))
+	{
+		std::cout << "ERROR:FREETYPE: Failed to load font" << std::endl;
 	}
 
 	// create axes with the largest number from data set.
