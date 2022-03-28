@@ -13,7 +13,7 @@ public:
 	ThreeDAxes();
 	~ThreeDAxes();
 
-	void makeAxes(int boundaries);
+	std::vector<std::string> makeAxes(int boundaries);
 	void drawAxes();
 	void clearLabels();
 

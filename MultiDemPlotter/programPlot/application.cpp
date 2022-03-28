@@ -55,13 +55,17 @@
 
 /* GL unassigned integers used for buffer arrays and shader programs */
 GLuint program;
+GLuint textureShaders;
 GLuint vArrayObj;
+GLuint textVertexArrayObj;
+GLuint textBufferObject;
 GLuint xAxesBufferObject, xColourBuffer;
 GLuint yAxesBufferObject, yColourBuffer;
 GLuint zAxesBufferObject, zColourBuffer;
 GLuint plotBufferObject;
 
-GLuint modelID, viewID, projectionID, colourModeID;
+GLuint modelID1, viewID1, projectionID1, colourModeID1;
+GLuint modelID2, viewID2, projectionID2;
 
 bool firstMouse = true;
 bool moveScene = false;
@@ -90,12 +94,13 @@ GLfloat aspect_ratio;
 
 static const char * graphs[] = { "Scatter Plot", "Line Graph", "Bar Chart"};
 
-static char Xlabel[128] = "";
+static char Xlabel[128] = "TEST";
 static char Ylabel[128] = "";
 static char Zlabel[128] = "";
 
 
 std::vector<float> vertexPos;
+std::vector<std::string> numLabels;
 
 struct Character
 {
@@ -108,7 +113,10 @@ struct Character
 std::map<char, Character> Characters;
 
 std::vector<float> read3DData(std::string filePath);
+
 void clearGraphVector();
+
+void RenderText(std::string text, float x, float y, float scale, glm::vec3 colour);
 
 /*
 *  Initialising Function, called before rendering loop to initialise variables and creating objects
@@ -119,13 +127,16 @@ void init(GLWrapper* glw)
 	aspect_ratio = 1024.f / 768.f;
 
 	glGenVertexArrays(1, &vArrayObj); // generate index (name) for one vertex array object
-	glBindVertexArray(vArrayObj); // create the vertex array object and make it current
+	glGenVertexArrays(1, &textVertexArrayObj);
+
+	//glBindVertexArray(vArrayObj); // create the vertex array object and make it current
 
 	// try to load in both vertex and fragment shaders
 	try
 	{
 		// set program variable to loaded shaders
 		program = glw->LoadShader("../../shaders/shaderVert.vert", "../../shaders/shaderFrag.frag");
+		textureShaders = glw->LoadShader("../../shaders/textureVert.vert", "../../shaders/textureFrag.frag");
 	}
 	catch (std::exception& e) // catch any exceptions
 	{
@@ -136,6 +147,10 @@ void init(GLWrapper* glw)
 		std::cin.ignore();
 		exit(0); // exit program
 	}
+
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Freetype Checks
 
@@ -195,15 +210,27 @@ void init(GLWrapper* glw)
 	FT_Done_Face(face);
 	FT_Done_FreeType(ft);
 
+	glBindVertexArray(textVertexArrayObj);
+	glGenBuffers(1, &textBufferObject);
+	glBindBuffer(GL_ARRAY_BUFFER, textBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	glBindVertexArray(0);
+
 	// create axes with the largest number from data set.
-	newAxes.makeAxes(largest);
+	numLabels = newAxes.makeAxes(largest);
 
 	sizePoint = 10.0f;
 
-	modelID = glGetUniformLocation(program, "model");
-	colourModeID = glGetUniformLocation(program, "colourMode");
-	viewID = glGetUniformLocation(program, "view");
-	projectionID = glGetUniformLocation(program, "projection");
+	modelID1 = glGetUniformLocation(program, "model");
+	colourModeID1 = glGetUniformLocation(program, "colourMode");
+	viewID1 = glGetUniformLocation(program, "view");
+	projectionID1 = glGetUniformLocation(program, "projection");
+
+	modelID2 = glGetUniformLocation(textureShaders, "model");
+	viewID2 = glGetUniformLocation(textureShaders, "view");
+	projectionID2 = glGetUniformLocation(textureShaders, "projection");
 
 }
 
@@ -215,12 +242,17 @@ void display()
 
 	glEnable(GL_DEPTH_TEST);
 
+	glBindVertexArray(vArrayObj);
+
 	glUseProgram(program);
 
 	std::stack<glm::mat4> model;
+
 	model.push(glm::mat4(1.0));
 
-	glm::mat4 projection = glm::perspective(glm::radians(fov), aspect_ratio, 0.1f, 100.0f);
+	glm::mat4 projection3D = glm::perspective(glm::radians(fov), aspect_ratio, 0.1f, 100.0f);
+
+	glm::mat4 projection2D = glm::ortho(0.0f, 800.f, 0.0f, 600.0f);
 
 	glm::mat4 view = glm::lookAt(
 		glm::vec3(0, 0, camZ),
@@ -234,9 +266,9 @@ void display()
 	//model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
 	//model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
 
-	glUniform1ui(colourModeID, colourMode);
-	glUniformMatrix4fv(viewID, 1, GL_FALSE, &view[0][0]);
-	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projection[0][0]);
+	glUniform1ui(colourModeID1, colourMode);
+	glUniformMatrix4fv(viewID1, 1, GL_FALSE, &view[0][0]);
+	glUniformMatrix4fv(projectionID1, 1, GL_FALSE, &projection3D[0][0]);
 
 	model.top() = glm::scale(model.top(), glm::vec3(scaler, scaler, scaler));
 
@@ -245,11 +277,10 @@ void display()
 
 		//model.top() = glm::scale(model.top(), glm::vec3(1, 1, 1));
 
-
 		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
 		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
 
-		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
+		glUniformMatrix4fv(modelID1, 1, GL_FALSE, &model.top()[0][0]);
 
 		newAxes.drawAxes();
 
@@ -266,13 +297,13 @@ void display()
 		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	
-		glUniformMatrix4fv(modelID, 1, GL_FALSE, &model.top()[0][0]);
+		glUniformMatrix4fv(modelID1, 1, GL_FALSE, &model.top()[0][0]);
 		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(0);
 
 		colourMode = 0;
-		glUniform1ui(colourModeID, colourMode);
+		glUniform1ui(colourModeID1, colourMode);
 		glPointSize(sizePoint);
 
 		if (graphType == 0)
@@ -324,8 +355,26 @@ void display()
 		}
 
 		colourMode = 0;
-		glUniform1ui(colourModeID, colourMode);
+		glUniform1ui(colourModeID1, colourMode);
 
+	}
+	model.pop();
+
+	glUseProgram(0);
+	glUseProgram(textureShaders);
+
+	glUniformMatrix4fv(viewID2, 1, GL_FALSE, &view[0][0]);
+	glUniformMatrix4fv(projectionID2, 1, GL_FALSE, &projection2D[0][0]);
+
+	model.push(model.top());
+	{
+
+		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
+		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
+
+		RenderText(Xlabel, 25.0f, 25.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
 	}
 	model.pop();
 
@@ -613,6 +662,51 @@ void clearGraphVector()
 	glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
 	glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void RenderText(std::string text, float x, float y, float scale, glm::vec3 colour) 
+{
+	glUniform3f(glGetUniformLocation(textureShaders, "textColour"), colour.x, colour.y, colour.z);
+	glActiveTexture(GL_TEXTURE0);
+	glBindVertexArray(textVertexArrayObj);
+
+	std::string::const_iterator c;
+	for (c = text.begin(); c != text.end(); c++)
+	{
+		Character ch = Characters[*c];
+
+		float xpos = x + ch.Bearing.x * scale;
+		float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+
+		float w = ch.Size.x * scale;
+		float h = ch.Size.y * scale;
+
+		float verticies[6][4] = {
+
+			{xpos, ypos + h, 0.0f, 0.0f},
+			{xpos, ypos,     0.0f, 1.0f},
+			{xpos + w, ypos, 1.0f, 1.0f},
+
+			{xpos, ypos + h,     0.0f, 0.0f},
+			{xpos + w, ypos,     1.0f, 1.0f},
+			{xpos + w, ypos + h, 1.0f, 0.0f}
+		};
+
+		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+
+		glBindBuffer(GL_ARRAY_BUFFER, textBufferObject);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(verticies), verticies);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		x += (ch.Advance >> 6) * scale;
+	}
+
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 }
 
 

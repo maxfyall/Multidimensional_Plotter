@@ -67,5 +67,11 @@
     <None Include="..\..\shaders\shaderVert.vert">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="..\..\shaders\textureVert.vert">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\shaders\textureFrag.frag">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

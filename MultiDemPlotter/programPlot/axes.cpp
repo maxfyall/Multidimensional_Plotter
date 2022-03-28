@@ -12,7 +12,7 @@ ThreeDAxes::~ThreeDAxes()
 {
 }
 
-void ThreeDAxes::makeAxes(int boundaries)
+std::vector<std::string> ThreeDAxes::makeAxes(int boundaries)
 {
 	GLfloat xAxesVertex[]
 	{
@@ -49,6 +49,8 @@ void ThreeDAxes::makeAxes(int boundaries)
 		0.0f, 0.0f, 1.0f, 1.0f,
 		0.0f, 0.0f, 1.0f, 1.0f
 	};
+
+	std::vector<std::string> numberLabels;
 
 	float multiple;
 	int addBY;
@@ -171,6 +173,8 @@ void ThreeDAxes::makeAxes(int boundaries)
 	glBindBuffer(GL_ARRAY_BUFFER, labelColourBuffer);
 	glBufferData(GL_ARRAY_BUFFER, labelColour.size() * sizeof(float), &(labelColour[0]), GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	return numberLabels;
 	
 }
 
