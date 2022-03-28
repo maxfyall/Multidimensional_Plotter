@@ -3,6 +3,13 @@
 	Multidimensional Plotter
 */
 
+/*
+
+	Freetype Code Reference - https://learnopengl.com/In-Practice/Text-Rendering
+
+
+*/
+
 #define UNICODE
 #pragma comment(lib, "user32.lib")
 
@@ -29,6 +36,7 @@
 #include <sstream>
 #include <algorithm>
 #include <vector>
+#include <map>
 #include <windows.h>
 #include <commdlg.h>
 
@@ -89,6 +97,16 @@ static char Zlabel[128] = "";
 
 std::vector<float> vertexPos;
 
+struct Character
+{
+	unsigned int TextureID;
+	glm::ivec2 Size;
+	glm::ivec2 Bearing;
+	unsigned int Advance;
+};
+
+std::map<char, Character> Characters;
+
 std::vector<float> read3DData(std::string filePath);
 void clearGraphVector();
 
@@ -119,18 +137,63 @@ void init(GLWrapper* glw)
 		exit(0); // exit program
 	}
 
+	// Freetype Checks
+
 	FT_Library ft;
 	if (FT_Init_FreeType(&ft))
 	{
 		std::cout << "ERROR::FREETYPE: Could not init Freetype Library" << std::endl;
 	}
+	else
+	{
+		std::cout << "Freetype Library Loaded" << std::endl;
+	}
+
 
 	FT_Face face;
-
 	if (FT_New_Face(ft, "../../fonts/arial.ttf", 0, &face))
 	{
 		std::cout << "ERROR:FREETYPE: Failed to load font" << std::endl;
 	}
+	else
+	{
+		FT_Set_Pixel_Sizes(face, 0, 48);
+
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		for (unsigned char c = 0; c < 128; c++)
+		{
+			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+			{
+				std::cout << "ERROR::FREETYPE: Failed to load Glyph" << std::endl;
+				continue;
+			}
+
+			unsigned int texture;
+			glGenTextures(1, &texture);
+			glBindTexture(GL_TEXTURE_2D, texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			Character letter = {
+				texture,
+				glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+				glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+				static_cast<unsigned int>(face->glyph->advance.x)
+
+			};
+
+			Characters.insert(std::pair<char, Character>(c, letter));
+		}
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	FT_Done_Face(face);
+	FT_Done_FreeType(ft);
 
 	// create axes with the largest number from data set.
 	newAxes.makeAxes(largest);
