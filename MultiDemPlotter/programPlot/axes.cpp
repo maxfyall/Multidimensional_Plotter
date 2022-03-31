@@ -40,14 +40,14 @@ std::vector<std::string> ThreeDAxes::makeAxes(int boundaries)
 
 	GLfloat yAxesColour[]
 	{
-		0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f
+		0.0f, 0.0f, 1.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f
 	};
 
 	GLfloat zAxesColour[]
 	{
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f
 	};
 
 	std::vector<std::string> numberLabels;
@@ -93,22 +93,27 @@ std::vector<std::string> ThreeDAxes::makeAxes(int boundaries)
 	{
 		for (int i = 0; i < numOfLines; i++)
 		{
-			labelPosX.insert(labelPosX.end(), { (multiple), 0, 0.1 });
-			labelPosX.insert(labelPosX.end(), { (multiple), 0, -0.1 });
-			labelPosX.insert(labelPosX.end(), { (-multiple), 0, 0.1 });
-			labelPosX.insert(labelPosX.end(), { (-multiple), 0, -0.1 });
+			labelPosX.insert(labelPosX.end(), { (multiple), 0.1, 0 });
+			labelPosX.insert(labelPosX.end(), { (multiple), -0.1, 0 });
+			labelPosX.insert(labelPosX.end(), { (-multiple), 0.1, 0 });
+			labelPosX.insert(labelPosX.end(), { (-multiple), -0.1, 0 });
 
 			labelPosY.insert(labelPosY.end(), { 0, (multiple), 0.1 });
 			labelPosY.insert(labelPosY.end(), { 0, (multiple), -0.1 });
 			labelPosY.insert(labelPosY.end(), { 0, (-multiple), 0.1 });
 			labelPosY.insert(labelPosY.end(), { 0, (-multiple), -0.1 });
 
-			labelPosZ.insert(labelPosZ.end(), { 0.1, 0, (multiple) });
-			labelPosZ.insert(labelPosZ.end(), { -0.1, 0, (multiple) });
-			labelPosZ.insert(labelPosZ.end(), { 0.1, 0, -(multiple) });
-			labelPosZ.insert(labelPosZ.end(), { -0.1, 0, -(multiple) });
+			labelPosZ.insert(labelPosZ.end(), { 0, 0.1, (multiple) });
+			labelPosZ.insert(labelPosZ.end(), { 0, -0.1, (multiple) });
+			labelPosZ.insert(labelPosZ.end(), { 0, 0.1, -(multiple) });
+			labelPosZ.insert(labelPosZ.end(), { 0, -0.1, -(multiple) });
 
 			multiple = multiple + addBY;
+
+			numberLabels.push_back(std::to_string(multiple));
+			numberLabels.push_back(std::to_string(-multiple));
+
+			std::cout << numberLabels[i] << std::endl;
 
 		}
 
@@ -124,7 +129,7 @@ std::vector<std::string> ThreeDAxes::makeAxes(int boundaries)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(xAxesVertex), xAxesVertex, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	// x axes colour
+	// x axes colour (RED)
 	glGenBuffers(1, &xColourBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, xColourBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(xAxesColour), xAxesColour, GL_STATIC_DRAW);
@@ -136,7 +141,7 @@ std::vector<std::string> ThreeDAxes::makeAxes(int boundaries)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(yAxesVertex), yAxesVertex, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	// y axse colour
+	// y axse colour (BLUE)
 	glGenBuffers(1, &yColourBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, yColourBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(yAxesColour), yAxesColour, GL_STATIC_DRAW);
@@ -148,7 +153,7 @@ std::vector<std::string> ThreeDAxes::makeAxes(int boundaries)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(zAxesVertex), zAxesVertex, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	// z axes colour
+	// z axes colour (GREEN)
 	glGenBuffers(1, &zColourBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, zColourBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(zAxesColour), zAxesColour, GL_STATIC_DRAW);

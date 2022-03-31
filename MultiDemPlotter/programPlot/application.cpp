@@ -64,18 +64,23 @@ GLuint yAxesBufferObject, yColourBuffer;
 GLuint zAxesBufferObject, zColourBuffer;
 GLuint plotBufferObject;
 
+GLuint quadBO;
+GLuint quadColourBO;
+GLuint quadTextBO;
+
 GLuint modelID1, viewID1, projectionID1, colourModeID1;
 GLuint modelID2, viewID2, projectionID2;
 
 bool firstMouse = true;
 bool moveScene = false;
-float yaw = -90.0f;
+float yaw = 0.0f;
 float pitch = 0.0f;
 float lastX = 1024.f / 2.0;
 float lastY = 768.f / 2.0;
 float fov = 45.f;
 float scaler = 0.5f;
-float camZ = 4;
+
+float camY = 0;
 float camX = 0;
 
 int size;
@@ -91,6 +96,8 @@ ThreeDAxes newAxes;
 Cube testCube;
 
 GLfloat aspect_ratio;
+
+std::string::const_iterator test;
 
 static const char * graphs[] = { "Scatter Plot", "Line Graph", "Bar Chart"};
 
@@ -111,6 +118,10 @@ struct Character
 };
 
 std::map<char, Character> Characters;
+
+
+
+
 
 std::vector<float> read3DData(std::string filePath);
 
@@ -148,7 +159,7 @@ void init(GLWrapper* glw)
 		exit(0); // exit program
 	}
 
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -189,10 +200,13 @@ void init(GLWrapper* glw)
 			glBindTexture(GL_TEXTURE_2D, texture);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
 
+			glGenerateMipmap(GL_TEXTURE_2D);
+
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
 
 			Character letter = {
 				texture,
@@ -213,7 +227,7 @@ void init(GLWrapper* glw)
 	glBindVertexArray(textVertexArrayObj);
 	glGenBuffers(1, &textBufferObject);
 	glBindBuffer(GL_ARRAY_BUFFER, textBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 5, NULL, GL_DYNAMIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
 	glBindVertexArray(0);
@@ -222,6 +236,8 @@ void init(GLWrapper* glw)
 	numLabels = newAxes.makeAxes(largest);
 
 	sizePoint = 10.0f;
+
+	std::cout << numLabels.empty() << std::endl;
 
 	modelID1 = glGetUniformLocation(program, "model");
 	colourModeID1 = glGetUniformLocation(program, "colourMode");
@@ -252,11 +268,11 @@ void display()
 
 	glm::mat4 projection3D = glm::perspective(glm::radians(fov), aspect_ratio, 0.1f, 100.0f);
 
-	glm::mat4 projection2D = glm::ortho(0.0f, 800.f, 0.0f, 600.0f);
+	//glm::mat4 projection2D = glm::ortho(0.0f, 800.f, 0.0f, 600.0f);
 
 	glm::mat4 view = glm::lookAt(
-		glm::vec3(0, 0, camZ),
-		glm::vec3(camX, 0, 0),
+		glm::vec3(0, 0, 4),
+		glm::vec3(camX, camY, 0),
 		glm::vec3(0, 1, 0)
 	);
 
@@ -278,7 +294,8 @@ void display()
 		//model.top() = glm::scale(model.top(), glm::vec3(1, 1, 1));
 
 		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
+		
 
 		glUniformMatrix4fv(modelID1, 1, GL_FALSE, &model.top()[0][0]);
 
@@ -290,11 +307,8 @@ void display()
 	model.push(model.top());
 	{
 
-		//model.top() = glm::scale(model.top(), glm::vec3(0.1, 0.1, 0.1));
-		//model.top() = glm::translate(model.top(), glm::vec3(-1, -1, -1));
-
 		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	
 		glUniformMatrix4fv(modelID1, 1, GL_FALSE, &model.top()[0][0]);
@@ -360,21 +374,130 @@ void display()
 	}
 	model.pop();
 
+
 	glUseProgram(0);
 	glUseProgram(textureShaders);
 
 	glUniformMatrix4fv(viewID2, 1, GL_FALSE, &view[0][0]);
-	glUniformMatrix4fv(projectionID2, 1, GL_FALSE, &projection2D[0][0]);
+	glUniformMatrix4fv(projectionID2, 1, GL_FALSE, &projection3D[0][0]);
+
+	//model.push(model.top());
+	//{
+
+	//	model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
+	//	model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	//	glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
+
+	//	//RenderText(Xlabel, 25.0f, 25.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+	//}
+	//model.pop();
 
 	model.push(model.top());
 	{
 
 		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		model.top() = glm::translate(model.top(), glm::vec3(0, 1, 0));
+
+		model.top() = glm::rotate(model.top(), glm::radians(180.f), glm::vec3(1.0f, 0.0f, 0.0f));
+
 
 		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
 
-		RenderText(Xlabel, 25.0f, 25.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+		std::string jim;
+
+		if (numLabels.empty())
+		{
+			std::cout << "EMpty" << std::endl;
+			jim = Xlabel;
+		}
+		else
+		{
+			jim = numLabels[0];
+		}
+
+		float next = 0;
+
+		for (test = jim.begin(); test != jim.end(); test++)
+		{
+			Character texTEST = Characters[*test];
+
+			glActiveTexture(GL_TEXTURE0);
+
+			glBindVertexArray(textVertexArrayObj);
+
+			int loc = glGetUniformLocation(textureShaders, "text");
+			if (loc >= 0) glUniform1i(loc, 0);
+
+			GLfloat quad[] =
+			{
+				-0.05f + next, 0.05f, 0.f,
+				0.05f + next, 0.05f, 0.f,
+				0.05f + next, -0.05f, 0.f,
+				-0.05f + next, -0.05f, 0.f
+
+			};
+
+			GLfloat quadColour[] =
+			{
+				1.0, 1.0, 1.0, 1.0,
+				1.0, 1.0, 1.0, 1.0,
+				1.0, 1.0, 1.0, 1.0,
+				1.0, 1.0, 1.0, 1.0
+
+			};
+
+			GLfloat quadTextCoord[] =
+			{
+				0.0f, 1.0f, 0,
+				1.0f, 1.0f, 0,
+				1.0f, 0.0f, 0,
+				0.0f, 0.0f, 0,
+			};
+
+
+			glGenBuffers(1, &quadBO);
+			glBindBuffer(GL_ARRAY_BUFFER, quadBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			glGenBuffers(1, &quadColourBO);
+			glBindBuffer(GL_ARRAY_BUFFER, quadColourBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(quadColour), quadColour, GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			glGenBuffers(1, &quadTextBO);
+			glBindBuffer(GL_ARRAY_BUFFER, quadTextBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(quadTextCoord), quadTextCoord, GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			glBindBuffer(GL_ARRAY_BUFFER, quadBO);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+
+			glBindBuffer(GL_ARRAY_BUFFER, quadColourBO);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+			glBindBuffer(GL_ARRAY_BUFFER, quadTextBO);
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+			glBindTexture(GL_TEXTURE_2D, texTEST.TextureID);
+
+
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+			glBindVertexArray(0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			next = next + 0.3 ;
+		}
+
+
 	}
 	model.pop();
 
@@ -419,7 +542,7 @@ void display()
 
 			size = vertexPos.size();
 
-			newAxes.makeAxes(largest);
+			numLabels = newAxes.makeAxes(largest);
 			
 			glGenBuffers(1, &plotBufferObject);
 			glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
@@ -494,11 +617,11 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 	}
 	if (key == GLFW_KEY_UP)
 	{
-		camZ -= 0.1f;
+		camY -= 0.1f;
 	}
 	else if (key == GLFW_KEY_DOWN)
 	{
-		camZ += 0.1f;
+		camY += 0.1f;
 	}
 	else if (key == GLFW_KEY_RIGHT)
 	{
