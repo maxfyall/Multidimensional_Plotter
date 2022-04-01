@@ -50,7 +50,7 @@ std::vector<std::string> ThreeDAxes::makeAxes(int boundaries)
 		0.0f, 1.0f, 0.0f, 1.0f
 	};
 
-	std::vector<std::string> numberLabels;
+	std::vector<std::string> numLabels;
 
 	float multiple;
 	int addBY;
@@ -108,12 +108,12 @@ std::vector<std::string> ThreeDAxes::makeAxes(int boundaries)
 			labelPosZ.insert(labelPosZ.end(), { 0, 0.1, -(multiple) });
 			labelPosZ.insert(labelPosZ.end(), { 0, -0.1, -(multiple) });
 
+			numLabels.push_back(std::to_string(multiple));
+			numLabels.push_back(std::to_string(-multiple));
+
 			multiple = multiple + addBY;
 
-			numberLabels.push_back(std::to_string(multiple));
-			numberLabels.push_back(std::to_string(-multiple));
-
-			std::cout << numberLabels[i] << std::endl;
+			//std::cout << numberLabels[i] << std::endl;
 
 		}
 
@@ -179,7 +179,7 @@ std::vector<std::string> ThreeDAxes::makeAxes(int boundaries)
 	glBufferData(GL_ARRAY_BUFFER, labelColour.size() * sizeof(float), &(labelColour[0]), GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	return numberLabels;
+	return numLabels;
 	
 }
 

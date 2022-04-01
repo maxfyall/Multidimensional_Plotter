@@ -46,6 +46,7 @@
 #include FT_FREETYPE_H
 
 #include "axes.h"
+#include "quad.h"
 #include "cube.h"
 
 /* Include the GLM maths library for GLM functions along with matrix extensions	*/
@@ -92,7 +93,11 @@ GLuint colourMode;
 static int graphType = 0;
 bool drawmode;
 
+int bump;
+int addby;
+
 ThreeDAxes newAxes;
+Quad newQuad;
 Cube testCube;
 
 GLfloat aspect_ratio;
@@ -101,13 +106,19 @@ std::string::const_iterator test;
 
 static const char * graphs[] = { "Scatter Plot", "Line Graph", "Bar Chart"};
 
-static char Xlabel[128] = "TEST";
+static char Xlabel[128] = "123456789";
 static char Ylabel[128] = "";
 static char Zlabel[128] = "";
 
 
 std::vector<float> vertexPos;
-std::vector<std::string> numLabels;
+
+std::vector<std::string> labels;
+
+
+std::vector<std::string> positiveLabels;
+std::vector<std::string> negativeLabels;
+
 
 struct Character
 {
@@ -120,12 +131,11 @@ struct Character
 std::map<char, Character> Characters;
 
 
-
-
-
 std::vector<float> read3DData(std::string filePath);
 
 void clearGraphVector();
+
+void splitLabelVectors();
 
 void RenderText(std::string text, float x, float y, float scale, glm::vec3 colour);
 
@@ -202,10 +212,11 @@ void init(GLWrapper* glw)
 
 			glGenerateMipmap(GL_TEXTURE_2D);
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+			
 
 
 			Character letter = {
@@ -233,11 +244,14 @@ void init(GLWrapper* glw)
 	glBindVertexArray(0);
 
 	// create axes with the largest number from data set.
-	numLabels = newAxes.makeAxes(largest);
+	
+	labels = newAxes.makeAxes(largest);
+
+	splitLabelVectors();
 
 	sizePoint = 10.0f;
 
-	std::cout << numLabels.empty() << std::endl;
+	//std::cout << numLabels.empty() << std::endl;
 
 	modelID1 = glGetUniformLocation(program, "model");
 	colourModeID1 = glGetUniformLocation(program, "colourMode");
@@ -275,6 +289,17 @@ void display()
 		glm::vec3(camX, camY, 0),
 		glm::vec3(0, 1, 0)
 	);
+
+	if (largest < 10)
+	{
+		bump = 1;
+		addby = 1;
+	}
+	else
+	{
+		bump = 2;
+		addby = 2;
+	}
 
 	//view = glm::rotate(view, -glm::radians(yaw), glm::vec3(1, 0, 0));
 	//view = glm::rotate(view, glm::radians(20.0f), glm::vec3(1, 0, 0));
@@ -381,123 +406,67 @@ void display()
 	glUniformMatrix4fv(viewID2, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionID2, 1, GL_FALSE, &projection3D[0][0]);
 
-	//model.push(model.top());
-	//{
-
-	//	model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-	//	model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
-
-	//	glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
-
-	//	//RenderText(Xlabel, 25.0f, 25.0f, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f));
-	//}
-	//model.pop();
-
 	model.push(model.top());
 	{
 
 		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
 		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		model.top() = glm::translate(model.top(), glm::vec3(0, 1, 0));
+		model.top() = glm::translate(model.top(), glm::vec3(0, -0.4, 0));
 
-		model.top() = glm::rotate(model.top(), glm::radians(180.f), glm::vec3(1.0f, 0.0f, 0.0f));
+		//model.top() = glm::rotate(model.top(), glm::radians(180.f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 
 		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
 
 		std::string jim;
 
-		if (numLabels.empty())
+		for (int i = 0; i < labels.size(); i++)
 		{
-			std::cout << "EMpty" << std::endl;
-			jim = Xlabel;
-		}
-		else
-		{
-			jim = numLabels[0];
-		}
 
-		float next = 0;
-
-		for (test = jim.begin(); test != jim.end(); test++)
-		{
-			Character texTEST = Characters[*test];
-
-			glActiveTexture(GL_TEXTURE0);
-
-			glBindVertexArray(textVertexArrayObj);
-
-			int loc = glGetUniformLocation(textureShaders, "text");
-			if (loc >= 0) glUniform1i(loc, 0);
-
-			GLfloat quad[] =
+			if (labels.empty())
 			{
-				-0.05f + next, 0.05f, 0.f,
-				0.05f + next, 0.05f, 0.f,
-				0.05f + next, -0.05f, 0.f,
-				-0.05f + next, -0.05f, 0.f
 
-			};
-
-			GLfloat quadColour[] =
+			}
+			else
 			{
-				1.0, 1.0, 1.0, 1.0,
-				1.0, 1.0, 1.0, 1.0,
-				1.0, 1.0, 1.0, 1.0,
-				1.0, 1.0, 1.0, 1.0
+				jim = std::to_string(std::stoi(labels[i]));
+				//std::cout << jim << std::endl;
+			}
 
-			};
-
-			GLfloat quadTextCoord[] =
+			for (test = jim.begin(); test != jim.end(); test++)
 			{
-				0.0f, 1.0f, 0,
-				1.0f, 1.0f, 0,
-				1.0f, 0.0f, 0,
-				0.0f, 0.0f, 0,
-			};
+				Character texTEST = Characters[*test];
 
+				glActiveTexture(GL_TEXTURE0);
 
-			glGenBuffers(1, &quadBO);
-			glBindBuffer(GL_ARRAY_BUFFER, quadBO);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
+				glBindVertexArray(textVertexArrayObj);
 
-			glGenBuffers(1, &quadColourBO);
-			glBindBuffer(GL_ARRAY_BUFFER, quadColourBO);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(quadColour), quadColour, GL_STATIC_DRAW);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
+				int loc = glGetUniformLocation(textureShaders, "text");
+				if (loc >= 0) glUniform1i(loc, 0);
 
-			glGenBuffers(1, &quadTextBO);
-			glBindBuffer(GL_ARRAY_BUFFER, quadTextBO);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(quadTextCoord), quadTextCoord, GL_STATIC_DRAW);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
+				if (std::stoi(jim) < 0)
+				{
+					newQuad.makeQuad(-bump);
+				}
+				else
+				{
+					newQuad.makeQuad(bump);
+				}
 
-			glBindBuffer(GL_ARRAY_BUFFER, quadBO);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+				glBindTexture(GL_TEXTURE_2D, texTEST.TextureID);
 
+				newQuad.drawQuad();
 
-			glBindBuffer(GL_ARRAY_BUFFER, quadColourBO);
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+				glBindVertexArray(0);
+				glBindTexture(GL_TEXTURE_2D, 0);
 
-			glBindBuffer(GL_ARRAY_BUFFER, quadTextBO);
-			glEnableVertexAttribArray(2);
-			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+				bump = bump + addby;
 
-			glBindTexture(GL_TEXTURE_2D, texTEST.TextureID);
-
-
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-			glBindVertexArray(0);
-			glBindTexture(GL_TEXTURE_2D, 0);
-
-			next = next + 0.3 ;
+			}
 		}
 
-
+		//jim = numLabels[next + 1];
 	}
 	model.pop();
 
@@ -542,7 +511,9 @@ void display()
 
 			size = vertexPos.size();
 
-			numLabels = newAxes.makeAxes(largest);
+			labels = newAxes.makeAxes(largest);
+
+			splitLabelVectors();
 			
 			glGenBuffers(1, &plotBufferObject);
 			glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
@@ -785,6 +756,26 @@ void clearGraphVector()
 	glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
 	glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void splitLabelVectors() 
+{
+	for (int i = 0; i < labels.size(); i++)
+	{
+		if (!labels.empty())
+		{
+			if (std::stof(labels[i]) < 0)
+			{
+				negativeLabels.push_back(std::to_string(std::stoi(labels[i])));
+				std::cout << "NEG NUM " << negativeLabels[0] << std::endl;
+			}
+			else
+			{
+				positiveLabels.push_back(std::to_string(std::stoi(labels[i])));
+				std::cout << "POS NUM " << positiveLabels[0] << std::endl;
+			}
+		}
+	}
 }
 
 void RenderText(std::string text, float x, float y, float scale, glm::vec3 colour) 

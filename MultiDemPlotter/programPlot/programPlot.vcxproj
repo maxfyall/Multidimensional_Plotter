@@ -152,11 +152,13 @@
     <ClCompile Include="..\..\imgui\imgui_widgets.cpp" />
     <ClCompile Include="application.cpp" />
     <ClCompile Include="axes.cpp" />
+    <ClCompile Include="quad.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\cube.h" />
     <ClInclude Include="..\..\common\wrapper_glfw.h" />
     <ClInclude Include="axes.h" />
+    <ClInclude Include="quad.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\shaders\shaderFrag.frag" />
