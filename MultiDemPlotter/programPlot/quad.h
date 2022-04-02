@@ -13,7 +13,7 @@ public:
 	Quad();
 	~Quad();
 
-	void makeQuad(float bump, bool small);
+	void makeQuad(float bump, bool small, int dir, float yBump);
 	void drawQuad();
 
 	GLuint quadBO;
@@ -24,5 +24,4 @@ public:
 	GLuint attribute_v_colours;
 	GLuint attribute_v_textures;
 
-	std::vector<float> quad;
 };

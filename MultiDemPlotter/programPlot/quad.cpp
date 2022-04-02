@@ -13,46 +13,61 @@ Quad::~Quad()
 
 }
 
-void Quad::makeQuad(float bump, bool small)
+void Quad::makeQuad(float bump, bool small, int dir, float yBump)
 {
-	//GLfloat quad[] = 
-	//{
-	//	0.0f + bump, 0.1f, 0.f,
-	//	0.09f + bump, 0.1f, 0.f,
-	//	0.09f + bump, 0.3f, 0.f,
-	//	0.0f + bump, 0.3f, 0.f
-	//};
 
-	if (!small)
+	std::vector<float> quad;
+
+	if (dir == 0)
 	{
-	/*	GLfloat quad[] =
+		if (!small)
 		{
-			0.0f + bump, 0.1f, 0.f,
-			0.09f + bump, 0.1f, 0.f,
-			0.09f + bump, 0.3f, 0.f,
-			0.0f + bump, 0.3f, 0.f
-
-		};*/
-
-		quad.insert(quad.end(), { (0.0f + bump), 0.1f, 0.f });
-		quad.insert(quad.end(), { (0.09f + bump), 0.1f, 0.f });
-		quad.insert(quad.end(), { (0.09f + bump), 0.3f, 0.f });
-		quad.insert(quad.end(), { (0.0f + bump), 0.3f, 0.f });
+			quad.insert(quad.end(), { (0.0f + bump), 0.1f, 0.f });
+			quad.insert(quad.end(), { (0.09f + bump), 0.1f, 0.f });
+			quad.insert(quad.end(), { (0.09f + bump), 0.3f, 0.f });
+			quad.insert(quad.end(), { (0.0f + bump), 0.3f, 0.f });
+		}
+		else
+		{
+			quad.insert(quad.end(), { (0.0f + bump), 0.2f, 0.f });
+			quad.insert(quad.end(), { (0.09f + bump), 0.2f, 0.f });
+			quad.insert(quad.end(), { (0.09f + bump), 0.21f, 0.f });
+			quad.insert(quad.end(), { (0.0f + bump), 0.21f, 0.f });
+		}
 	}
-	else
+	else if(dir == 1)
 	{
-		/*GLfloat quad[] =
+		if (!small)
 		{
-			0.0f + bump, 0.01f, 0.f,
-			0.09f + bump, 0.01f, 0.f,
-			0.09f + bump, 0.03f, 0.f,
-			0.0f + bump, 0.03f, 0.f
-		};*/
-
-		quad.insert(quad.end(), { (0.0f + bump), 0.01f, 0.f });
-		quad.insert(quad.end(), { (0.09f + bump), 0.01f, 0.f });
-		quad.insert(quad.end(), { (0.09f + bump), 0.03f, 0.f });
-		quad.insert(quad.end(), { (0.0f + bump), 0.03f, 0.f });
+			quad.insert(quad.end(), { (0.09f+yBump), (0.2f+bump), 0.f });
+			quad.insert(quad.end(), { (0.18f+yBump), (0.2f+bump), 0.f });
+			quad.insert(quad.end(), { (0.18f+yBump), (0.4f+bump), 0.f });
+			quad.insert(quad.end(), { (0.09f+yBump), (0.4f+bump), 0.f });
+		}
+		else
+		{
+			quad.insert(quad.end(), { (0.09f+yBump), (0.3f+bump), 0.f });
+			quad.insert(quad.end(), { (0.18f+yBump), (0.3f+bump), 0.f });
+			quad.insert(quad.end(), { (0.18f+yBump), (0.31f+bump), 0.f });
+			quad.insert(quad.end(), { (0.09f+yBump), (0.31f+bump), 0.f });
+		}
+	}
+	else if (dir == 2) 
+	{
+		if (!small)
+		{
+			quad.insert(quad.end(), { 0.0f, 0.1f, (0.f+ bump) });
+			quad.insert(quad.end(), { 0.0f, 0.1f, (0.09f + bump) });
+			quad.insert(quad.end(), { 0.0f, 0.3f, (0.09f + bump) });
+			quad.insert(quad.end(), { 0.0f, 0.3f, (0.f + bump) });
+		}
+		else
+		{
+			quad.insert(quad.end(), { 0.0f, 0.2f, (0.f+bump) });
+			quad.insert(quad.end(), { 0.f, 0.2f, (0.09f+bump) });
+			quad.insert(quad.end(), { 0.f, 0.21f, (0.09f+bump) });
+			quad.insert(quad.end(), { 0.0f, 0.21f, (0.f+bump) });
+		}
 	}
 
 	GLfloat quadColour[] =
@@ -88,10 +103,13 @@ void Quad::makeQuad(float bump, bool small)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadTextCoord), quadTextCoord, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	std::cout << "QUAD MADE" << std::endl;
+
 }
 
 void Quad::drawQuad() 
 {
+
 	glBindBuffer(GL_ARRAY_BUFFER, quadBO);
 	glEnableVertexAttribArray(attribute_v_coord);
 	glVertexAttribPointer(attribute_v_coord, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -105,4 +123,7 @@ void Quad::drawQuad()
 	glVertexAttribPointer(attribute_v_textures, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+	std::cout << "DRAWN" << std::endl;
+
 }

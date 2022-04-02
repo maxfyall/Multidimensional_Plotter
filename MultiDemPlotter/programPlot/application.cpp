@@ -107,9 +107,9 @@ std::string::const_iterator test;
 
 static const char * graphs[] = { "Scatter Plot", "Line Graph", "Bar Chart"};
 
-static char Xlabel[128] = "123456789";
-static char Ylabel[128] = "";
-static char Zlabel[128] = "";
+static char Xlabel[128] = "TEST X AXES";
+static char Ylabel[128] = "TEST Y AXES";
+static char Zlabel[128] = "TEST Z AXES";
 
 
 std::vector<float> vertexPos;
@@ -119,6 +119,9 @@ std::vector<std::string> labels;
 
 std::vector<std::string> positiveLabels;
 std::vector<std::string> negativeLabels;
+
+std::vector<Quad> quads;
+
 
 
 struct Character
@@ -137,6 +140,10 @@ std::vector<float> read3DData(std::string filePath);
 void clearGraphVector();
 
 void splitLabelVectors();
+
+void makeQuadArray();
+
+void createNumberLabels();
 
 void RenderText(std::string text, float x, float y, float scale, glm::vec3 colour);
 
@@ -249,6 +256,8 @@ void init(GLWrapper* glw)
 	labels = newAxes.makeAxes(largest);
 
 	splitLabelVectors();
+
+
 
 	sizePoint = 10.0f;
 
@@ -420,107 +429,18 @@ void display()
 
 		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
 
-		std::string jim;
-		float temp = bump;
+		// draw labels from quad vector
 
-		for (int i = 0; i < positiveLabels.size(); i++)
+		for (int i = 0; i < quads.size(); i++)
 		{
-			
-			int cycle = 0;
-
-			if (!labels.empty())
+			if (!quads.empty())
 			{
-				jim = positiveLabels[i];
-
-				for (test = jim.begin(); test != jim.end(); test++)
-				{
-					if (cycle >= 1)
-					{
-						bump = bump + 0.1f;
-					}
-
-					Character texTEST = Characters[*test];
-
-					glActiveTexture(GL_TEXTURE0);
-
-					glBindVertexArray(textVertexArrayObj);
-
-					int loc = glGetUniformLocation(textureShaders, "text");
-					if (loc >= 0) glUniform1i(loc, 0);
-					
-					newQuad.makeQuad(bump, false);
-					
-					glBindTexture(GL_TEXTURE_2D, texTEST.TextureID);
-
-					newQuad.drawQuad();
-
-					glBindVertexArray(0);
-					glBindTexture(GL_TEXTURE_2D, 0);
-
-					cycle = cycle + 1;
-				
-				}
-
-				if (cycle == 1)
-				{
-					bump = bump + addby;
-				}
-			
-			}
-	
-		}
-
-		bump = largest - 1;
-
-		for (int i = 0; i < negativeLabels.size(); i++)
-		{
-			int cycle2 = 0;
-
-			if (!labels.empty())
-			{
-				jim = negativeLabels[i];
-				temp = bump;
-
-				for (test = jim.begin(); test != jim.end(); test++)
-				{
-					if (cycle2 >= 1)
-					{
-						bump = bump - 0.09f;
-					}
-
-					Character texTEST = Characters[*test];
-
-					glActiveTexture(GL_TEXTURE0);
-
-					glBindVertexArray(textVertexArrayObj);
-
-					int loc = glGetUniformLocation(textureShaders, "text");
-					if (loc >= 0) glUniform1i(loc, 0);
-
-					if (cycle2 == 0)
-					{
-						newQuad.makeQuad(-(bump), false);
-					}
-					else
-					{
-						newQuad.makeQuad(-(bump), true);
-					}
-					glBindTexture(GL_TEXTURE_2D, texTEST.TextureID);
-
-					newQuad.drawQuad();
-
-					glBindVertexArray(0);
-					glBindTexture(GL_TEXTURE_2D, 0);
-
-					cycle2 = cycle2 + 1;
-
-				}
-
-
-				bump = temp - addby;
-
+				std::cout << "SIZE" << std::endl;
+				std::cout << quads.size() << std::endl;
+				quads[0].drawQuad();
 			}
 		}
+
 
 	}
 	model.pop();
@@ -569,6 +489,10 @@ void display()
 			labels = newAxes.makeAxes(largest);
 
 			splitLabelVectors();
+
+			//makeQuadArray();
+			createNumberLabels();
+
 			
 			glGenBuffers(1, &plotBufferObject);
 			glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
@@ -822,17 +746,197 @@ void splitLabelVectors()
 			if (std::stof(labels[i]) < 0)
 			{
 				negativeLabels.push_back(std::to_string(std::stoi(labels[i])));
-				std::cout << "NEG NUM " << negativeLabels[0] << std::endl;
 			}
 			else
 			{
 				positiveLabels.push_back(std::to_string(std::stoi(labels[i])));
-				std::cout << "POS NUM " << positiveLabels[0] << std::endl;
 			}
 		}
 	}
 
 	std::reverse(negativeLabels.begin(), negativeLabels.end());
+}
+
+void makeQuadArray() 
+{
+
+	std::string::const_iterator loop;
+	std::string fred;
+
+	for (int i = 0; i < positiveLabels.size(); i++)
+	{
+		fred = positiveLabels[i];
+
+		for (loop = fred.begin(); loop != fred.end(); loop++)
+		{
+			quads.push_back(newQuad);
+			quads.push_back(newQuad);
+			quads.push_back(newQuad);
+		}
+
+		fred = negativeLabels[i];
+
+		for (loop = fred.begin(); loop != fred.end(); loop++)
+		{
+			quads.push_back(newQuad);
+			quads.push_back(newQuad);
+			quads.push_back(newQuad);
+		}
+	}
+
+	std::cout << quads.size() << std::endl;
+}
+
+
+// REMEBER TO MAKE THIS METHOD ADD QUADS TO VECTOR POTENTIAL MEMORY LEAK
+void createNumberLabels() 
+{
+	float yBump = 0;
+
+	std::string jim;
+	float temp = bump;
+
+	for (int j = 0; j < 3; j++)
+	{
+
+		for (int i = 0; i < positiveLabels.size(); i++)
+		{
+			float cycle = 0;
+
+			if (!labels.empty())
+			{
+				jim = positiveLabels[i];
+
+				yBump = 0;
+
+				for (test = jim.begin(); test != jim.end(); test++)
+				{
+					if (j == 1)
+					{
+						if (cycle >= 1)
+						{
+							yBump = yBump + 0.1f;
+						}
+					}
+					else
+					{
+						if (cycle >= 1 && j != 1) 
+						{
+							bump = bump + 0.1f;
+						}
+					}
+
+					Character texTEST = Characters[*test];
+
+					glActiveTexture(GL_TEXTURE0);
+
+					glBindVertexArray(textVertexArrayObj);
+
+					int loc = glGetUniformLocation(textureShaders, "text");
+					if (loc >= 0) glUniform1i(loc, 0);
+
+					quads.push_back(newQuad);
+					quads[i+cycle].makeQuad(bump, false, j, yBump);
+
+					glBindTexture(GL_TEXTURE_2D, texTEST.TextureID);
+
+					//newQuad.drawQuad();
+
+					glBindVertexArray(0);
+					glBindTexture(GL_TEXTURE_2D, 0);
+
+					cycle = cycle + 1;
+
+				}
+
+				if (cycle > 1 && j != 1)
+				{
+					bump = bump - (0.1f * (cycle - 1));
+				}
+
+				yBump = 0;
+
+				bump = bump + addby;
+
+			}
+
+		}
+
+		bump = bump - 2;
+
+		for (int i = 0; i < negativeLabels.size(); i++)
+		{
+			float cycle2 = 0;
+
+			if (!labels.empty())
+			{
+				jim = negativeLabels[i];
+
+				yBump = 0;
+
+				for (test = jim.begin(); test != jim.end(); test++)
+				{
+					if (j == 1)
+					{
+						if (cycle2 >= 1)
+						{
+							yBump = yBump + 0.1f;
+						}
+					}
+					else
+					{
+						if (cycle2 >= 1 && j != 1)
+						{
+							bump = bump - 0.1f;
+						}
+					}
+
+					Character texTEST = Characters[*test];
+
+					glActiveTexture(GL_TEXTURE0);
+
+					glBindVertexArray(textVertexArrayObj);
+
+					int loc = glGetUniformLocation(textureShaders, "text");
+					if (loc >= 0) glUniform1i(loc, 0);
+
+					quads.push_back(newQuad);
+
+					if (cycle2 == 0)
+					{
+						quads[i+cycle2].makeQuad(-(bump), true, j, yBump);
+					}
+					else
+					{
+						quads[i+cycle2].makeQuad(-(bump), false, j, yBump);
+					}
+
+					glBindTexture(GL_TEXTURE_2D, texTEST.TextureID);
+
+					//newQuad.drawQuad();
+
+					glBindVertexArray(0);
+					glBindTexture(GL_TEXTURE_2D, 0);
+
+					cycle2 = cycle2 + 1;
+
+				}
+
+				if (cycle2 > 1 && j!= 1)
+				{
+					bump = bump + (0.1f * (cycle2 - 1));
+				}
+
+				yBump = 0;
+
+				bump = bump - addby;
+
+			}
+		}
+		bump = temp;
+
+	}
+
 }
 
 void RenderText(std::string text, float x, float y, float scale, glm::vec3 colour) 

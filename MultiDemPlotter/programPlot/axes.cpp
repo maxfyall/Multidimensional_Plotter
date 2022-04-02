@@ -98,10 +98,10 @@ std::vector<std::string> ThreeDAxes::makeAxes(int boundaries)
 			labelPosX.insert(labelPosX.end(), { (-multiple), 0.1, 0 });
 			labelPosX.insert(labelPosX.end(), { (-multiple), -0.1, 0 });
 
-			labelPosY.insert(labelPosY.end(), { 0, (multiple), 0.1 });
-			labelPosY.insert(labelPosY.end(), { 0, (multiple), -0.1 });
-			labelPosY.insert(labelPosY.end(), { 0, (-multiple), 0.1 });
-			labelPosY.insert(labelPosY.end(), { 0, (-multiple), -0.1 });
+			labelPosY.insert(labelPosY.end(), { 0.1 , (multiple), 0 });
+			labelPosY.insert(labelPosY.end(), { -0.1 , (multiple), 0 });
+			labelPosY.insert(labelPosY.end(), { 0.1 , (-multiple), 0 });
+			labelPosY.insert(labelPosY.end(), { -0.1, (-multiple), 0 });
 
 			labelPosZ.insert(labelPosZ.end(), { 0, 0.1, (multiple) });
 			labelPosZ.insert(labelPosZ.end(), { 0, -0.1, (multiple) });
