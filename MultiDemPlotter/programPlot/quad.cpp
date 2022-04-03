@@ -103,7 +103,7 @@ void Quad::makeQuad(float bump, bool small, int dir, float yBump)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadTextCoord), quadTextCoord, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	std::cout << "QUAD MADE" << std::endl;
+	//std::cout << "QUAD MADE " << bump << std::endl;
 
 }
 
@@ -124,6 +124,6 @@ void Quad::drawQuad()
 
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-	std::cout << "DRAWN" << std::endl;
+	//std::cout << "DRAWN" << std::endl;
 
 }

@@ -17,7 +17,7 @@ void main()
 	
 	outputColour = fragColour * sampled;
 
-	outputColour = vec4(1.0, 1.0, 1.0, 1.0);
+	//outputColour = vec4(1.0, 1.0, 1.0, 1.0);
 
 	//vec4 sampled = texture(text, TexCoords);
 
