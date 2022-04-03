@@ -6,6 +6,8 @@
 /*
 
 	Freetype Code Reference - https://learnopengl.com/In-Practice/Text-Rendering
+	ImGui Documentatation - 
+	Open File using Window API Tutorial - 
 
 
 */
@@ -64,7 +66,7 @@ GLuint textBufferObject;
 GLuint xAxesBufferObject, xColourBuffer;
 GLuint yAxesBufferObject, yColourBuffer;
 GLuint zAxesBufferObject, zColourBuffer;
-GLuint plotBufferObject;
+GLuint plotBufferObject, plotColourBuffer;
 
 GLuint quadBO;
 GLuint quadColourBO;
@@ -101,6 +103,9 @@ ThreeDAxes newAxes;
 Quad newQuad;
 Cube testCube;
 
+static float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+
 GLfloat aspect_ratio;
 
 std::string::const_iterator test;
@@ -113,6 +118,7 @@ static char Zlabel[128] = "TEST Z AXES";
 
 
 std::vector<float> vertexPos;
+std::vector<float> vertexColours = {1.0, 1.0, 1.0, 1.0};
 
 std::vector<std::string> labels;
 
@@ -255,9 +261,9 @@ void init(GLWrapper* glw)
 
 	splitLabelVectors();
 
-
-
 	sizePoint = 10.0f;
+
+	//vertexColours.push_back(0);
 
 	//std::cout << numLabels.empty() << std::endl;
 
@@ -348,12 +354,25 @@ void display()
 
 	
 		glUniformMatrix4fv(modelID1, 1, GL_FALSE, &model.top()[0][0]);
-		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		glEnableVertexAttribArray(0);
 
-		colourMode = 0;
-		glUniform1ui(colourModeID1, colourMode);
+		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+		glGenBuffers(1, &plotColourBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
+		glBufferData(GL_ARRAY_BUFFER, vertexColours.size() * sizeof(float), &(vertexColours[0]), GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+		//testCube.makeCube(1, 1);
+		//testCube.drawCube(0);
+
+		//colourMode = 0;
+		//glUniform1ui(colourModeID1, colourMode);
 		glPointSize(sizePoint);
 
 		if (graphType == 0)
@@ -404,8 +423,8 @@ void display()
 			}
 		}
 
-		colourMode = 0;
-		glUniform1ui(colourModeID1, colourMode);
+		//colourMode = 0;
+		//glUniform1ui(colourModeID1, colourMode);
 
 	}
 	model.pop();
@@ -543,6 +562,15 @@ void display()
 
 			size = vertexPos.size();
 
+			// clear labels...
+			for (int i = 0; i < quads.size(); i++)
+			{
+				quads[i].clearQuad();
+			}
+			quads.clear();
+			positiveLabels.clear();
+			negativeLabels.clear();
+
 			labels = newAxes.makeAxes(largest);
 
 			splitLabelVectors();
@@ -562,6 +590,13 @@ void display()
 	if (ImGui::Combo("Graph", &graphType, graphs, IM_ARRAYSIZE(graphs))) {
 		clearGraphVector();
 		newAxes.clearLabels();
+		for (int i = 0; i < quads.size(); i++)
+		{
+			quads[i].clearQuad();
+		}
+		quads.clear();
+		positiveLabels.clear();
+		negativeLabels.clear();
 	}
 
 	ImGui::Dummy(ImVec2(0.0f, 5.f));
@@ -595,10 +630,39 @@ void display()
 		camY = 0;
 	}
 
+	ImGui::SameLine();
+
 	if (ImGui::Button("Clear Graph"))
 	{
 		clearGraphVector();
 		newAxes.clearLabels();
+
+		for (int i = 0; i < quads.size(); i++)
+		{
+			quads[i].clearQuad();
+		}
+		quads.clear();
+		positiveLabels.clear();
+		negativeLabels.clear();
+	}
+
+	ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+	ImGui::Text("Data Point Colour");
+
+	ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+	if (ImGui::ColorEdit3(" ", color)) 
+	{
+		if (!vertexPos.empty())
+		{
+			vertexColours.clear();
+
+			for (int i = 0; i < vertexPos.size(); i++)
+			{
+				vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] });
+			}
+		}
 	}
 
 	ImGui::End();
@@ -776,6 +840,16 @@ std::vector<float> read3DData(std::string filePath)
 	{
 		bump = 2;
 		addby = 2;
+	}
+
+	if (!vertexColours.empty())
+	{
+		vertexColours.clear();
+	}
+
+	for (int i = 0; i < plotPos.size(); i++)
+	{
+		vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] });
 	}
 
 	if (plotPos.empty())

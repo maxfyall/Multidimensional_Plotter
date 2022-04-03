@@ -9,7 +9,6 @@ layout(location = 2) in vec3 normal;
 uniform mat4 model, view, projection;
 uniform uint colourMode;
 
-//out vec2 TexCoords;
 out vec4 fragColour;
 
 void main()
@@ -24,9 +23,5 @@ void main()
 	}
 
 	gl_Position = (projection* view * model) * position;
-
-	//gl_Position = projection * vec4(position.xy, 0.0, 1.0);
-
-	//TexCoords = position.zw;
 
 }

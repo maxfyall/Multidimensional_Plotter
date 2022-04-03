@@ -17,6 +17,7 @@ public:
 
 	void makeCube(float height, int move);
 	void drawCube(int drawmode);
+	void clearCube();
 
 	// Define vertex buffer object names (e.g as globals)
 	GLuint positionBufferObject;

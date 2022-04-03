@@ -37,60 +37,119 @@ void Cube::makeCube(float height, int move)
 
 	GLfloat vertexPositions[] =
 	{
+		// BACK PLANE
+		0.25f+move, 0.25f, -0.75f,
+		0.f+move, -0.25f, -0.75f,
+		0.25f+move, -0.25f, -0.75f,
 
-		// bottom plane
-		0.005f+move, 0.205f, 0.f,
-		0.005f+move, 0.005f, 0.f,
-		0.205f+move, 0.005f, 0.f,
+		0.25f+move, -0.25f, -0.75f,
+		0.25f+move, 0.25f, -0.75f,
+		0.25f+move, 0.25f, -0.75f,
 
-		0.205f+move, 0.005f, 0.f,
-		0.205f+move, 0.205f, 0.f,
-		0.005f+move, 0.205f, 0.f,
-			  
-		// right plane
-		0.205f+move, 0.005f, 0.0f,
-		0.205f+move, 0.005f, height, // mod
-		0.205f+move, 0.205f, 0.f,
+		// RIGHT PLANE
+		0.25f, -0.25f, -0.75f,
+		0.25f, -0.25f, -0.25f,
+		0.25f, 0.25f, -0.75f,
 
-		0.205f+move, 0.005f, height, // mod
-		0.205f+move, 0.205f, height, // mod
-		0.205f+move, 0.205f, 0.f,
-		
-		// top plane
-		0.205f+move, 0.005f, height, // mod
-		0.005f+move, 0.005f, height, // mod
-		0.205f+move, 0.205f, height, // mod
+		0.25f, -0.25f, -0.25f,
+		0.25f, 0.25f, -0.25f,
+		0.25f, 0.25f, -0.75f,
 
-		0.005f+move, 0.005f, height, //mod
-		0.005f+move, 0.205f, height, // mod
-		0.205f+move, 0.205f, height, // mod
+		// FRONT PLANE
+		0.25f, -0.25f, -0.25f,
+		-0.25f, -0.25f, -0.25f,
+		0.25f, 0.25f, -0.25f,
+
+		-0.25f, -0.25f, -0.25f,
+		-0.25f, 0.25f, -0.25f,
+		0.25f, 0.25f, -0.25f,
+
+		// LEFT PLANE
+		-0.25f, -0.25f, -0.25f,
+		-0.25f, -0.25f, -0.75f,
+		-0.25f, 0.25f, -0.25f,
+
+		-0.25f, -0.25f, -0.75f,
+		-0.25f, 0.25f, -0.75f,
+		-0.25f, 0.25f, -0.25f,
+
+		// BOTTOM PLANE
+		-0.25f, -0.25f, -0.25f,
+		0.25f, -0.25f, -0.25f,
+		0.25f, -0.25f, -0.75f,
+
+		0.25f, -0.25f, -0.75f,
+		-0.25f, -0.25f, -0.75f,
+		-0.25f, -0.25f, -0.25f,
+
+		// TOP PLANE
+		-0.25f, height, -0.75f,
+		0.25f, height, -0.75f,
+		0.25f, height, -0.25f,
+
+		0.25f, height, -0.25f,
+		-0.25f, height, -0.25f,
+		-0.25f, height, -0.75f,
+
+		//// bottom plane
+		//// NEW: BACK PLANE
+		//0.005f+move, height, 0.205f,	// 205
+		//0.005f+move, height, 0.005f,	// 005
+		//0.205f+move, height, 0.005f,
+
+		//0.205f+move, height, 0.005f,
+		//0.205f+move, height, 0.205f,
+		//0.005f+move, height, 0.205f,
+		//	  
+		//// right plane
+		//// NEW: RIGHT PLANE
+		//0.205f+move, 2, 0.005f,
+		//0.205f+move, 2, 1.005f, // mod
+		//0.205f+move, 2, 1.205f,
+
+		//0.205f+move, 2, 1.005f, // mod
+		//0.205f+move, 2, 1.205f, // mod
+		//0.205f+move, 2, 1.205f,
+		//
+		//// top plane
+		//// NEW: BOTTOM PLANE
+		//0.205f+move, 0, 0.005f, // mod
+		//0.005f+move, 0, 0.005f, // mod
+		//0.205f+move, 0, 0.205f, // mod
+
+		//0.005f+move, 0, 0.005f, //mod
+		//0.005f+move, 0, 0.205f, // mod
+		//0.205f+move, 0, 0.205f, // mod
 	
-		// left plane
-		0.005f+move, 0.005f, height, // mod
-		0.005f+move, 0.005f, 0.f,
-		0.005f+move, 0.205f, height, // mod
+		//// left plane
+		//// NEW: LEFT? PLANE
+		//0.005f+move, 0, 0.005f, // mod
+		//0.005f+move, 0, 0.005f,
+		//0.005f+move, 0, 0.205f, // mod
 
-		0.005f+move, 0.005f, 0.f,
-		0.005f+move, 0.205f, 0.f,
-		0.005f+move, 0.205f, height, // mod
+		//0.005f+move, 0, 0.005f,
+		//0.005f+move, 0, 0.205f,
+		//0.005f+move, 0, 0.205f, // mod
 	
-		// front plane
-		0.005f+move, 0.005f, height, // mod
-		0.205f+move, 0.005f, height, // mod
-		0.205f+move, 0.005f, 0.f,
+		//// front plane
+		//// NEW: ? PLANE
+		//0.005f+move, 0, 0.005f, // mod
+		//0.205f+move, 0, 0.005f, // mod
+		//0.205f+move, 0, 0.005f,
 
-		0.205f+move, 0.005f, 0.f,
-		0.005f+move, 0.005f, 0.f,
-		0.005f+move, 0.005f, height, // mod
+		//0.205f+move, 0, 0.005f,
+		//0.005f+move, 0, 0.005f,
+		//0.005f+move, 0, 0.005f, // mod
 	
-		// back plane
-		0.005f+move, 0.205f, 0.f,
-		0.205f+move, 0.205f, 0.f,
-		0.205f+move, 0.205f, height, // mod
+		//// back plane
+		//// NEW: ? PLANE
+		//0.005f+move, 0, 0.205f,
+		//0.205f+move, 0, 0.205f,
+		//0.205f+move, 0, 0.205f, // mod
 
-		0.205f+move, 0.205f, height, // mod
-		0.005f+move, 0.205f, height, // mod
-		0.005f+move, 0.205f, 0.f,
+		//0.205f+move, 0, 0.205f, // mod
+		//0.005f+move, 0, 0.205f, // mod
+		//0.005f+move, 0, 0.205f,
 	};
 
 	/* Manually specified colours for our cube */
@@ -211,4 +270,14 @@ void Cube::drawCube(int drawmode)
 	{
 		glDrawArrays(GL_TRIANGLES, 0, numvertices * 3);
 	}
+}
+
+void Cube::clearCube() 
+{
+	std::vector<GLfloat> vertexPositions = { 0 };
+
+	glGenBuffers(1, &positionBufferObject);
+	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, vertexPositions.size() * sizeof(GLfloat), &(vertexPositions[0]), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

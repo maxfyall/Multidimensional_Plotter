@@ -16,7 +16,9 @@ Quad::~Quad()
 void Quad::makeQuad(float bump, bool small, int dir, float yBump)
 {
 
-	std::vector<float> quad;
+	//std::vector<float> quad;
+
+	quad.clear();
 
 	if (dir == 0)
 	{
@@ -126,4 +128,16 @@ void Quad::drawQuad()
 
 	//std::cout << "DRAWN" << std::endl;
 
+}
+
+void Quad::clearQuad() 
+{
+	quad.clear();
+
+	quad.push_back(0);
+
+	glGenBuffers(1, &quadBO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadBO);
+	glBufferData(GL_ARRAY_BUFFER, quad.size() * sizeof(float), &(quad[0]), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
