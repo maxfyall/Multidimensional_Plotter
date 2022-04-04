@@ -108,13 +108,13 @@ static float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 GLfloat aspect_ratio;
 
-std::string::const_iterator test;
-
 static const char * graphs[] = { "Scatter Plot", "Line Graph", "Bar Chart"};
 
-static char Xlabel[128] = "TEST X AXES";
-static char Ylabel[128] = "TEST Y AXES";
-static char Zlabel[128] = "TEST Z AXES";
+static char Xlabel[128] = "";
+static char Ylabel[128] = "";
+static char Zlabel[128] = "";
+
+std::string labelCheckX, labelCheckY, labelCheckZ;
 
 
 std::vector<float> vertexPos;
@@ -126,7 +126,11 @@ std::vector<std::string> labels;
 std::vector<std::string> positiveLabels;
 std::vector<std::string> negativeLabels;
 
-std::vector<Quad> quads;
+std::vector<Quad> numberLables;
+
+std::vector<Quad> XAxesLabel;
+std::vector<Quad> YAxesLabel;
+std::vector<Quad> ZAxesLabel;
 
 
 
@@ -148,6 +152,8 @@ void clearGraphVector();
 void splitLabelVectors();
 
 void createNumberLabels();
+
+void makeAxesNames();
 
 //void RenderText(std::string text, float x, float y, float scale, glm::vec3 colour);
 
@@ -247,13 +253,13 @@ void init(GLWrapper* glw)
 	FT_Done_Face(face);
 	FT_Done_FreeType(ft);
 
-	glBindVertexArray(textVertexArrayObj);
-	glGenBuffers(1, &textBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, textBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 5, NULL, GL_DYNAMIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-	glBindVertexArray(0);
+	//glBindVertexArray(textVertexArrayObj);
+	//glGenBuffers(1, &textBufferObject);
+	//glBindBuffer(GL_ARRAY_BUFFER, textBufferObject);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 5, NULL, GL_DYNAMIC_DRAW);
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	//glBindVertexArray(0);
 
 	// create axes with the largest number from data set.
 	
@@ -262,6 +268,11 @@ void init(GLWrapper* glw)
 	splitLabelVectors();
 
 	sizePoint = 10.0f;
+
+	labelCheckX = Xlabel;
+	labelCheckY = Ylabel;
+	labelCheckZ = Zlabel;
+
 
 	//vertexColours.push_back(0);
 
@@ -300,7 +311,7 @@ void display()
 
 	glm::mat4 view = glm::lookAt(
 		glm::vec3(0, 0, 4),
-		glm::vec3(camX, camY, 0),
+		glm::vec3(0, 0, 0),
 		glm::vec3(0, 1, 0)
 	);
 
@@ -326,6 +337,7 @@ void display()
 	glUniformMatrix4fv(projectionID1, 1, GL_FALSE, &projection3D[0][0]);
 
 	model.top() = glm::scale(model.top(), glm::vec3(scaler, scaler, scaler));
+	model.top() = glm::translate(model.top(), glm::vec3(camX, camY, 0));
 
 	// draws axes
 	model.push(model.top());
@@ -371,8 +383,6 @@ void display()
 		//testCube.makeCube(1, 1);
 		//testCube.drawCube(0);
 
-		//colourMode = 0;
-		//glUniform1ui(colourModeID1, colourMode);
 		glPointSize(sizePoint);
 
 		if (graphType == 0)
@@ -423,9 +433,6 @@ void display()
 			}
 		}
 
-		//colourMode = 0;
-		//glUniform1ui(colourModeID1, colourMode);
-
 	}
 	model.pop();
 
@@ -455,12 +462,12 @@ void display()
 		int track = 0;
 		std::string::const_iterator q;
 
-		while (track < quads.size())
+		while (track < numberLables.size())
 		{
 
 			for (int i = 0; i < positiveLabels.size(); i++)
 			{
-				if (!quads.empty())
+				if (!numberLables.empty())
 				{
 					q = positiveLabels[i].begin();
 
@@ -478,7 +485,7 @@ void display()
 
 						glBindTexture(GL_TEXTURE_2D, texTEST.TextureID);
 
-						quads[track].drawQuad();
+						numberLables[track].drawQuad();
 						track++;
 
 						glBindVertexArray(0);
@@ -489,7 +496,7 @@ void display()
 			}
 			for (int i = 0; i < negativeLabels.size(); i++)
 			{
-				if (!quads.empty())
+				if (!numberLables.empty())
 				{
 					for (q = negativeLabels[i].begin(); q != negativeLabels[i].end(); q++)
 					{
@@ -504,7 +511,7 @@ void display()
 
 						glBindTexture(GL_TEXTURE_2D, texTEST.TextureID);
 
-						quads[track].drawQuad();
+						numberLables[track].drawQuad();
 						track++;
 
 
@@ -515,155 +522,221 @@ void display()
 			}
 		}
 
-
 	}
 	model.pop();
+
+	model.push(model.top()); 
+	{
+
+		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
+		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		model.top() = glm::translate(model.top(), glm::vec3(0, -0.2, 0));
+
+
+		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
+
+		if (!XAxesLabel.empty())
+		{
+			for (int i = 0; i < XAxesLabel.size(); i++)
+			{
+				XAxesLabel[0].drawQuad();
+				XAxesLabel[1].drawQuad();
+
+				std::cout << "DRAW" << std::endl;
+
+				// for loop for string
+				// set string to axes check variable
+				// draw quad
+				// texture quad
+
+				// set string to next axes i.e. either y or z depending on I value
+			}
+		}
+
+		//model.top() = glm::translate(model.top(), glm::vec3(-1, 0, 0));
+
+		if (!YAxesLabel.empty())
+		{
+			for (int i = 0; i < YAxesLabel.size(); i++)
+			{
+				YAxesLabel[0].drawQuad();
+			}
+		}
+
+		if (!ZAxesLabel.empty())
+		{
+			for (int i = 0; i < ZAxesLabel.size(); i++)
+			{
+				ZAxesLabel[0].drawQuad();
+			}
+		}
+	}
 
 	// IMGUI CODE
 
 	ImGui::Begin("MULTIDIMENSIONAL PLOTTER");
 	
-	ImGui::Text("Welcome to Multidimensional Plotter");
+		ImGui::Text("Welcome to Multidimensional Plotter");
 
-	ImGui::Dummy(ImVec2(0.0f, 10.f));
+		ImGui::Dummy(ImVec2(0.0f, 10.f));
 
-	// Open a file to read in using windows.h api
-	if (ImGui::Button("Open File")) 
-	{
-		// https://www.youtube.com/watch?v=-iMGhSlvIR0
-		// https://docs.microsoft.com/en-us/answers/questions/483237/a-value-of-type-34const-char-34-cannot-be-assigned.html
-
-		OPENFILENAME ofn;
-
-		wchar_t file_name[MAX_PATH];
-		const wchar_t spec[] = L"Text Files\0*.TXT\0CSV Files\0*.CSV\0";
-
-		ZeroMemory(&ofn, sizeof(OPENFILENAME));
-
-		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = GetFocus();
-		ofn.lpstrFile = file_name;
-		ofn.lpstrFile[0] = '\0';
-		ofn.nMaxFile = MAX_PATH;
-		ofn.lpstrFilter = spec;
-		ofn.nFilterIndex = 1;
-		
-		GetOpenFileName(&ofn);
-
-		std::wstring convert(ofn.lpstrFile);
-
-		std::string path(convert.begin(), convert.end());
-
-		std::cout << path << std::endl;
-
-		if (!path.empty())
+		// Open a file to read in using windows.h api
+		if (ImGui::Button("Open File")) 
 		{
-			vertexPos = read3DData(path);
+			// https://www.youtube.com/watch?v=-iMGhSlvIR0
+			// https://docs.microsoft.com/en-us/answers/questions/483237/a-value-of-type-34const-char-34-cannot-be-assigned.html
 
-			size = vertexPos.size();
+			OPENFILENAME ofn;
 
-			// clear labels...
-			for (int i = 0; i < quads.size(); i++)
+			wchar_t file_name[MAX_PATH];
+			const wchar_t spec[] = L"Text Files\0*.TXT\0CSV Files\0*.CSV\0";
+
+			ZeroMemory(&ofn, sizeof(OPENFILENAME));
+
+			ofn.lStructSize = sizeof(OPENFILENAME);
+			ofn.hwndOwner = GetFocus();
+			ofn.lpstrFile = file_name;
+			ofn.lpstrFile[0] = '\0';
+			ofn.nMaxFile = MAX_PATH;
+			ofn.lpstrFilter = spec;
+			ofn.nFilterIndex = 1;
+			
+			GetOpenFileName(&ofn);
+
+			std::wstring convert(ofn.lpstrFile);
+
+			std::string path(convert.begin(), convert.end());
+
+			std::cout << path << std::endl;
+
+			if (!path.empty())
 			{
-				quads[i].clearQuad();
+				vertexPos = read3DData(path);
+
+				size = vertexPos.size();
+
+				// clear labels...
+				for (int i = 0; i < numberLables.size(); i++)
+				{
+					numberLables[i].clearQuad();
+				}
+				numberLables.clear();
+				positiveLabels.clear();
+				negativeLabels.clear();
+
+				labels = newAxes.makeAxes(largest);
+
+				splitLabelVectors();
+
+				createNumberLabels();
+
+				makeAxesNames();
+				
+				glGenBuffers(1, &plotBufferObject);
+				glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
+				glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
 			}
-			quads.clear();
+
+		}
+
+		ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+		if (ImGui::Combo("Graph", &graphType, graphs, IM_ARRAYSIZE(graphs))) {
+			clearGraphVector();
+			newAxes.clearLabels();
+			for (int i = 0; i < numberLables.size(); i++)
+			{
+				numberLables[i].clearQuad();
+			}
+			numberLables.clear();
 			positiveLabels.clear();
 			negativeLabels.clear();
-
-			labels = newAxes.makeAxes(largest);
-
-			splitLabelVectors();
-
-			createNumberLabels();
-			
-			glGenBuffers(1, &plotBufferObject);
-			glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
-			glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 
-	}
-
-	ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-	if (ImGui::Combo("Graph", &graphType, graphs, IM_ARRAYSIZE(graphs))) {
-		clearGraphVector();
-		newAxes.clearLabels();
-		for (int i = 0; i < quads.size(); i++)
-		{
-			quads[i].clearQuad();
-		}
-		quads.clear();
-		positiveLabels.clear();
-		negativeLabels.clear();
-	}
-
-	ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-	if (graphType == 0) {
-
-		ImGui::SliderFloat("Point Size", &sizePoint, 5.0f, 20.f);
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
-	}
 
-	if (graphType == 1) {
-		ImGui::Checkbox("Line Loop", &drawmode);
-		ImGui::Dummy(ImVec2(0.0f, 5.f));
-	}
+		if (graphType == 0) {
 
-	ImGui::SliderFloat("Graph Size", &scaler, 0.01f, 1.f);
-	ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-	ImGui::InputText("X Axes Label", Xlabel, IM_ARRAYSIZE(Xlabel));
-	ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-	ImGui::InputText("Y Axes Label", Ylabel, IM_ARRAYSIZE(Ylabel));
-	ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-	ImGui::InputText("Z Axes Label", Ylabel, IM_ARRAYSIZE(Zlabel));
-	ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-	if (ImGui::Button("RESET POSITION"))
-	{
-		camX = 0;
-		camY = 0;
-	}
-
-	ImGui::SameLine();
-
-	if (ImGui::Button("Clear Graph"))
-	{
-		clearGraphVector();
-		newAxes.clearLabels();
-
-		for (int i = 0; i < quads.size(); i++)
-		{
-			quads[i].clearQuad();
+			ImGui::SliderFloat("Point Size", &sizePoint, 5.0f, 20.f);
+			ImGui::Dummy(ImVec2(0.0f, 5.f));
 		}
-		quads.clear();
-		positiveLabels.clear();
-		negativeLabels.clear();
-	}
 
-	ImGui::Dummy(ImVec2(0.0f, 5.f));
+		if (graphType == 1) {
+			ImGui::Checkbox("Line Loop", &drawmode);
+			ImGui::Dummy(ImVec2(0.0f, 5.f));
+		}
 
-	ImGui::Text("Data Point Colour");
+		ImGui::SliderFloat("Graph Size", &scaler, 0.01f, 1.f);
+		ImGui::Dummy(ImVec2(0.0f, 5.f));
 
-	ImGui::Dummy(ImVec2(0.0f, 5.f));
+		ImGui::InputTextWithHint("X Axes", "INSERT NAME HERE", Xlabel, IM_ARRAYSIZE(Xlabel));
 
-	if (ImGui::ColorEdit3(" ", color)) 
-	{
-		if (!vertexPos.empty())
+		ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+		ImGui::InputTextWithHint("Y Axes", "INSERT NAME HERE", Ylabel, IM_ARRAYSIZE(Ylabel));
+
+		ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+		ImGui::InputTextWithHint("Z Axes", "INSERT NAME HERE", Zlabel, IM_ARRAYSIZE(Zlabel));
+
+		if (labelCheckX != Xlabel || labelCheckY != Ylabel || labelCheckZ != Zlabel)
 		{
-			vertexColours.clear();
-
-			for (int i = 0; i < vertexPos.size(); i++)
+			ImGui::Dummy(ImVec2(0.0f, 3.f));
+			if (ImGui::Button("UPDATE LABELS"))
 			{
-				vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] });
+				labelCheckX = Xlabel; // update the label and make quads regarding that
+				labelCheckY = Ylabel; // update the label and make quads regarding that
+				labelCheckZ = Zlabel; // update the label and make quads regarding that
+				makeAxesNames();
+				// make new quads for this label
+			}
+
+		}
+
+		ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+		if (ImGui::Button("RESET POSITION"))
+		{
+			camX = 0;
+			camY = 0;
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Clear Graph"))
+		{
+			clearGraphVector();
+			newAxes.clearLabels();
+
+			for (int i = 0; i < numberLables.size(); i++)
+			{
+				numberLables[i].clearQuad();
+			}
+			numberLables.clear();
+			positiveLabels.clear();
+			negativeLabels.clear();
+		}
+
+		ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+		ImGui::Text("Data Point Colour");
+
+		ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+		if (ImGui::ColorEdit3(" ", color)) 
+		{
+			if (!vertexPos.empty())
+			{
+				vertexColours.clear();
+
+				for (int i = 0; i < vertexPos.size(); i++)
+				{
+					vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] });
+				}
 			}
 		}
-	}
 
 	ImGui::End();
 	ImGui::Render();
@@ -743,7 +816,7 @@ static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 */
 static void mouseButonCallback(GLFWwindow* window, int button, int action, int mods) 
 {
-	if (button == GLFW_MOUSE_BUTTON_MIDDLE)
+	if (button == GLFW_MOUSE_BUTTON_MIDDLE || button == GLFW_MOUSE_BUTTON_2)
 	{
 		if (action == GLFW_PRESS)
 		{
@@ -912,6 +985,8 @@ void createNumberLabels()
 {
 	float yBump = 0;
 	int count = 0;
+	std::string::const_iterator test;
+
 
 	std::string jim;
 	float temp = bump;
@@ -947,8 +1022,8 @@ void createNumberLabels()
 						}
 					}
 
-					quads.insert(quads.end(), newQuad);
-					quads[count].makeQuad(bump, false, j, yBump);
+					numberLables.insert(numberLables.end(), newQuad);
+					numberLables[count].makeQuad(bump, false, j, yBump);
 
 					count++;
 
@@ -998,15 +1073,15 @@ void createNumberLabels()
 						}
 					}
 
-					quads.insert(quads.end(), newQuad);
+					numberLables.insert(numberLables.end(), newQuad);
 
 					if (cycle2 == 0)
 					{
-						quads[count].makeQuad(-(bump), true, j, yBump);
+						numberLables[count].makeQuad(-(bump), true, j, yBump);
 					}
 					else
 					{
-						quads[count].makeQuad(-(bump), false, j, yBump);
+						numberLables[count].makeQuad(-(bump), false, j, yBump);
 					}
 
 
@@ -1030,6 +1105,69 @@ void createNumberLabels()
 		bump = temp;
 
 	}
+
+}
+
+void makeAxesNames() 
+{
+
+	if (!XAxesLabel.empty() || !YAxesLabel.empty() || !ZAxesLabel.empty())
+	{
+
+		for (int i = 0; i < XAxesLabel.size(); i++)
+		{
+			XAxesLabel[i].clearQuad();
+		}
+		for (int i = 0; i < YAxesLabel.size(); i++)
+		{
+			YAxesLabel[i].clearQuad();
+		}
+		for (int i = 0; i < ZAxesLabel.size(); i++)
+		{
+			ZAxesLabel[i].clearQuad();
+		}
+
+		XAxesLabel.clear();
+		YAxesLabel.clear();
+		ZAxesLabel.clear();
+	}
+
+	std::cout << "make names running" << std::endl;
+
+	std::string::const_iterator t;
+	int count = 0;
+	float indent = largest+1.1f;
+
+	std::cout << largest << std::endl;
+
+	for (t = labelCheckX.begin(); t != labelCheckX.end() ; t++)
+	{
+		XAxesLabel.insert(XAxesLabel.end(), newQuad);
+		XAxesLabel[count].makeQuad(indent, 0, 0, 0);
+		count++;
+		indent = indent + 0.1f;
+	}
+
+	count = 0;
+	float yIndent = 0.1f;
+	indent = largest + 1.1f;
+
+	for (t = labelCheckY.begin(); t != labelCheckY.end(); t++)
+	{
+		YAxesLabel.insert(YAxesLabel.end(), newQuad);
+		YAxesLabel[count].makeQuad(indent, 0, 1, yIndent);
+		count++;
+		yIndent = yIndent + 0.1f;
+	}
+
+	for (t = labelCheckZ.begin(); t != labelCheckZ.end(); t++)
+	{
+
+	}
+
+	// loop through each label string (Starting with X)
+	// insert a new quad object into the quad vector the quads belong to i.e. x axes name
+	// create a quad for each character in that string
 
 }
 
