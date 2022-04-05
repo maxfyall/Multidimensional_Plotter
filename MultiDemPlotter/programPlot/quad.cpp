@@ -13,7 +13,7 @@ Quad::~Quad()
 
 }
 
-void Quad::makeQuad(float bump, bool small, int dir, float yBump)
+void Quad::makeQuad(float bump, int small, int dir, float yBump)
 {
 
 	//std::vector<float> quad;
@@ -22,12 +22,19 @@ void Quad::makeQuad(float bump, bool small, int dir, float yBump)
 
 	if (dir == 0)
 	{
-		if (!small)
+		if (small == 1)
 		{
 			quad.insert(quad.end(), { (0.0f + bump), 0.1f, 0.f });
 			quad.insert(quad.end(), { (0.09f + bump), 0.1f, 0.f });
 			quad.insert(quad.end(), { (0.09f + bump), 0.3f, 0.f });
 			quad.insert(quad.end(), { (0.0f + bump), 0.3f, 0.f });
+		}
+		else if (small == 2)
+		{
+			quad.insert(quad.end(), { (0.07f + bump-0.03f), 0.1f, 0.f });
+			quad.insert(quad.end(), { (0.09f + bump-0.03f), 0.1f, 0.f });
+			quad.insert(quad.end(), { (0.09f + bump-0.03f), 0.3f, 0.f });
+			quad.insert(quad.end(), { (0.07f + bump-0.03f), 0.3f, 0.f });
 		}
 		else
 		{
@@ -39,12 +46,19 @@ void Quad::makeQuad(float bump, bool small, int dir, float yBump)
 	}
 	else if(dir == 1)
 	{
-		if (!small)
+		if (small == 1)
 		{
 			quad.insert(quad.end(), { (0.09f+yBump), (0.2f+bump), 0.f });
 			quad.insert(quad.end(), { (0.18f+yBump), (0.2f+bump), 0.f });
 			quad.insert(quad.end(), { (0.18f+yBump), (0.4f+bump), 0.f });
 			quad.insert(quad.end(), { (0.09f+yBump), (0.4f+bump), 0.f });
+		}
+		else if (small == 2)
+		{
+			quad.insert(quad.end(), { (0.16f + yBump-0.03f), (0.2f + bump), 0.f });
+			quad.insert(quad.end(), { (0.18f + yBump-0.03f), (0.2f + bump), 0.f });
+			quad.insert(quad.end(), { (0.18f + yBump-0.03f), (0.4f + bump), 0.f });
+			quad.insert(quad.end(), { (0.16f + yBump-0.03f), (0.4f + bump), 0.f });
 		}
 		else
 		{
@@ -56,12 +70,19 @@ void Quad::makeQuad(float bump, bool small, int dir, float yBump)
 	}
 	else if (dir == 2) 
 	{
-		if (!small)
+		if (small == 1)
 		{
 			quad.insert(quad.end(), { 0.0f, 0.1f, (0.f+ bump) });
 			quad.insert(quad.end(), { 0.0f, 0.1f, (0.09f + bump) });
 			quad.insert(quad.end(), { 0.0f, 0.3f, (0.09f + bump) });
 			quad.insert(quad.end(), { 0.0f, 0.3f, (0.f + bump) });
+		}
+		else if (small == 2)
+		{
+			quad.insert(quad.end(), { 0.0f, 0.1f, (0.07f + bump-0.03f) });
+			quad.insert(quad.end(), { 0.0f, 0.1f, (0.09f + bump-0.03f) });
+			quad.insert(quad.end(), { 0.0f, 0.3f, (0.09f + bump - 0.03f) });
+			quad.insert(quad.end(), { 0.0f, 0.3f, (0.07f + bump - 0.03f) });
 		}
 		else
 		{

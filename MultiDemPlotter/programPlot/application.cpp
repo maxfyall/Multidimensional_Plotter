@@ -91,6 +91,7 @@ int size;
 bool clear;
 
 float largest;
+float labelBoundary;
 GLfloat sizePoint;
 GLuint colourMode;
 static int graphType = 0;
@@ -99,12 +100,17 @@ bool drawmode;
 float bump;
 float addby;
 
+int numberofBarsX;
+
+std::vector<int> barsX;
+
+int numberofBarsZ;
+
 ThreeDAxes newAxes;
 Quad newQuad;
 Cube testCube;
 
 static float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
 
 GLfloat aspect_ratio;
 
@@ -114,8 +120,9 @@ static char Xlabel[128] = "";
 static char Ylabel[128] = "";
 static char Zlabel[128] = "";
 
-std::string labelCheckX, labelCheckY, labelCheckZ;
-
+std::string labelCheckX;
+std::string labelCheckY;
+std::string labelCheckZ;
 
 std::vector<float> vertexPos;
 std::vector<float> vertexColours = {1.0, 1.0, 1.0, 1.0};
@@ -131,8 +138,6 @@ std::vector<Quad> numberLables;
 std::vector<Quad> XAxesLabel;
 std::vector<Quad> YAxesLabel;
 std::vector<Quad> ZAxesLabel;
-
-
 
 struct Character
 {
@@ -155,7 +160,7 @@ void createNumberLabels();
 
 void makeAxesNames();
 
-//void RenderText(std::string text, float x, float y, float scale, glm::vec3 colour);
+void createBars();
 
 /*
 *  Initialising Function, called before rendering loop to initialise variables and creating objects
@@ -253,14 +258,6 @@ void init(GLWrapper* glw)
 	FT_Done_Face(face);
 	FT_Done_FreeType(ft);
 
-	//glBindVertexArray(textVertexArrayObj);
-	//glGenBuffers(1, &textBufferObject);
-	//glBindBuffer(GL_ARRAY_BUFFER, textBufferObject);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 5, NULL, GL_DYNAMIC_DRAW);
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-	//glBindVertexArray(0);
-
 	// create axes with the largest number from data set.
 	
 	labels = newAxes.makeAxes(largest);
@@ -273,6 +270,10 @@ void init(GLWrapper* glw)
 	labelCheckY = Ylabel;
 	labelCheckZ = Zlabel;
 
+	testCube.makeCube(1, 1);
+
+	numberofBarsX = 0;
+	numberofBarsZ = 0;
 
 	//vertexColours.push_back(0);
 
@@ -369,7 +370,7 @@ void display()
 
 		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // modify 3 to change between 2d and 3d
 
 		glGenBuffers(1, &plotColourBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
@@ -436,12 +437,155 @@ void display()
 	}
 	model.pop();
 
+	model.push(model.top()); 
+	{
+		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
+		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		model.top() = glm::translate(model.top(), glm::vec3(0.2,0.25,0.2));
+		model.top() = glm::scale(model.top(), glm::vec3(0.25, 1, 0.25));
+
+
+		glUniformMatrix4fv(modelID1, 1, GL_FALSE, &model.top()[0][0]);
+
+		testCube.drawCube(0);
+
+		// apply transformations
+		// sned uniform var
+		// draw cube
+
+	}
+	model.pop();
 
 	glUseProgram(0);
 	glUseProgram(textureShaders);
 
 	glUniformMatrix4fv(viewID2, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionID2, 1, GL_FALSE, &projection3D[0][0]);
+
+	// draw the name for the X axes
+	model.push(model.top());
+	{
+
+		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
+		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		model.top() = glm::translate(model.top(), glm::vec3(0, -0.2, 0));
+
+		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
+
+		std::string::const_iterator q = labelCheckX.begin();
+
+		if (!XAxesLabel.empty())
+		{
+			for (int x = 0; x < XAxesLabel.size(); x++)
+			{
+				Character label = Characters[*q];
+
+				glActiveTexture(GL_TEXTURE0);
+
+				glBindVertexArray(textVertexArrayObj);
+
+				int loc = glGetUniformLocation(textureShaders, "text");
+				if (loc >= 0) glUniform1i(loc, 0);
+
+				glBindTexture(GL_TEXTURE_2D, label.TextureID);
+
+				XAxesLabel[x].drawQuad();
+
+				glBindVertexArray(0);
+				glBindTexture(GL_TEXTURE_2D, 0);
+
+				q++;
+			}
+		}
+
+
+	}
+	model.pop();
+
+	// draw the name for the Y axes
+	model.push(model.top());
+	{
+
+		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
+		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		model.top() = glm::translate(model.top(), glm::vec3(-0.2, -0.2, 0));
+
+
+		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
+
+		//model.top() = glm::translate(model.top(), glm::vec3(-1, 0, 0));
+
+		std::string::const_iterator q = labelCheckY.begin();
+
+		if (!YAxesLabel.empty())
+		{
+			for (int y = 0; y < YAxesLabel.size(); y++)
+			{
+				Character label = Characters[*q];
+
+				glActiveTexture(GL_TEXTURE0);
+
+				glBindVertexArray(textVertexArrayObj);
+
+				int loc = glGetUniformLocation(textureShaders, "text");
+				if (loc >= 0) glUniform1i(loc, 0);
+
+				glBindTexture(GL_TEXTURE_2D, label.TextureID);
+
+				YAxesLabel[y].drawQuad();
+
+				glBindVertexArray(0);
+				glBindTexture(GL_TEXTURE_2D, 0);
+
+				q++;
+			}
+		}
+	}
+	model.pop();
+
+	// draw the name for the z axes
+	model.push(model.top());
+	{
+
+		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
+		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		model.top() = glm::translate(model.top(), glm::vec3(0, -0.2, 0.01));
+
+
+		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
+
+		std::string::const_iterator q = labelCheckZ.begin();
+
+		if (!ZAxesLabel.empty())
+		{
+			for (int z = 0; z < ZAxesLabel.size(); z++)
+			{
+				Character label = Characters[*q];
+
+				glActiveTexture(GL_TEXTURE0);
+
+				glBindVertexArray(textVertexArrayObj);
+
+				int loc = glGetUniformLocation(textureShaders, "text");
+				if (loc >= 0) glUniform1i(loc, 0);
+
+				glBindTexture(GL_TEXTURE_2D, label.TextureID);
+
+				ZAxesLabel[z].drawQuad();
+
+				glBindVertexArray(0);
+				glBindTexture(GL_TEXTURE_2D, 0);
+
+				q++;
+
+			}
+		}
+	}
+	model.pop();
 
 	// draws labels (numbers)
 	model.push(model.top());
@@ -453,7 +597,6 @@ void display()
 		model.top() = glm::translate(model.top(), glm::vec3(0, -0.4, 0));
 
 		//model.top() = glm::rotate(model.top(), glm::radians(180.f), glm::vec3(1.0f, 0.0f, 0.0f));
-
 
 		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
 
@@ -525,54 +668,6 @@ void display()
 	}
 	model.pop();
 
-	model.push(model.top()); 
-	{
-
-		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		model.top() = glm::translate(model.top(), glm::vec3(0, -0.2, 0));
-
-
-		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
-
-		if (!XAxesLabel.empty())
-		{
-			for (int i = 0; i < XAxesLabel.size(); i++)
-			{
-				XAxesLabel[0].drawQuad();
-				XAxesLabel[1].drawQuad();
-
-				std::cout << "DRAW" << std::endl;
-
-				// for loop for string
-				// set string to axes check variable
-				// draw quad
-				// texture quad
-
-				// set string to next axes i.e. either y or z depending on I value
-			}
-		}
-
-		//model.top() = glm::translate(model.top(), glm::vec3(-1, 0, 0));
-
-		if (!YAxesLabel.empty())
-		{
-			for (int i = 0; i < YAxesLabel.size(); i++)
-			{
-				YAxesLabel[0].drawQuad();
-			}
-		}
-
-		if (!ZAxesLabel.empty())
-		{
-			for (int i = 0; i < ZAxesLabel.size(); i++)
-			{
-				ZAxesLabel[0].drawQuad();
-			}
-		}
-	}
-
 	// IMGUI CODE
 
 	ImGui::Begin("MULTIDIMENSIONAL PLOTTER");
@@ -590,7 +685,7 @@ void display()
 			OPENFILENAME ofn;
 
 			wchar_t file_name[MAX_PATH];
-			const wchar_t spec[] = L"Text Files\0*.TXT\0CSV Files\0*.CSV\0";
+			const wchar_t spec[] = L"Text Files\0*.TXT\0";
 
 			ZeroMemory(&ofn, sizeof(OPENFILENAME));
 
@@ -625,6 +720,11 @@ void display()
 				positiveLabels.clear();
 				negativeLabels.clear();
 
+				if (graphType == 2)
+				{
+					createBars();
+				}
+
 				labels = newAxes.makeAxes(largest);
 
 				splitLabelVectors();
@@ -643,7 +743,8 @@ void display()
 
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
 
-		if (ImGui::Combo("Graph", &graphType, graphs, IM_ARRAYSIZE(graphs))) {
+		if (ImGui::Combo("Graph", &graphType, graphs, IM_ARRAYSIZE(graphs))) 
+		{
 			clearGraphVector();
 			newAxes.clearLabels();
 			for (int i = 0; i < numberLables.size(); i++)
@@ -714,6 +815,7 @@ void display()
 			{
 				numberLables[i].clearQuad();
 			}
+
 			numberLables.clear();
 			positiveLabels.clear();
 			negativeLabels.clear();
@@ -860,6 +962,8 @@ static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 std::vector<float> read3DData(std::string filePath)
 {
 	std::vector<std::string> vertexPositions;
+	bool invalid = false;
+	numberofBarsZ = 0;
 
 	std::ifstream filestream(filePath);
 
@@ -890,19 +994,57 @@ std::vector<float> read3DData(std::string filePath)
 
 		std::stringstream ss(temp);
 
+		numberofBarsZ = 0;
+
+
 		while (ss >> num)
 		{
+
 			std::cout << num << std::endl;
 
-			plotPos.push_back(std::stof(num));
-
-			if (std::stof(num) > largest)
+			for (int i = 0; i < num.length(); i++)
 			{
-				largest = std::stof(num);
+				if (isalpha(num[i]))
+				{
+					invalid = true;
+					break;
+				}
 			}
+			
+			if (invalid)
+			{
+				std::cout << "INVALID DATA LINE - REMOVING" << std::endl;
+				invalid = false;
+			}
+			else
+			{
+				plotPos.push_back(std::stof(num));
+
+				if (std::stof(num) > largest)
+				{
+					largest = std::stof(num);
+				}
+				else if(-(std::stof(num)) > largest)
+				{
+					largest = -std::stof(num);
+				}
+			}
+			numberofBarsZ++;
 
 		}
+		barsX.insert(barsX.end(), numberofBarsZ);
+
 	}
+
+	//std::cout << "NUM: " << numberofBarsZ/3 << std::endl;
+
+	for (int i = 0; i < barsX.size(); i++)
+	{
+		std::cout << barsX[i] << std::endl;
+	}
+
+	// if graph type == 2
+	// perform bar chart things
 
 	if (largest < 10)
 	{
@@ -927,12 +1069,14 @@ std::vector<float> read3DData(std::string filePath)
 
 	if (plotPos.empty())
 	{
+		labelBoundary = largest;
 		std::vector<float> check;
 		check.push_back(0);
 		return check;
 	}
 	else
 	{
+		labelBoundary = largest;
 		return plotPos;
 	}
 }
@@ -942,6 +1086,8 @@ std::vector<float> read3DData(std::string filePath)
 */
 void clearGraphVector() 
 {
+	labelBoundary = largest;
+
 	std::cout << "CLEAR THE GRAPH" << std::endl;
 	vertexPos.clear();
 	vertexPos.push_back(0);
@@ -985,13 +1131,22 @@ void createNumberLabels()
 {
 	float yBump = 0;
 	int count = 0;
+	int bar = 0;
+	int limit = 3;
 	std::string::const_iterator test;
+
+	if (graphType == 2)
+	{
+		bar = 1;
+		limit = 2;
+
+	}
 
 
 	std::string jim;
 	float temp = bump;
 
-	for (int j = 0; j < 3; j++)
+	for (int j = bar; j < limit; j++)
 	{
 		std::cout << bump << std::endl;
 
@@ -1023,7 +1178,7 @@ void createNumberLabels()
 					}
 
 					numberLables.insert(numberLables.end(), newQuad);
-					numberLables[count].makeQuad(bump, false, j, yBump);
+					numberLables[count].makeQuad(bump, 1, j, yBump);
 
 					count++;
 
@@ -1077,11 +1232,11 @@ void createNumberLabels()
 
 					if (cycle2 == 0)
 					{
-						numberLables[count].makeQuad(-(bump), true, j, yBump);
+						numberLables[count].makeQuad(-(bump), 0, j, yBump);
 					}
 					else
 					{
-						numberLables[count].makeQuad(-(bump), false, j, yBump);
+						numberLables[count].makeQuad(-(bump), 1, j, yBump);
 					}
 
 
@@ -1110,21 +1265,20 @@ void createNumberLabels()
 
 void makeAxesNames() 
 {
-
 	if (!XAxesLabel.empty() || !YAxesLabel.empty() || !ZAxesLabel.empty())
 	{
 
-		for (int i = 0; i < XAxesLabel.size(); i++)
+		for (int x = 0; x < XAxesLabel.size(); x++)
 		{
-			XAxesLabel[i].clearQuad();
+			XAxesLabel[x].clearQuad();
 		}
-		for (int i = 0; i < YAxesLabel.size(); i++)
+		for (int y = 0; y < YAxesLabel.size(); y++)
 		{
-			YAxesLabel[i].clearQuad();
+			YAxesLabel[y].clearQuad();
 		}
-		for (int i = 0; i < ZAxesLabel.size(); i++)
+		for (int z = 0; z < ZAxesLabel.size(); z++)
 		{
-			ZAxesLabel[i].clearQuad();
+			ZAxesLabel[z].clearQuad();
 		}
 
 		XAxesLabel.clear();
@@ -1132,37 +1286,77 @@ void makeAxesNames()
 		ZAxesLabel.clear();
 	}
 
-	std::cout << "make names running" << std::endl;
-
 	std::string::const_iterator t;
-	int count = 0;
-	float indent = largest+1.1f;
+	int loop = 0;
+	float indent = labelBoundary+1.1f;
 
-	std::cout << largest << std::endl;
+
 
 	for (t = labelCheckX.begin(); t != labelCheckX.end() ; t++)
 	{
-		XAxesLabel.insert(XAxesLabel.end(), newQuad);
-		XAxesLabel[count].makeQuad(indent, 0, 0, 0);
-		count++;
-		indent = indent + 0.1f;
+		labelCheckX[loop] = std::toupper(labelCheckX[loop]);
+		if (labelCheckX[loop] == 'I' )
+		{
+			XAxesLabel.insert(XAxesLabel.end(), newQuad);
+			XAxesLabel[loop].makeQuad(indent, 2, 0, 0);
+			loop++;
+			indent = indent + 0.1f;
+		}
+		else
+		{
+			XAxesLabel.insert(XAxesLabel.end(), newQuad);
+			XAxesLabel[loop].makeQuad(indent, 1, 0, 0);
+			loop++;
+			indent = indent + 0.1f;
+		}
 	}
 
-	count = 0;
+	loop = 0;
 	float yIndent = 0.1f;
-	indent = largest + 1.1f;
+	indent = labelBoundary + 1.1f;
 
 	for (t = labelCheckY.begin(); t != labelCheckY.end(); t++)
 	{
-		YAxesLabel.insert(YAxesLabel.end(), newQuad);
-		YAxesLabel[count].makeQuad(indent, 0, 1, yIndent);
-		count++;
-		yIndent = yIndent + 0.1f;
+		labelCheckY[loop] = std::toupper(labelCheckY[loop]);
+		if (labelCheckY[loop] == 'I')
+		{
+			YAxesLabel.insert(YAxesLabel.end(), newQuad);
+			YAxesLabel[loop].makeQuad(indent, 2, 1, yIndent);
+			loop++;
+			yIndent = yIndent + 0.1f;
+		}
+		else
+		{
+			labelCheckY[loop] = std::toupper(labelCheckY[loop]);
+			YAxesLabel.insert(YAxesLabel.end(), newQuad);
+			YAxesLabel[loop].makeQuad(indent, 1, 1, yIndent);
+			loop++;
+			yIndent = yIndent + 0.1f;
+		}
 	}
+
+
+	loop = 0;
+	indent = labelBoundary + 1.1f;
 
 	for (t = labelCheckZ.begin(); t != labelCheckZ.end(); t++)
 	{
-
+		labelCheckZ[loop] = std::toupper(labelCheckZ[loop]);
+		if (labelCheckY[loop] == 'I')
+		{
+			ZAxesLabel.insert(ZAxesLabel.end(), newQuad);
+			ZAxesLabel[loop].makeQuad(indent, 2, 2, 0);
+			loop++;
+			indent = indent + 0.1f;
+		}
+		else
+		{
+			labelCheckZ[loop] = std::toupper(labelCheckZ[loop]);
+			ZAxesLabel.insert(ZAxesLabel.end(), newQuad);
+			ZAxesLabel[loop].makeQuad(indent, 1, 2, 0);
+			loop++;
+			indent = indent + 0.1f;
+		}
 	}
 
 	// loop through each label string (Starting with X)
@@ -1171,50 +1365,10 @@ void makeAxesNames()
 
 }
 
-//void RenderText(std::string text, float x, float y, float scale, glm::vec3 colour) 
-//{
-//	glUniform3f(glGetUniformLocation(textureShaders, "textColour"), colour.x, colour.y, colour.z);
-//	glActiveTexture(GL_TEXTURE0);
-//	glBindVertexArray(textVertexArrayObj);
-//
-//	std::string::const_iterator c;
-//	for (c = text.begin(); c != text.end(); c++)
-//	{
-//		Character ch = Characters[*c];
-//
-//		float xpos = x + ch.Bearing.x * scale;
-//		float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
-//
-//		float w = ch.Size.x * scale;
-//		float h = ch.Size.y * scale;
-//
-//		float verticies[6][4] = {
-//
-//			{xpos, ypos + h, 0.0f, 0.0f},
-//			{xpos, ypos,     0.0f, 1.0f},
-//			{xpos + w, ypos, 1.0f, 1.0f},
-//
-//			{xpos, ypos + h,     0.0f, 0.0f},
-//			{xpos + w, ypos,     1.0f, 1.0f},
-//			{xpos + w, ypos + h, 1.0f, 0.0f}
-//		};
-//
-//		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-//
-//		glBindBuffer(GL_ARRAY_BUFFER, textBufferObject);
-//		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(verticies), verticies);
-//
-//		glBindBuffer(GL_ARRAY_BUFFER, 0);
-//
-//		glDrawArrays(GL_TRIANGLES, 0, 6);
-//
-//		x += (ch.Advance >> 6) * scale;
-//	}
-//
-//	glBindVertexArray(0);
-//	glBindTexture(GL_TEXTURE_2D, 0);
-//
-//}
+void createBars() 
+{
+
+}
 
 
 /*
