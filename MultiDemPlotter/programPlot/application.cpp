@@ -48,6 +48,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+/* Include Header Files of required classes */
 #include "axes.h"
 #include "quad.h"
 #include "cube.h"
@@ -68,13 +69,11 @@ GLuint yAxesBufferObject, yColourBuffer;
 GLuint zAxesBufferObject, zColourBuffer;
 GLuint plotBufferObject, plotColourBuffer;
 
-GLuint quadBO;
-GLuint quadColourBO;
-GLuint quadTextBO;
-
-GLuint modelID1, viewID1, projectionID1, colourModeID1;
+/* Unassigned integers used for locations of uniform matricies passed to relevent vertex shaders*/
+GLuint modelID1, viewID1, projectionID1;
 GLuint modelID2, viewID2, projectionID2;
 
+/* Scene control variables*/
 bool firstMouse = true;
 bool moveScene = false;
 float yaw = 0.0f;
@@ -83,86 +82,103 @@ float lastX = 1024.f / 2.0;
 float lastY = 768.f / 2.0;
 float fov = 45.f;
 float scaler = 0.5f;
-
 float camY = 0;
 float camX = 0;
 
-int size;
-bool clear;
+int size; // check up on this
 
-float largest;
-float labelBoundary;
-GLfloat sizePoint;
-GLuint colourMode;
-static int graphType = 0;
-bool drawmode;
+/* Graphing Variables */
 
-float bump;
-float addby;
+float largest; // holds the largest value from loaded data set
+float labelBoundary; // determines where axes names appear
+GLfloat sizePoint; // holds size of points (edited by ImGUI)
+static int graphType = 0; // integer var determines which graph to draw
+bool drawmode; // used in line graph (determines if line graph points are connected)
 
-int numberofBarsX;
+bool twoD = false; // sets drawing mode to 2D
+bool threeD = true; // sets drawing mode to 3D (Set to true by default)
 
+/* Axes Label variables */
+float bump; // used to move label to next spot
+float addby; // keeps track of how much to move label by
+
+/* Holds number of bars to make in X direction */
 std::vector<int> barsX;
 
-int numberofBarsZ;
+/* Class Objects */
+ThreeDAxes newAxes; // Axes class instance, draws the X, Y, Z axes
+Quad newQuad; // Quad class instance, used to make and draw quads for labels
+Cube testCube; // Cube class instance, used to make and draw cubes (rectangles for bar chart)
 
-ThreeDAxes newAxes;
-Quad newQuad;
-Cube testCube;
-
+/* Colour Float, allows user to change colour of data points */
 static float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
+/* Aspect ration var - stores the aspect res of the GLFW Window */
 GLfloat aspect_ratio;
 
-static const char * graphs[] = { "Scatter Plot", "Line Graph", "Bar Chart"};
+/* Char Array used in ImGUI */
+static const char * graphs[] = { "Scatter Plot", "Line Graph", "Bar Chart (Experimental)"};
 
+/* Char's for Axes Names (Edited by ImGUI)*/
 static char Xlabel[128] = "";
 static char Ylabel[128] = "";
 static char Zlabel[128] = "";
 
+/* Strings to used to store current label */
 std::string labelCheckX;
 std::string labelCheckY;
 std::string labelCheckZ;
 
-std::vector<float> vertexPos;
-std::vector<float> vertexColours = {1.0, 1.0, 1.0, 1.0};
+/* Data point Vectors */
+std::vector<float> vertexPos; // stores vertex positions (read in from file)
+std::vector<float> vertexColours = {1.0, 1.0, 1.0, 1.0}; // stores colour values for data points
 
-std::vector<std::string> labels;
+/* Vectors for storing number labels */
+std::vector<std::string> labels; // stores all labels generated from axes class
 
-
+/* Seperate vectors for positive and negative labels */
 std::vector<std::string> positiveLabels;
 std::vector<std::string> negativeLabels;
 
+/* Vector of Quads for number labels */
 std::vector<Quad> numberLables;
 
+/* Vector of Quads for Axes Names */
 std::vector<Quad> XAxesLabel;
 std::vector<Quad> YAxesLabel;
 std::vector<Quad> ZAxesLabel;
 
+/* Vector of Cubes for bar chart - Holds neccessary number of cubes (rectangles) */
 std::vector<Cube> barChart;
 
+/* Character Struct - Holds font data (acquired from the LearnOpenGL Tutorial */
 struct Character
 {
-	unsigned int TextureID;
+	unsigned int TextureID; // texture id - distinguishes textures
+
+	/* Other variables not used */
 	glm::ivec2 Size;
 	glm::ivec2 Bearing;
 	unsigned int Advance;
 };
 
+/* Map for key value pairs (key - char ('y') value - Character Struct)*/
 std::map<char, Character> Characters;
 
 
-std::vector<float> read3DData(std::string filePath);
+/* Function Declarations */
 
-void clearGraphVector();
+std::vector<float> read3DData(std::string filePath); // read from file method
 
-void splitLabelVectors();
+void clearGraphVector(); // clears the vector positions vector (removing data from the screen)
 
-void createNumberLabels();
+void splitLabelVectors(); // splits the label vector into the positive/negative vectors
 
-void makeAxesNames();
+void createNumberLabels(); // creates the quads for the number variables
 
-void createBars();
+void makeAxesNames(); // creates quads for the axes name
+
+void createBars(); // creates cubes for bar chart
 
 /*
 *  Initialising Function, called before rendering loop to initialise variables and creating objects
@@ -195,55 +211,66 @@ void init(GLWrapper* glw)
 	}
 
 	//glEnable(GL_CULL_FACE);
+
+	// enable blending
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	/* FREETYPE LIBRARY INITIALISING - AQUIRED FROM LEARNOPENGL - https://learnopengl.com/In-Practice/Text-Rendering */
+
 	// Freetype Checks
 
-	FT_Library ft;
-	if (FT_Init_FreeType(&ft))
+	FT_Library ft; // create freetype instance
+	if (FT_Init_FreeType(&ft)) // check if lib can be initialised
 	{
-		std::cout << "ERROR::FREETYPE: Could not init Freetype Library" << std::endl;
+		std::cout << "ERROR::FREETYPE: Could not init Freetype Library" << std::endl; // display error
 	}
 	else
 	{
-		std::cout << "Freetype Library Loaded" << std::endl;
+		std::cout << "Freetype Library Loaded" << std::endl; // confirmation
 	}
 
 
-	FT_Face face;
-	if (FT_New_Face(ft, "../../fonts/arial.ttf", 0, &face))
+	FT_Face face; // create font face
+	if (FT_New_Face(ft, "../../fonts/arial.ttf", 0, &face)) // create new face from font file (returns error code if fails)
 	{
-		std::cout << "ERROR:FREETYPE: Failed to load font" << std::endl;
+		std::cout << "ERROR:FREETYPE: Failed to load font" << std::endl; // return error
 	}
 	else
 	{
+
+		// set size to load glyphs
 		FT_Set_Pixel_Sizes(face, 0, 48);
 
+		// disable byte-alignment restriction
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
+		// load first 128 chracters of ASCII set
 		for (unsigned char c = 0; c < 128; c++)
 		{
+			// load character glyph
 			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
 			{
 				std::cout << "ERROR::FREETYPE: Failed to load Glyph" << std::endl;
 				continue;
 			}
 
+			// Generate texture
 			unsigned int texture;
 			glGenTextures(1, &texture);
 			glBindTexture(GL_TEXTURE_2D, texture);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
 
-			glGenerateMipmap(GL_TEXTURE_2D);
+			glGenerateMipmap(GL_TEXTURE_2D); // Generate Mipmaps - Limit some aliasing issues (Unsure if this has any effect due to the sizes)
 
+			// set texture options - using mipmaps
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 			
 
-
+			// store the character for later use
 			Character letter = {
 				texture,
 				glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
@@ -252,37 +279,35 @@ void init(GLWrapper* glw)
 
 			};
 
+			// add char and character struct to map
 			Characters.insert(std::pair<char, Character>(c, letter));
 		}
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(GL_TEXTURE_2D, 0); // unbind the texture
 	}
-
+	
+	// destroy Freetype once finished (Prevent Unecessary memory usage)
 	FT_Done_Face(face);
 	FT_Done_FreeType(ft);
 
 	// create axes with the largest number from data set.
-	
-	labels = newAxes.makeAxes(largest);
+	labels = newAxes.makeAxes(largest); // make axes returns vector of floats containing the labels required for x y z axes
 
-	splitLabelVectors();
+	splitLabelVectors(); // split "labels" vector into positive and negative vectors
 
-	sizePoint = 10.0f;
+	sizePoint = 10.0f; // initialise points size
+
 
 	labelCheckX = Xlabel;
 	labelCheckY = Ylabel;
 	labelCheckZ = Zlabel;
 
-	testCube.makeCube(1,0,0);
-
-	numberofBarsX = 0;
-	numberofBarsZ = 0;
+	//testCube.makeCube(1,0,0);
 
 	//vertexColours.push_back(0);
 
 	//std::cout << numLabels.empty() << std::endl;
 
 	modelID1 = glGetUniformLocation(program, "model");
-	colourModeID1 = glGetUniformLocation(program, "colourMode");
 	viewID1 = glGetUniformLocation(program, "view");
 	projectionID1 = glGetUniformLocation(program, "projection");
 
@@ -329,13 +354,6 @@ void display()
 		addby = 2;
 	}
 
-	//view = glm::rotate(view, -glm::radians(yaw), glm::vec3(1, 0, 0));
-	//view = glm::rotate(view, glm::radians(20.0f), glm::vec3(1, 0, 0));
-
-	//model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-	//model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
-
-	glUniform1ui(colourModeID1, colourMode);
 	glUniformMatrix4fv(viewID1, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionID1, 1, GL_FALSE, &projection3D[0][0]);
 
@@ -372,7 +390,16 @@ void display()
 
 		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // modify 3 to change between 2d and 3d
+
+		if (twoD)
+		{
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0); // modify 3 to change between 2d and 3d
+		}
+
+		if (threeD)
+		{
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // modify 3 to change between 2d and 3d
+		}
 
 		glGenBuffers(1, &plotColourBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
@@ -382,9 +409,6 @@ void display()
 		glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-		//testCube.makeCube(1, 1);
-		//testCube.drawCube(0);
 
 		glPointSize(sizePoint);
 
@@ -416,25 +440,14 @@ void display()
 			{
 				if (!drawmode)
 				{
-					glDrawArrays(GL_LINE_STRIP, 0, size / 3);
+					glDrawArrays(GL_LINE_STRIP, 0, size / 2);
 				}
 				else
 				{
-					glDrawArrays(GL_LINE_LOOP, 0, size / 3);
+					glDrawArrays(GL_LINE_LOOP, 0, size / 2);
 				}
 			}
 		}
-		//else if (graphType == 2) 
-		//{
-		//	if (!(vertexPos.size() == 1 && vertexPos[0] == 0))
-		//	{
-		//		for (int i = 0; i < vertexPos.size(); i++)
-		//		{
-		//			testCube.makeCube(vertexPos[i], i);
-		//			testCube.drawCube(0);
-		//		}
-		//	}
-		//}
 
 	}
 	model.pop();
@@ -444,7 +457,6 @@ void display()
 		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
 		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		model.top() = glm::translate(model.top(), glm::vec3(0, 0.25, 0));
 		model.top() = glm::scale(model.top(), glm::vec3(0.25, 1, 0.25));
 
 	    glUniformMatrix4fv(modelID1, 1, GL_FALSE, &model.top()[0][0]);
@@ -533,8 +545,6 @@ void display()
 
 		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
 
-		//model.top() = glm::translate(model.top(), glm::vec3(-1, 0, 0));
-
 		std::string::const_iterator q = labelCheckY.begin();
 
 		if (!YAxesLabel.empty())
@@ -612,8 +622,6 @@ void display()
 		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		model.top() = glm::translate(model.top(), glm::vec3(0, -0.4, 0));
-
-		//model.top() = glm::rotate(model.top(), glm::radians(180.f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
 
@@ -754,6 +762,7 @@ void display()
 					if (largest < barsX.size())
 					{
 						largest = (barsX.size());
+						labelBoundary = largest;
 					}
 				}
 
@@ -793,6 +802,22 @@ void display()
 			}
 			barChart.clear();
 			barsX.clear();
+		}
+		
+		if (graphType != 2)
+		{
+			ImGui::Dummy(ImVec2(0.0f, 2.f));
+
+			if (ImGui::Checkbox("2D", &twoD))
+			{
+				threeD = !threeD;
+			}
+			ImGui::SameLine();
+
+			if (ImGui::Checkbox("3D", &threeD))
+			{
+				twoD = !twoD;
+			}
 		}
 
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
@@ -871,19 +896,22 @@ void display()
 
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
 
-		ImGui::Text("Data Point Colour");
-
-		ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-		if (ImGui::ColorEdit3(" ", color)) 
+		if (graphType != 2)
 		{
-			if (!vertexPos.empty())
-			{
-				vertexColours.clear();
+			ImGui::Text("Data Point Colour");
 
-				for (int i = 0; i < vertexPos.size(); i++)
+			ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+			if (ImGui::ColorEdit3(" ", color))
+			{
+				if (!vertexPos.empty())
 				{
-					vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] });
+					vertexColours.clear();
+
+					for (int i = 0; i < vertexPos.size(); i++)
+					{
+						vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] });
+					}
 				}
 			}
 		}
@@ -1011,7 +1039,7 @@ std::vector<float> read3DData(std::string filePath)
 {
 	std::vector<std::string> vertexPositions;
 	bool invalid = false;
-	numberofBarsZ = 0;
+	int numberofBarsZ = 0;
 
 	std::ifstream filestream(filePath);
 
@@ -1083,8 +1111,6 @@ std::vector<float> read3DData(std::string filePath)
 		barsX.insert(barsX.end(), numberofBarsZ);
 
 	}
-
-	//std::cout << "NUM: " << numberofBarsZ/3 << std::endl;
 
 	for (int i = 0; i < barsX.size(); i++)
 	{
@@ -1338,15 +1364,9 @@ void makeAxesNames()
 	int loop = 0;
 	float indent = 0;
 
-	if (graphType == 2)
-	{
-		indent = labelBoundary + 2.1f;
-	}
-	else 
-	{
-		indent = labelBoundary + 1.1f;
-	}
 
+	indent = labelBoundary + 1.1f;
+	
 
 	for (t = labelCheckX.begin(); t != labelCheckX.end() ; t++)
 	{
@@ -1370,14 +1390,8 @@ void makeAxesNames()
 	loop = 0;
 	float yIndent = 0.1f;
 
-	if (graphType == 2)
-	{
-		indent = labelBoundary + 2.1f;
-	}
-	else
-	{
-		indent = labelBoundary + 1.1f;
-	}
+
+	indent = labelBoundary + 1.1f;
 
 	for (t = labelCheckY.begin(); t != labelCheckY.end(); t++)
 	{
@@ -1401,15 +1415,9 @@ void makeAxesNames()
 
 	loop = 0;
 
-	if (graphType == 2)
-	{
-		indent = labelBoundary + 2.1f;
-	}
-	else
-	{
-		indent = labelBoundary + 1.1f;
-	}
-
+	
+	indent = labelBoundary + 1.1f;
+	
 	for (t = labelCheckZ.begin(); t != labelCheckZ.end(); t++)
 	{
 		labelCheckZ[loop] = std::toupper(labelCheckZ[loop]);
@@ -1425,13 +1433,14 @@ void makeAxesNames()
 		{
 			labelCheckZ[loop] = std::toupper(labelCheckZ[loop]);
 			ZAxesLabel.insert(ZAxesLabel.end(), newQuad);
+		
 			ZAxesLabel[loop].makeQuad(indent, 1, 2, 0);
+			
 			loop++;
 			indent = indent + 0.1f;
 
 		}
 	}
-
 
 	// loop through each label string (Starting with X)
 	// insert a new quad object into the quad vector the quads belong to i.e. x axes name
@@ -1446,9 +1455,12 @@ void createBars()
 
 	int q = 0;
 	int moveZ = 0;
+	int moveX = 0;
 
 	for (int i = 0; i < barsX.size(); i++)
 	{
+		moveX = 0;
+
 		if (barsX[i] == 0)
 		{
 			std::cout << "breaking" << std::endl;
@@ -1458,16 +1470,18 @@ void createBars()
 			for (int j = 0; j < barsX[i]; j++)
 			{
 				barChart.insert(barChart.end(), testCube);
-				barChart[q].makeCube(vertexPos[q], ((j + 1)) * 4, (-(moveZ + 1) * 4));
-				std::cout << "BAR WITH: " << vertexPos[q] << std::endl;
+				barChart[q].makeCube((vertexPos[q]), ((moveX + addby)) * 4, (-(moveZ + addby) * 4));
+				//std::cout << "BAR WITH: " << vertexPos[q] << std::endl;
 				q++;
+				moveX = moveX + addby;
+
 			}
-			moveZ++;
+			moveZ = moveZ + addby;
 		}
 
 	}
 
-	std::cout << "Bars: " << barChart.size() << std::endl;
+	//std::cout << "Bars: " << barChart.size() << std::endl;
 }
 
 

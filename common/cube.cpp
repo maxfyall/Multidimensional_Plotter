@@ -38,37 +38,37 @@ void Cube::makeCube(float height, int moveX, int moveZ)
 	GLfloat vertexPositions[] =
 	{
 		
-		-0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
+		-0.25f+moveX, (height), -0.25f+moveZ,
 		-0.25f+moveX, -0.25f, -0.25f+moveZ,
 		0.25f+moveX, -0.25f, -0.25f+moveZ,
 
 		0.25f+moveX, -0.25f, -0.25f+moveZ,
-		0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
-		-0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
+		0.25f+moveX, (height), -0.25f+moveZ,
+		-0.25f+moveX, (height), -0.25f+moveZ,
 
 		0.25f+moveX, -0.25f, -0.25f+moveZ,
 		0.25f+moveX, -0.25f, 0.25f+moveZ,
-		0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
+		0.25f+moveX, (height), -0.25f+moveZ,
 
 		0.25f+moveX, -0.25f, 0.25f+moveZ,
-		0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
-		0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
+		0.25f+moveX, (height), 0.25f+moveZ,
+		0.25f+moveX, (height), -0.25f+moveZ,
 
 		0.25f+moveX, -0.25f, 0.25f+moveZ,
 		-0.25f+moveX, -0.25f, 0.25f+moveZ,
-		0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
+		0.25f+moveX, (height), 0.25f+moveZ,
 
 		-0.25f+moveX, -0.25f, 0.25f+moveZ,
-		-0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
-		0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
+		-0.25f+moveX, (height), 0.25f+moveZ,
+		0.25f+moveX, (height), 0.25f+moveZ,
 
 		-0.25f+moveX, -0.25f, 0.25f+moveZ,
 		-0.25f+moveX, -0.25f, -0.25f+moveZ,
-		-0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
+		-0.25f+moveX, (height), 0.25f+moveZ,
 
 		-0.25f+moveX, -0.25f, -0.25f+moveZ,
-		-0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
-		-0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
+		-0.25f+moveX, (height), -0.25f+moveZ,
+		-0.25f+moveX, (height), 0.25f+moveZ,
 
 		-0.25f+moveX, -0.25f, 0.25f+moveZ,
 		0.25f+moveX, -0.25f, 0.25f+moveZ,
@@ -78,73 +78,13 @@ void Cube::makeCube(float height, int moveX, int moveZ)
 		-0.25f+moveX, -0.25f, -0.25f+moveZ,
 		-0.25f+moveX, -0.25f, 0.25f+moveZ,
 
-		-0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
-		0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
-		0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
+		-0.25f+moveX, (height), -0.25f+moveZ,
+		0.25f+moveX, (height), -0.25f+moveZ,
+		0.25f+moveX, (height), 0.25f+moveZ,
 
-		0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
-		-0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
-		-0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
-
-		//// bottom plane
-		//// NEW: BACK PLANE
-		//0.005f+move, height, 0.205f,	// 205
-		//0.005f+move, height, 0.005f,	// 005
-		//0.205f+move, height, 0.005f,
-
-		//0.205f+move, height, 0.005f,
-		//0.205f+move, height, 0.205f,
-		//0.005f+move, height, 0.205f,
-		//	  
-		//// right plane
-		//// NEW: RIGHT PLANE
-		//0.205f+move, 2, 0.005f,
-		//0.205f+move, 2, 1.005f, // mod
-		//0.205f+move, 2, 1.205f,
-
-		//0.205f+move, 2, 1.005f, // mod
-		//0.205f+move, 2, 1.205f, // mod
-		//0.205f+move, 2, 1.205f,
-		//
-		//// top plane
-		//// NEW: BOTTOM PLANE
-		//0.205f+move, 0, 0.005f, // mod
-		//0.005f+move, 0, 0.005f, // mod
-		//0.205f+move, 0, 0.205f, // mod
-
-		//0.005f+move, 0, 0.005f, //mod
-		//0.005f+move, 0, 0.205f, // mod
-		//0.205f+move, 0, 0.205f, // mod
-	
-		//// left plane
-		//// NEW: LEFT? PLANE
-		//0.005f+move, 0, 0.005f, // mod
-		//0.005f+move, 0, 0.005f,
-		//0.005f+move, 0, 0.205f, // mod
-
-		//0.005f+move, 0, 0.005f,
-		//0.005f+move, 0, 0.205f,
-		//0.005f+move, 0, 0.205f, // mod
-	
-		//// front plane
-		//// NEW: ? PLANE
-		//0.005f+move, 0, 0.005f, // mod
-		//0.205f+move, 0, 0.005f, // mod
-		//0.205f+move, 0, 0.005f,
-
-		//0.205f+move, 0, 0.005f,
-		//0.005f+move, 0, 0.005f,
-		//0.005f+move, 0, 0.005f, // mod
-	
-		//// back plane
-		//// NEW: ? PLANE
-		//0.005f+move, 0, 0.205f,
-		//0.205f+move, 0, 0.205f,
-		//0.205f+move, 0, 0.205f, // mod
-
-		//0.205f+move, 0, 0.205f, // mod
-		//0.005f+move, 0, 0.205f, // mod
-		//0.005f+move, 0, 0.205f,
+		0.25f+moveX, (height), 0.25f+moveZ,
+		-0.25f+moveX, (height), 0.25f+moveZ,
+		-0.25f+moveX, (height), -0.25f+moveZ,
 	};
 
 	/* Manually specified colours for our cube */
