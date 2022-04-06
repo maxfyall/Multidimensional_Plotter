@@ -15,7 +15,7 @@ public:
 	Cube();
 	~Cube();
 
-	void makeCube(float height, int move);
+	void makeCube(float height, int moveX, int moveZ);
 	void drawCube(int drawmode);
 	void clearCube();
 

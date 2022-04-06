@@ -139,6 +139,8 @@ std::vector<Quad> XAxesLabel;
 std::vector<Quad> YAxesLabel;
 std::vector<Quad> ZAxesLabel;
 
+std::vector<Cube> barChart;
+
 struct Character
 {
 	unsigned int TextureID;
@@ -270,7 +272,7 @@ void init(GLWrapper* glw)
 	labelCheckY = Ylabel;
 	labelCheckZ = Zlabel;
 
-	testCube.makeCube(1, 1);
+	testCube.makeCube(1,0,0);
 
 	numberofBarsX = 0;
 	numberofBarsZ = 0;
@@ -422,17 +424,17 @@ void display()
 				}
 			}
 		}
-		else if (graphType == 2) 
-		{
-			if (!(vertexPos.size() == 1 && vertexPos[0] == 0))
-			{
-				for (int i = 0; i < vertexPos.size(); i++)
-				{
-					testCube.makeCube(vertexPos[i], i);
-					testCube.drawCube(0);
-				}
-			}
-		}
+		//else if (graphType == 2) 
+		//{
+		//	if (!(vertexPos.size() == 1 && vertexPos[0] == 0))
+		//	{
+		//		for (int i = 0; i < vertexPos.size(); i++)
+		//		{
+		//			testCube.makeCube(vertexPos[i], i);
+		//			testCube.drawCube(0);
+		//		}
+		//	}
+		//}
 
 	}
 	model.pop();
@@ -442,16 +444,31 @@ void display()
 		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
 		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		model.top() = glm::translate(model.top(), glm::vec3(0.2,0.25,0.2));
+		model.top() = glm::translate(model.top(), glm::vec3(0, 0.25, 0));
 		model.top() = glm::scale(model.top(), glm::vec3(0.25, 1, 0.25));
 
+	    glUniformMatrix4fv(modelID1, 1, GL_FALSE, &model.top()[0][0]);
 
-		glUniformMatrix4fv(modelID1, 1, GL_FALSE, &model.top()[0][0]);
+		int p = 0;
 
-		testCube.drawCube(0);
+		if (graphType == 2)
+		{	
+			if (!barChart.empty())
+			{
+				for (int i = 0; i < barsX.size(); i++)
+				{
+					for (int j = 0; j < barsX[i]; j++)
+					{
+						barChart[p].drawCube(0);
+						p++;
+					}
+				}
+			}
+
+		}
 
 		// apply transformations
-		// sned uniform var
+		// send uniform var
 		// draw cube
 
 	}
@@ -707,6 +724,17 @@ void display()
 
 			if (!path.empty())
 			{
+
+				if (!barChart.empty())
+				{
+					for (int i = 0; i < barChart.size(); i++)
+					{
+						barChart[i].clearCube();
+					}
+					barChart.clear();
+					barsX.clear();
+				}
+
 				vertexPos = read3DData(path);
 
 				size = vertexPos.size();
@@ -723,6 +751,10 @@ void display()
 				if (graphType == 2)
 				{
 					createBars();
+					if (largest < barsX.size())
+					{
+						largest = (barsX.size());
+					}
 				}
 
 				labels = newAxes.makeAxes(largest);
@@ -754,6 +786,13 @@ void display()
 			numberLables.clear();
 			positiveLabels.clear();
 			negativeLabels.clear();
+
+			for (int i = 0; i < barChart.size(); i++)
+			{
+				barChart[i].clearCube();
+			}
+			barChart.clear();
+			barsX.clear();
 		}
 
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
@@ -819,6 +858,15 @@ void display()
 			numberLables.clear();
 			positiveLabels.clear();
 			negativeLabels.clear();
+
+		
+			for (int i = 0; i < barChart.size(); i++)
+			{
+				barChart[i].clearCube();
+			}				
+			barChart.clear();
+			barsX.clear();
+			
 		}
 
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
@@ -1013,7 +1061,7 @@ std::vector<float> read3DData(std::string filePath)
 			
 			if (invalid)
 			{
-				std::cout << "INVALID DATA LINE - REMOVING" << std::endl;
+				std::cout << "INVALID DATA POINT - REMOVING" << std::endl;
 				invalid = false;
 			}
 			else
@@ -1288,8 +1336,16 @@ void makeAxesNames()
 
 	std::string::const_iterator t;
 	int loop = 0;
-	float indent = labelBoundary+1.1f;
+	float indent = 0;
 
+	if (graphType == 2)
+	{
+		indent = labelBoundary + 2.1f;
+	}
+	else 
+	{
+		indent = labelBoundary + 1.1f;
+	}
 
 
 	for (t = labelCheckX.begin(); t != labelCheckX.end() ; t++)
@@ -1313,7 +1369,15 @@ void makeAxesNames()
 
 	loop = 0;
 	float yIndent = 0.1f;
-	indent = labelBoundary + 1.1f;
+
+	if (graphType == 2)
+	{
+		indent = labelBoundary + 2.1f;
+	}
+	else
+	{
+		indent = labelBoundary + 1.1f;
+	}
 
 	for (t = labelCheckY.begin(); t != labelCheckY.end(); t++)
 	{
@@ -1335,14 +1399,22 @@ void makeAxesNames()
 		}
 	}
 
-
 	loop = 0;
-	indent = labelBoundary + 1.1f;
+
+	if (graphType == 2)
+	{
+		indent = labelBoundary + 2.1f;
+	}
+	else
+	{
+		indent = labelBoundary + 1.1f;
+	}
 
 	for (t = labelCheckZ.begin(); t != labelCheckZ.end(); t++)
 	{
 		labelCheckZ[loop] = std::toupper(labelCheckZ[loop]);
-		if (labelCheckY[loop] == 'I')
+
+		if (labelCheckZ[loop] == 'I')
 		{
 			ZAxesLabel.insert(ZAxesLabel.end(), newQuad);
 			ZAxesLabel[loop].makeQuad(indent, 2, 2, 0);
@@ -1356,8 +1428,10 @@ void makeAxesNames()
 			ZAxesLabel[loop].makeQuad(indent, 1, 2, 0);
 			loop++;
 			indent = indent + 0.1f;
+
 		}
 	}
+
 
 	// loop through each label string (Starting with X)
 	// insert a new quad object into the quad vector the quads belong to i.e. x axes name
@@ -1367,7 +1441,33 @@ void makeAxesNames()
 
 void createBars() 
 {
+	// loop through bars vector for size to get number in the z
+	// loop again to get number in the x
 
+	int q = 0;
+	int moveZ = 0;
+
+	for (int i = 0; i < barsX.size(); i++)
+	{
+		if (barsX[i] == 0)
+		{
+			std::cout << "breaking" << std::endl;
+		}
+		else 
+		{
+			for (int j = 0; j < barsX[i]; j++)
+			{
+				barChart.insert(barChart.end(), testCube);
+				barChart[q].makeCube(vertexPos[q], ((j + 1)) * 4, (-(moveZ + 1) * 4));
+				std::cout << "BAR WITH: " << vertexPos[q] << std::endl;
+				q++;
+			}
+			moveZ++;
+		}
+
+	}
+
+	std::cout << "Bars: " << barChart.size() << std::endl;
 }
 
 

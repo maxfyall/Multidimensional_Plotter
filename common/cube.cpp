@@ -27,7 +27,7 @@ Cube::~Cube()
 
 
 /* Make a cube from hard-coded vertex positions and normals  */
-void Cube::makeCube(float height, int move)
+void Cube::makeCube(float height, int moveX, int moveZ)
 {
 	/* Define vertices for a cube in 12 triangles */
 	if (height == 0)
@@ -38,53 +38,53 @@ void Cube::makeCube(float height, int move)
 	GLfloat vertexPositions[] =
 	{
 		
-		-0.25f, 0.25f+height, -0.25f,
-		-0.25f, -0.25f, -0.25f,
-		0.25f, -0.25f, -0.25f,
+		-0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
+		-0.25f+moveX, -0.25f, -0.25f+moveZ,
+		0.25f+moveX, -0.25f, -0.25f+moveZ,
 
-		0.25f, -0.25f, -0.25f,
-		0.25f, 0.25f+height, -0.25f,
-		-0.25f, 0.25f+height, -0.25f,
+		0.25f+moveX, -0.25f, -0.25f+moveZ,
+		0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
+		-0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
 
-		0.25f, -0.25f, -0.25f,
-		0.25f, -0.25f, 0.25f,
-		0.25f, 0.25f+height, -0.25f,
+		0.25f+moveX, -0.25f, -0.25f+moveZ,
+		0.25f+moveX, -0.25f, 0.25f+moveZ,
+		0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
 
-		0.25f, -0.25f, 0.25f,
-		0.25f, 0.25f+height, 0.25f,
-		0.25f, 0.25f+height, -0.25f,
+		0.25f+moveX, -0.25f, 0.25f+moveZ,
+		0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
+		0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
 
-		0.25f, -0.25f, 0.25f,
-		-0.25f, -0.25f, 0.25f,
-		0.25f, 0.25f+height, 0.25f,
+		0.25f+moveX, -0.25f, 0.25f+moveZ,
+		-0.25f+moveX, -0.25f, 0.25f+moveZ,
+		0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
 
-		-0.25f, -0.25f, 0.25f,
-		-0.25f, 0.25f+height, 0.25f,
-		0.25f, 0.25f+height, 0.25f,
+		-0.25f+moveX, -0.25f, 0.25f+moveZ,
+		-0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
+		0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
 
-		-0.25f, -0.25f, 0.25f,
-		-0.25f, -0.25f, -0.25f,
-		-0.25f, 0.25f+height, 0.25f,
+		-0.25f+moveX, -0.25f, 0.25f+moveZ,
+		-0.25f+moveX, -0.25f, -0.25f+moveZ,
+		-0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
 
-		-0.25f, -0.25f, -0.25f,
-		-0.25f, 0.25f+height, -0.25f,
-		-0.25f, 0.25f+height, 0.25f,
+		-0.25f+moveX, -0.25f, -0.25f+moveZ,
+		-0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
+		-0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
 
-		-0.25f, -0.25f, 0.25f,
-		0.25f, -0.25f, 0.25f,
-		0.25f, -0.25f, -0.25f,
+		-0.25f+moveX, -0.25f, 0.25f+moveZ,
+		0.25f+moveX, -0.25f, 0.25f+moveZ,
+		0.25f+moveX, -0.25f, -0.25f+moveZ,
 
-		0.25f, -0.25f, -0.25f,
-		-0.25f, -0.25f, -0.25f,
-		-0.25f, -0.25f, 0.25f,
+		0.25f+moveX, -0.25f, -0.25f+moveZ,
+		-0.25f+moveX, -0.25f, -0.25f+moveZ,
+		-0.25f+moveX, -0.25f, 0.25f+moveZ,
 
-		-0.25f, 0.25f+height, -0.25f,
-		0.25f, 0.25f+height, -0.25f,
-		0.25f, 0.25f+height, 0.25f,
+		-0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
+		0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
+		0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
 
-		0.25f, 0.25f+height, 0.25f,
-		-0.25f, 0.25f+height, 0.25f,
-		-0.25f, 0.25f+height, -0.25f,
+		0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
+		-0.25f+moveX, 0.25f+(height/2), 0.25f+moveZ,
+		-0.25f+moveX, 0.25f+(height/2), -0.25f+moveZ,
 
 		//// bottom plane
 		//// NEW: BACK PLANE
