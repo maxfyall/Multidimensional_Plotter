@@ -8,6 +8,7 @@ Iain Martin November 2018
 #include "wrapper_glfw.h"
 #include <vector>
 #include <glm/glm.hpp>
+#include <iostream>
 
 class Cube
 {
@@ -15,7 +16,8 @@ public:
 	Cube();
 	~Cube();
 
-	void makeCube(float height, int moveX, int moveZ);
+	void makeCube(float height, int moveX, int moveZ, static float colour[4]);
+	void editColour(static float colour[4]);
 	void drawCube(int drawmode);
 	void clearCube();
 

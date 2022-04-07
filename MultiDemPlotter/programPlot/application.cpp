@@ -117,7 +117,7 @@ static float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 GLfloat aspect_ratio;
 
 /* Char Array used in ImGUI */
-static const char * graphs[] = { "Scatter Plot", "Line Graph", "Bar Chart (Experimental)"};
+static const char * graphs[] = { "Scatter Plot", "Line Graph", "Bar Chart"};
 
 /* Char's for Axes Names (Edited by ImGUI)*/
 static char Xlabel[128] = "";
@@ -139,6 +139,7 @@ std::vector<std::string> labels; // stores all labels generated from axes class
 /* Seperate vectors for positive and negative labels */
 std::vector<std::string> positiveLabels;
 std::vector<std::string> negativeLabels;
+
 
 /* Vector of Quads for number labels */
 std::vector<Quad> numberLables;
@@ -296,115 +297,126 @@ void init(GLWrapper* glw)
 
 	sizePoint = 10.0f; // initialise points size
 
-
+	// initialise axes name variables, set them to static chars that are change by ImGUI input box
 	labelCheckX = Xlabel;
 	labelCheckY = Ylabel;
 	labelCheckZ = Zlabel;
 
-	//testCube.makeCube(1,0,0);
-
-	//vertexColours.push_back(0);
-
-	//std::cout << numLabels.empty() << std::endl;
-
+	// uniform location variables for first shader
 	modelID1 = glGetUniformLocation(program, "model");
 	viewID1 = glGetUniformLocation(program, "view");
 	projectionID1 = glGetUniformLocation(program, "projection");
 
+	// uniform location variables for second shader (used for texturing labels)
 	modelID2 = glGetUniformLocation(textureShaders, "model");
 	viewID2 = glGetUniformLocation(textureShaders, "view");
 	projectionID2 = glGetUniformLocation(textureShaders, "projection");
 
 }
 
+/*
+* Display Function - The main render loop
+* - In main we tell our GLFW instance this is our render loop
+* - GLFW class will use this function in the event loop function inside of the GLFW Class
+*/
 void display()
 {
+	// set background colour of scene
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+	// clear colour and frame buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// enable to depth test
 	glEnable(GL_DEPTH_TEST);
 
+	// make one of our vertex array objects current (i.e. this VAO is used for everything minus the labels)
 	glBindVertexArray(vArrayObj);
 
+	// bind our first shader program i.e. make it current
 	glUseProgram(program);
 
+	// create a stack of 4D matrices (used in transformations)
 	std::stack<glm::mat4> model;
 
+	// push an indentity matrix onto the top of the stack
 	model.push(glm::mat4(1.0));
 
+	// create projection matrix - 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
 	glm::mat4 projection3D = glm::perspective(glm::radians(fov), aspect_ratio, 0.1f, 100.0f);
 
-	//glm::mat4 projection2D = glm::ortho(0.0f, 800.f, 0.0f, 600.0f);
-
+	// view matrix (Camera Matrix) - 
 	glm::mat4 view = glm::lookAt(
-		glm::vec3(0, 0, 4),
-		glm::vec3(0, 0, 0),
-		glm::vec3(0, 1, 0)
+		glm::vec3(0, 0, 4), // Camera is at (0,0,4), in World Space
+		glm::vec3(0, 0, 0),	// and looks at the origin
+		glm::vec3(0, 1, 0)	// Head is up (set to 0,-1,0 to look upside-down)
 	);
 
+	// checks for updating label bump variables (corresponds to marks on each axes)
 	if (largest < 9)
 	{
+		// set label variables to one (since distance between each axes mark is 1)
 		bump = 1;
 		addby = 1;
 	}
 	else
 	{
+		// set label variables to two (since distance between each axes mark is 2)
 		bump = 2;
 		addby = 2;
 	}
 
+	// send the uniform matricies to the vertex shader (used in model-view-projection calculation)
 	glUniformMatrix4fv(viewID1, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionID1, 1, GL_FALSE, &projection3D[0][0]);
 
-	model.top() = glm::scale(model.top(), glm::vec3(scaler, scaler, scaler));
-	model.top() = glm::translate(model.top(), glm::vec3(camX, camY, 0));
+	// apply transformations to the whole scene
+	model.top() = glm::scale(model.top(), glm::vec3(scaler, scaler, scaler)); // scale the scene using the variable editted by ImGui
+	model.top() = glm::translate(model.top(), glm::vec3(camX, camY, 0)); // apply a translate using variable update by the user (using the arrow keys)
 
-	// draws axes
-	model.push(model.top());
-	{
+	/* SCENE ROTATIONS */
+	model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f)); // mouse rotation X
+	model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f)); // mouse rotation Y
 
-		//model.top() = glm::scale(model.top(), glm::vec3(1, 1, 1));
-
-		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
-		
-
+	/* DRAWS THE AXES */
+	model.push(model.top()); // push an indentity matrix onto the stack apply transformations to drawn items within
+	{	
+		// send model uniform matrix to the vertex shader with applied transformations
 		glUniformMatrix4fv(modelID1, 1, GL_FALSE, &model.top()[0][0]);
 
+		// draw the 3D axes using the axes class instance
 		newAxes.drawAxes();
 
 	}
-	model.pop();
+	model.pop(); // pop from the stack
 
 
-	// draws graphs
+	// draws graphs (scatter plot and line graphs)
 	model.push(model.top());
 	{
-
-		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
-
-	
+		// send model uniform matrix to the vertex shader with applied transformations
 		glUniformMatrix4fv(modelID1, 1, GL_FALSE, &model.top()[0][0]);
 
+		/* Bind the data verticies read in from file */
 		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
 		glEnableVertexAttribArray(0);
 
+		// check for 2D or 3D drawing
 		if (twoD)
 		{
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0); // modify 3 to change between 2d and 3d
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0); // specify 2 components
 		}
-
-		if (threeD)
+		else if (threeD)
 		{
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // modify 3 to change between 2d and 3d
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // specify 3 components
 		}
 
+		/* Create Colour Buffer for data points */ 
 		glGenBuffers(1, &plotColourBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
 		glBufferData(GL_ARRAY_BUFFER, vertexColours.size() * sizeof(float), &(vertexColours[0]), GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 
 		glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
 		glEnableVertexAttribArray(1);
@@ -414,38 +426,17 @@ void display()
 
 		if (graphType == 0)
 		{
-			if (size / 3 >= 1)
-			{
-				glDrawArrays(GL_POINTS, 0, size / 3);
-			}
-			else if (size / 2)
-			{
-				glDrawArrays(GL_POINTS, 0, size / 2);
-			}
+			glDrawArrays(GL_POINTS, 0, size);
 		}
 		else if (graphType == 1) 
 		{
-			if (size / 3 >= 1)
+			if (!drawmode)
 			{
-				if (!drawmode)
-				{
-					glDrawArrays(GL_LINE_STRIP, 0, size / 3);
-				}
-				else
-				{
-					glDrawArrays(GL_LINE_LOOP, 0, size / 3);
-				}
+				glDrawArrays(GL_LINE_STRIP, 0, size);
 			}
-			else if (size / 2)
+			else
 			{
-				if (!drawmode)
-				{
-					glDrawArrays(GL_LINE_STRIP, 0, size / 2);
-				}
-				else
-				{
-					glDrawArrays(GL_LINE_LOOP, 0, size / 2);
-				}
+				glDrawArrays(GL_LINE_LOOP, 0, size);
 			}
 		}
 
@@ -454,9 +445,7 @@ void display()
 
 	model.push(model.top()); 
 	{
-		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
-
+		
 		model.top() = glm::scale(model.top(), glm::vec3(0.25, 1, 0.25));
 
 	    glUniformMatrix4fv(modelID1, 1, GL_FALSE, &model.top()[0][0]);
@@ -479,10 +468,6 @@ void display()
 
 		}
 
-		// apply transformations
-		// send uniform var
-		// draw cube
-
 	}
 	model.pop();
 
@@ -495,9 +480,6 @@ void display()
 	// draw the name for the X axes
 	model.push(model.top());
 	{
-
-		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		model.top() = glm::translate(model.top(), glm::vec3(0, -0.2, 0));
 
@@ -537,9 +519,6 @@ void display()
 	model.push(model.top());
 	{
 
-		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
-
 		model.top() = glm::translate(model.top(), glm::vec3(-0.2, -0.2, 0));
 
 
@@ -576,9 +555,6 @@ void display()
 	// draw the name for the z axes
 	model.push(model.top());
 	{
-
-		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		model.top() = glm::translate(model.top(), glm::vec3(0, -0.2, 0.01));
 
@@ -617,9 +593,6 @@ void display()
 	// draws labels (numbers)
 	model.push(model.top());
 	{
-
-		model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f));
-		model.top() = glm::rotate(model.top(), glm::radians(pitch), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		model.top() = glm::translate(model.top(), glm::vec3(0, -0.4, 0));
 
@@ -693,16 +666,18 @@ void display()
 	}
 	model.pop();
 
-	// IMGUI CODE
+
+	/* ImGui Code */
 
 	ImGui::Begin("MULTIDIMENSIONAL PLOTTER");
-	
+	{
+
 		ImGui::Text("Welcome to Multidimensional Plotter");
 
 		ImGui::Dummy(ImVec2(0.0f, 10.f));
 
 		// Open a file to read in using windows.h api
-		if (ImGui::Button("Open File")) 
+		if (ImGui::Button("Open File"))
 		{
 			// https://www.youtube.com/watch?v=-iMGhSlvIR0
 			// https://docs.microsoft.com/en-us/answers/questions/483237/a-value-of-type-34const-char-34-cannot-be-assigned.html
@@ -721,7 +696,7 @@ void display()
 			ofn.nMaxFile = MAX_PATH;
 			ofn.lpstrFilter = spec;
 			ofn.nFilterIndex = 1;
-			
+
 			GetOpenFileName(&ofn);
 
 			std::wstring convert(ofn.lpstrFile);
@@ -743,9 +718,11 @@ void display()
 					barsX.clear();
 				}
 
+				vertexPos.clear();
+
 				vertexPos = read3DData(path);
 
-				size = vertexPos.size();
+				size = barsX.size();
 
 				// clear labels...
 				for (int i = 0; i < numberLables.size(); i++)
@@ -773,7 +750,7 @@ void display()
 				createNumberLabels();
 
 				makeAxesNames();
-				
+
 				glGenBuffers(1, &plotBufferObject);
 				glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
 				glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
@@ -784,7 +761,7 @@ void display()
 
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
 
-		if (ImGui::Combo("Graph", &graphType, graphs, IM_ARRAYSIZE(graphs))) 
+		if (ImGui::Combo("Graph", &graphType, graphs, IM_ARRAYSIZE(graphs)))
 		{
 			clearGraphVector();
 			newAxes.clearLabels();
@@ -803,7 +780,7 @@ void display()
 			barChart.clear();
 			barsX.clear();
 		}
-		
+
 		if (graphType != 2)
 		{
 			ImGui::Dummy(ImVec2(0.0f, 2.f));
@@ -836,15 +813,15 @@ void display()
 		ImGui::SliderFloat("Graph Size", &scaler, 0.01f, 1.f);
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
 
-		ImGui::InputTextWithHint("X Axes", "INSERT NAME HERE", Xlabel, IM_ARRAYSIZE(Xlabel));
+		ImGui::InputTextWithHint("X Axes", "INSERT NAME HERE", Xlabel, IM_ARRAYSIZE(Xlabel), ImGuiInputTextFlags_CharsUppercase);
 
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
 
-		ImGui::InputTextWithHint("Y Axes", "INSERT NAME HERE", Ylabel, IM_ARRAYSIZE(Ylabel));
+		ImGui::InputTextWithHint("Y Axes", "INSERT NAME HERE", Ylabel, IM_ARRAYSIZE(Ylabel), ImGuiInputTextFlags_CharsUppercase);
 
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
 
-		ImGui::InputTextWithHint("Z Axes", "INSERT NAME HERE", Zlabel, IM_ARRAYSIZE(Zlabel));
+		ImGui::InputTextWithHint("Z Axes", "INSERT NAME HERE", Zlabel, IM_ARRAYSIZE(Zlabel), ImGuiInputTextFlags_CharsUppercase);
 
 		if (labelCheckX != Xlabel || labelCheckY != Ylabel || labelCheckZ != Zlabel)
 		{
@@ -884,38 +861,47 @@ void display()
 			positiveLabels.clear();
 			negativeLabels.clear();
 
-		
+
 			for (int i = 0; i < barChart.size(); i++)
 			{
 				barChart[i].clearCube();
-			}				
+			}
 			barChart.clear();
 			barsX.clear();
-			
+
+			labels = newAxes.makeAxes(largest);
+			labelBoundary = largest;
+			makeAxesNames();
+
 		}
 
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
 
-		if (graphType != 2)
+		ImGui::Text("Data Point Colour");
+
+		ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+		if (ImGui::ColorEdit3(" ", color))
 		{
-			ImGui::Text("Data Point Colour");
-
-			ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-			if (ImGui::ColorEdit3(" ", color))
+			if (!vertexPos.empty())
 			{
-				if (!vertexPos.empty())
-				{
-					vertexColours.clear();
+				vertexColours.clear();
 
-					for (int i = 0; i < vertexPos.size(); i++)
-					{
-						vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] });
-					}
+				for (int i = 0; i < vertexPos.size(); i++)
+				{
+					vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] });
+				}
+			}
+
+			if (!barChart.empty())
+			{
+				for (int i = 0; i < barChart.size(); i++) 
+				{
+					barChart[i].editColour(color);
 				}
 			}
 		}
-
+	}
 	ImGui::End();
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -1166,7 +1152,8 @@ void clearGraphVector()
 	vertexPos.clear();
 	vertexPos.push_back(0);
 
-	size = vertexPos.size();
+	//size = vertexPos.size();
+	size = 0;
 
 	largest = 0;
 
@@ -1174,6 +1161,8 @@ void clearGraphVector()
 	glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
 	glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	vertexPos.clear();
 }
 
 void splitLabelVectors() 
@@ -1205,22 +1194,14 @@ void createNumberLabels()
 {
 	float yBump = 0;
 	int count = 0;
-	int bar = 0;
 	int limit = 3;
 	std::string::const_iterator test;
-
-	if (graphType == 2)
-	{
-		bar = 1;
-		limit = 2;
-
-	}
 
 
 	std::string jim;
 	float temp = bump;
 
-	for (int j = bar; j < limit; j++)
+	for (int j = 0; j < limit; j++)
 	{
 		std::cout << bump << std::endl;
 
@@ -1312,7 +1293,6 @@ void createNumberLabels()
 					{
 						numberLables[count].makeQuad(-(bump), 1, j, yBump);
 					}
-
 
 					count++;
 
@@ -1414,10 +1394,22 @@ void makeAxesNames()
 	}
 
 	loop = 0;
+	float nextChar = 0;
+	float labelSize = labelCheckZ.size();
 
+	if (graphType == 2)
+	{
+		indent = (-labelBoundary) - ((labelSize)/10) - 1;
+		nextChar = 0.1f;
+	}
+	else 
+	{
+		indent = labelBoundary + 1.1f;
+		nextChar = 0.1f;
+	}
 	
-	indent = labelBoundary + 1.1f;
-	
+	std::cout << indent << std::endl;
+
 	for (t = labelCheckZ.begin(); t != labelCheckZ.end(); t++)
 	{
 		labelCheckZ[loop] = std::toupper(labelCheckZ[loop]);
@@ -1427,7 +1419,7 @@ void makeAxesNames()
 			ZAxesLabel.insert(ZAxesLabel.end(), newQuad);
 			ZAxesLabel[loop].makeQuad(indent, 2, 2, 0);
 			loop++;
-			indent = indent + 0.1f;
+			indent = indent + nextChar;
 		}
 		else
 		{
@@ -1437,7 +1429,7 @@ void makeAxesNames()
 			ZAxesLabel[loop].makeQuad(indent, 1, 2, 0);
 			
 			loop++;
-			indent = indent + 0.1f;
+			indent = indent + nextChar;
 
 		}
 	}
@@ -1470,7 +1462,7 @@ void createBars()
 			for (int j = 0; j < barsX[i]; j++)
 			{
 				barChart.insert(barChart.end(), testCube);
-				barChart[q].makeCube((vertexPos[q]), ((moveX + addby)) * 4, (-(moveZ + addby) * 4));
+				barChart[q].makeCube((vertexPos[q]), ((moveX + addby)) * 4, (-(moveZ + addby) * 4), color);
 				//std::cout << "BAR WITH: " << vertexPos[q] << std::endl;
 				q++;
 				moveX = moveX + addby;
@@ -1481,7 +1473,6 @@ void createBars()
 
 	}
 
-	//std::cout << "Bars: " << barChart.size() << std::endl;
 }
 
 
