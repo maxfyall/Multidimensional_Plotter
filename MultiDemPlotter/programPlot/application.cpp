@@ -417,12 +417,14 @@ void display()
 		glBufferData(GL_ARRAY_BUFFER, vertexColours.size() * sizeof(float), &(vertexColours[0]), GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-
+		/* Bind the Colour Buffer */
 		glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
-		glEnableVertexAttribArray(1);
+		glEnableVertexAttribArray(1); // colour in vertex attribute array in position 1
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
+		// set the point size to updatable variable
 		glPointSize(sizePoint);
+
 
 		if (graphType == 0)
 		{
