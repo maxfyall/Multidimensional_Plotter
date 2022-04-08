@@ -3,12 +3,14 @@
 	Multidimensional Plotter
 */
 
-/*
+/*	REFERENCES USED:
 
-	Freetype Code Reference - https://learnopengl.com/In-Practice/Text-Rendering
-	ImGui Documentatation - 
-	Open File using Window API Tutorial - 
-
+	[1] Freetype Code Reference - https://learnopengl.com/In-Practice/Text-Rendering
+	[2] Freetype Library - https://freetype.org/
+	[3] ImGui Documentatation - https://pthom.github.io/imgui_manual_online/manual/imgui_manual.html
+	[4] Open File using Window API Tutorial - https://www.youtube.com/watch?v=-iMGhSlvIR0
+	[5] Microsoft Documentation - https://docs.microsoft.com/en-us/answers/questions/483237/a-value-of-type-34const-char-34-cannot-be-assigned.html
+	[6] GLFW Mouse Button Callback - https://www.glfw.org/docs/3.3/input_guide.html
 
 */
 
@@ -29,7 +31,7 @@
 /* Include GLFW wrapper class (Written by Dr. Iain Martin) for GLFW and OpenGL extensions */
 #include "wrapper_glfw.h"
 
-/* Include standard C++ libraries (Improves code readability) */
+/* Include standard C++ libraries for help in functions */
 #include <iostream>
 #include <stack>
 #include <fstream>
@@ -169,7 +171,7 @@ std::map<char, Character> Characters;
 
 /* Function Declarations */
 
-std::vector<float> read3DData(std::string filePath); // read from file method
+std::vector<float> readData(std::string filePath); // read from file method
 
 void clearGraphVector(); // clears the vector positions vector (removing data from the screen)
 
@@ -425,45 +427,51 @@ void display()
 		// set the point size to updatable variable
 		glPointSize(sizePoint);
 
-
+		// check if graph type is scatter plot
 		if (graphType == 0)
 		{
-			glDrawArrays(GL_POINTS, 0, size);
+			glDrawArrays(GL_POINTS, 0, size); // draw data as points in 2-D/3-D space
 		}
-		else if (graphType == 1) 
+		else if (graphType == 1) // check if graph type is line graph
 		{
-			if (!drawmode)
+			if (!drawmode) // drawmode represents how the line graph is drawn
 			{
-				glDrawArrays(GL_LINE_STRIP, 0, size);
+				glDrawArrays(GL_LINE_STRIP, 0, size); // use drawing mode LINE_STRIP draw the points as a line
 			}
 			else
 			{
-				glDrawArrays(GL_LINE_LOOP, 0, size);
+				glDrawArrays(GL_LINE_LOOP, 0, size); // use drawing mode LINE_LOOP draw the points as interconnected line
 			}
 		}
 
 	}
 	model.pop();
 
+	// draw bar chart (when required)
 	model.push(model.top()); 
 	{
-		
+		// scale modifier to apply to the cubes so they look like rectangles
 		model.top() = glm::scale(model.top(), glm::vec3(0.25, 1, 0.25));
 
+		// send model uniform matrix to the vertex shader with applied transformations
 	    glUniformMatrix4fv(modelID1, 1, GL_FALSE, &model.top()[0][0]);
 
-		int p = 0;
+		int p = 0; // counter variable to cycle through the vector of cubes
 
+		// check if graph type is bar chart
 		if (graphType == 2)
 		{	
+			// prohibit draw the chart if the cube vector is empty (will cause an exception otherwise)
 			if (!barChart.empty())
 			{
+				// loop for vector size (vector size is equilvalent to the number of bars in the z direction)
 				for (int i = 0; i < barsX.size(); i++)
 				{
+					// loop for integer item in barX vector (each item in this vector is the number of bars in the X direction)
 					for (int j = 0; j < barsX[i]; j++)
 					{
-						barChart[p].drawCube(0);
-						p++;
+						barChart[p].drawCube(0); // draw pre-made cube from cube vector
+						p++; // increment by one to move to the next cube
 					}
 				}
 			}
@@ -473,42 +481,63 @@ void display()
 	}
 	model.pop();
 
+	// unbind the current shader program
 	glUseProgram(0);
+
+	// bind our second shader program
 	glUseProgram(textureShaders);
 
+	// send the uniform matricies to the vertex shader (used in model-view-projection calculation)
 	glUniformMatrix4fv(viewID2, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionID2, 1, GL_FALSE, &projection3D[0][0]);
 
-	// draw the name for the X axes
+	/* DRAW THE NAME FOR THE X AXES */
 	model.push(model.top());
 	{
-
+		// transformation to place the quad in the middle of the X axes
 		model.top() = glm::translate(model.top(), glm::vec3(0, -0.2, 0));
 
+		// send model uniform matrix to the vertex shader with applied transformations
 		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
 
+		// string iterator to go throught the Name string (Set it to the first char of the X Axes string)
 		std::string::const_iterator q = labelCheckX.begin();
 
+		// stop any drawing if the Quad vector is empty (can cause an exception if not present)
 		if (!XAxesLabel.empty())
 		{
+			// loop through the vector of quads (X axes)
 			for (int x = 0; x < XAxesLabel.size(); x++)
 			{
+				// create a character struct using the characters map to identify which character to use
+				// variable label is a character struct, it is assigned values by setting it to an instance in the characters map using the string iterator as a pointer
+				// this pointer will be used as a key and the pairing character struct will be set to label.
+				// the main purpose of this is to acquire the character texture required at the current time
 				Character label = Characters[*q];
 
+				// make textures active
 				glActiveTexture(GL_TEXTURE0);
 
+				// make our other VAO current
 				glBindVertexArray(textVertexArrayObj);
 
+				// This is the location of the texture object (TEXTURE0), i.e. tex1 will be the name
+				// of the sampler in the fragment shader
+				// Standard bit of code to enable a uniform sampler for our texture 
 				int loc = glGetUniformLocation(textureShaders, "text");
 				if (loc >= 0) glUniform1i(loc, 0);
 
+				// Bind the texture (character) using the texture ID variable inside the label struct
 				glBindTexture(GL_TEXTURE_2D, label.TextureID);
 
+				// draw the quad to texture the character on to
 				XAxesLabel[x].drawQuad();
 
+				// unbind the VAO and the texture (unbinding the texture will prevent it from texturing anything else)
 				glBindVertexArray(0);
 				glBindTexture(GL_TEXTURE_2D, 0);
 
+				// move the iterator onto the next character in the label string
 				q++;
 			}
 		}
@@ -517,74 +546,108 @@ void display()
 	}
 	model.pop();
 
-	// draw the name for the Y axes
+	/* DRAW THE NAME FOR THE Y AXES */
 	model.push(model.top());
 	{
-
+		// transform the Y label so it starts in the middle of the Y Axes
 		model.top() = glm::translate(model.top(), glm::vec3(-0.2, -0.2, 0));
 
-
+		// send model uniform matrix to the vertex shader with applied transformations
 		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
 
+		// string iterator to go throught the Name string (Set it to the first char of the Y Axes string)
 		std::string::const_iterator q = labelCheckY.begin();
 
+		// stop any drawing if the Quad vector is empty (can cause an exception if not present)
 		if (!YAxesLabel.empty())
 		{
+			// loop through the vector of quads (Y axes)
 			for (int y = 0; y < YAxesLabel.size(); y++)
 			{
+				// create a character struct using the characters map to identify which character to use
+				// variable label is a character struct, it is assigned values by setting it to an instance in the characters map using the string iterator as a pointer
+				// this pointer will be used as a key and the pairing character struct will be set to label.
+				// the main purpose of this is to acquire the character texture required at the current time
 				Character label = Characters[*q];
 
+				// make textures active
 				glActiveTexture(GL_TEXTURE0);
 
+				// make our other VAO current
 				glBindVertexArray(textVertexArrayObj);
 
+				// This is the location of the texture object (TEXTURE0), i.e. tex1 will be the name
+				// of the sampler in the fragment shader
+				// Standard bit of code to enable a uniform sampler for our texture 
 				int loc = glGetUniformLocation(textureShaders, "text");
 				if (loc >= 0) glUniform1i(loc, 0);
 
+				// Bind the texture (character) using the texture ID variable inside the label struct
 				glBindTexture(GL_TEXTURE_2D, label.TextureID);
 
+				// draw the quad to texture the character on to
 				YAxesLabel[y].drawQuad();
 
+				// unbind the VAO and the texture (unbinding the texture will prevent it from texturing anything else)
 				glBindVertexArray(0);
 				glBindTexture(GL_TEXTURE_2D, 0);
 
+				// move the iterator onto the next character in the label string
 				q++;
 			}
 		}
 	}
 	model.pop();
 
-	// draw the name for the z axes
+	/* DRAW THE NAME FOR THE Z AXES */
 	model.push(model.top());
 	{
 
+		// transform the Z label so it starts i the middle of the Z axes
 		model.top() = glm::translate(model.top(), glm::vec3(0, -0.2, 0.01));
 
-
+		// send model uniform matrix to the vertex shader with applied transformations
 		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
 
+		// string iterator to go throught the Name string (Set it to the first char of the Z Axes string)
 		std::string::const_iterator q = labelCheckZ.begin();
 
+		// stop any drawing if the Quad vector is empty (can cause an exception if not present)
 		if (!ZAxesLabel.empty())
 		{
+			// loop through the vector of quads (Z axes)
 			for (int z = 0; z < ZAxesLabel.size(); z++)
 			{
+
+				// create a character struct using the characters map to identify which character to use
+				// variable label is a character struct, it is assigned values by setting it to an instance in the characters map using the string iterator as a pointer
+				// this pointer will be used as a key and the pairing character struct will be set to label.
+				// the main purpose of this is to acquire the character texture required at the current time
 				Character label = Characters[*q];
 
+				// make textures active
 				glActiveTexture(GL_TEXTURE0);
 
+				// make our other VAO current
 				glBindVertexArray(textVertexArrayObj);
 
+				// This is the location of the texture object (TEXTURE0), i.e. tex1 will be the name
+				// of the sampler in the fragment shader
+				// Standard bit of code to enable a uniform sampler for our texture 
 				int loc = glGetUniformLocation(textureShaders, "text");
 				if (loc >= 0) glUniform1i(loc, 0);
 
+				// Bind the texture (character) using the texture ID variable inside the label struct
 				glBindTexture(GL_TEXTURE_2D, label.TextureID);
 
+				// draw the quad to texture the character on to
 				ZAxesLabel[z].drawQuad();
 
+				// unbind the VAO and the texture (unbinding the texture will prevent it from texturing anything else)
 				glBindVertexArray(0);
 				glBindTexture(GL_TEXTURE_2D, 0);
 
+				// move the iterator onto the next character in the label string
 				q++;
 
 			}
@@ -592,72 +655,104 @@ void display()
 	}
 	model.pop();
 
-	// draws labels (numbers)
+	/* DRAW THE AXES NUMBERS */
 	model.push(model.top());
 	{
 
+		// transformation to make numbers appear bellow the notches on the axes
 		model.top() = glm::translate(model.top(), glm::vec3(0, -0.4, 0));
 
+		// send model uniform matrix to the vertex shader with applied transformations
 		glUniformMatrix4fv(modelID2, 1, GL_FALSE, &model.top()[0][0]);
 
-		// draw labels from quad vector
+		/* DRAW NUMBERS FROM QUAD VECTOR */
 
+		// integer variable to keep track of number of loop iterations and which character/number to draw
 		int track = 0;
+
+		// string iterator
 		std::string::const_iterator q;
 
+		// loop for the number of quads inside numberLabels vector
+		// track keeps note of number of quads drawn - Quads are made in order of Axes e.g. (X Positve, X Negative, Y Positive etc.)
+		// draws quads for positive numbers first then negative numbers for one axes, then process repeats for the remaining axes
 		while (track < numberLables.size())
 		{
-
+			// first loop - draws positive labels for current axes
 			for (int i = 0; i < positiveLabels.size(); i++)
 			{
+				// check if vector is empty (exception triggered if attempt to access memory that doesn't exist)
 				if (!numberLables.empty())
 				{
-					q = positiveLabels[i].begin();
 
+					// loop for the length of the number given i.e. 10
 					for (q = positiveLabels[i].begin(); q != positiveLabels[i].end(); q++)
 					{
 
-						Character texTEST = Characters[*q];
+						// create a character struct using the characters map to identify which character to use
+						// variable label is a character struct, it is assigned values by setting it to an instance in the characters map using the string iterator as a pointer
+						// this pointer will be used as a key and the pairing character struct will be set to label.
+						// the main purpose of this is to acquire the character texture required at the current time e.g. Number = 12, on first iteration we need 1 first then 2
+						Character charTex = Characters[*q];
 
+						// make textures active
 						glActiveTexture(GL_TEXTURE0);
 
+						// make our other VAO current
 						glBindVertexArray(textVertexArrayObj);
 
+						// Standard bit of code to enable a uniform sampler for our texture 
 						int loc = glGetUniformLocation(textureShaders, "text");
 						if (loc >= 0) glUniform1i(loc, 0);
 
-						glBindTexture(GL_TEXTURE_2D, texTEST.TextureID);
+						// Bind the texture (character) using the texture ID variable inside the charTEX struct
+						glBindTexture(GL_TEXTURE_2D, charTex.TextureID);
 
+						// draw the quad to texture the character on to
 						numberLables[track].drawQuad();
-						track++;
+						track++; // add one to track var (this moves to the next quad in the vector, which is the next char in the string or the next notch number)
 
+						// unbind the VAO and the texture (unbinding the texture will prevent it from texturing anything else)
 						glBindVertexArray(0);
 						glBindTexture(GL_TEXTURE_2D, 0);
 					}
 
 				}
 			}
+			// second loop - draw negative labels for current axes
 			for (int i = 0; i < negativeLabels.size(); i++)
 			{
+				// check if vector is empty (exception triggered if attempt to access memory that doesn't exist)
 				if (!numberLables.empty())
 				{
+
+					// loop for the length of the number given i.e. -10
 					for (q = negativeLabels[i].begin(); q != negativeLabels[i].end(); q++)
 					{
-						Character texTEST = Characters[*q];
+						// create a character struct using the characters map to identify which character to use
+						// variable label is a character struct, it is assigned values by setting it to an instance in the characters map using the string iterator as a pointer
+						// this pointer will be used as a key and the pairing character struct will be set to label.
+						// the main purpose of this is to acquire the character texture required at the current time e.g. Number = 12, on first iteration we need 1 first then 2
+						Character charTex = Characters[*q];
 
+						// make textures active
 						glActiveTexture(GL_TEXTURE0);
 
+						// make our other VAO current
 						glBindVertexArray(textVertexArrayObj);
 
+						// Standard bit of code to enable a uniform sampler for our texture 
 						int loc = glGetUniformLocation(textureShaders, "text");
 						if (loc >= 0) glUniform1i(loc, 0);
 
-						glBindTexture(GL_TEXTURE_2D, texTEST.TextureID);
+						// Bind the texture (character) using the texture ID variable inside the charTEX struct
+						glBindTexture(GL_TEXTURE_2D, charTex.TextureID);
 
+						// draw the quad to texture the character on to
 						numberLables[track].drawQuad();
-						track++;
+						track++; // add one to track var (this moves to the next quad in the vector, which is the next char in the string or the next notch number)
 
-
+						// unbind the VAO and the texture (unbinding the texture will prevent it from texturing anything else)
 						glBindVertexArray(0);
 						glBindTexture(GL_TEXTURE_2D, 0);
 					}
@@ -669,90 +764,111 @@ void display()
 	model.pop();
 
 
-	/* ImGui Code */
+	/* IMGUI CODE - CREATION OF IMGUI FEATURES AND FUNCTIONALITY  (SEE REFERENCE [3]) */
 
+	// Begin - push a window
 	ImGui::Begin("MULTIDIMENSIONAL PLOTTER");
 	{
-
+		// welcome text
 		ImGui::Text("Welcome to Multidimensional Plotter");
 
-		ImGui::Dummy(ImVec2(0.0f, 10.f));
+		ImGui::Dummy(ImVec2(0.0f, 10.f)); // padding
 
-		// Open a file to read in using windows.h api
-		if (ImGui::Button("Open File"))
+		// Open a file (using file dialog box) to read in using windows.h api (SEE REFERENCE [4], [5])
+		if (ImGui::Button("Open File")) // if button is triggered perform tasks
 		{
-			// https://www.youtube.com/watch?v=-iMGhSlvIR0
-			// https://docs.microsoft.com/en-us/answers/questions/483237/a-value-of-type-34const-char-34-cannot-be-assigned.html
-
+			// create open file structure
 			OPENFILENAME ofn;
 
+			// variables used as elements when setting up ofn struct
 			wchar_t file_name[MAX_PATH];
 			const wchar_t spec[] = L"Text Files\0*.TXT\0";
 
+			// set all elements to 0
 			ZeroMemory(&ofn, sizeof(OPENFILENAME));
 
-			ofn.lStructSize = sizeof(OPENFILENAME);
-			ofn.hwndOwner = GetFocus();
-			ofn.lpstrFile = file_name;
-			ofn.lpstrFile[0] = '\0';
-			ofn.nMaxFile = MAX_PATH;
-			ofn.lpstrFilter = spec;
-			ofn.nFilterIndex = 1;
+			/* Initialising elements of ofn struct */
 
+			ofn.lStructSize = sizeof(OPENFILENAME); // specify size of ofn struct
+			ofn.hwndOwner = GetFocus(); // get our window
+			ofn.lpstrFile = file_name; // file name set to our wchar_t var file_name
+			ofn.lpstrFile[0] = '\0'; // set first char in file name to '\0', mean there is no default file (prevents unexpected results)
+			ofn.nMaxFile = MAX_PATH; // set maximum file buffer length of file to be read
+			ofn.lpstrFilter = spec; // filter for type of files that can be selected (Right now only text files are allowed but this can be changed to include CSV, JSON etc)
+			ofn.nFilterIndex = 1; // which item in filter to select by default, since we have 1 file type we can only select one
+
+			// opens file dialog box and returns file selected in ofn struct
 			GetOpenFileName(&ofn);
 
+			// convert the wchar_t to a wstring - to using the file path to read in data
 			std::wstring convert(ofn.lpstrFile);
 
+			// another conversion from wstring to string
 			std::string path(convert.begin(), convert.end());
 
-			std::cout << path << std::endl;
+			//std::cout << path << std::endl;
 
+			// check if the path is empty i.e. have we read a file in?
 			if (!path.empty())
 			{
-
+				// clear data from bar chart vectors is there are not empty
 				if (!barChart.empty())
 				{
+					// loop through all the created cubes and clear the vertex buffers to free up some memory
 					for (int i = 0; i < barChart.size(); i++)
 					{
 						barChart[i].clearCube();
 					}
+					// clear the vectors
 					barChart.clear();
 					barsX.clear();
 				}
 
+				// clear the data point vector (one which stores scatter plot and line plot points)
 				vertexPos.clear();
 
-				vertexPos = read3DData(path);
+				// set our plotting vector to the return value of read3DData which is a vector of floats
+				vertexPos = readData(path);
 
-				size = barsX.size();
+				// size variable - determines how many points we need to draw
+				size = barsX.size(); // set size to number of bars in Z direction since this matches the number of points present in the file
 
-				// clear labels...
+				// clear number labels vector
 				for (int i = 0; i < numberLables.size(); i++)
 				{
 					numberLables[i].clearQuad();
 				}
+
+				// clear appropriate vectors
 				numberLables.clear();
 				positiveLabels.clear();
 				negativeLabels.clear();
 
+				// if graph type is bar chart
 				if (graphType == 2)
 				{
+					// call function to create cubes and store them in a vector
 					createBars();
-					if (largest < barsX.size())
+					if (largest < barsX.size()) // largest data point may be smaller than the number of bars in a certain direction... if this is the case make largest var this value
 					{
 						largest = (barsX.size());
-						labelBoundary = largest;
+						labelBoundary = largest; // set global boundary variable for use in axes name function
 					}
 				}
 
+				// create our axes and set its return value (vector of strings) to labels vector.
 				labels = newAxes.makeAxes(largest);
 
+				// call function to split "labels" vector into two different vectors (Positive and Negative)
 				splitLabelVectors();
 
+				// call function to create the quads neccessary for the numbers on the axes... store these in the neccessary vector
 				createNumberLabels();
 
+				// call function to create the quads neccessary for the axes names and store the quads in vector
 				makeAxesNames();
 
+				/* Create Point Buffer for data points */
 				glGenBuffers(1, &plotBufferObject);
 				glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
 				glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
@@ -761,74 +877,97 @@ void display()
 
 		}
 
-		ImGui::Dummy(ImVec2(0.0f, 5.f));
+		ImGui::Dummy(ImVec2(0.0f, 5.f)); // padding function
 
-		if (ImGui::Combo("Graph", &graphType, graphs, IM_ARRAYSIZE(graphs)))
+		/* DROP DOWN MENU FOR GRAPH SELECTION */
+		if (ImGui::Combo("Graph", &graphType, graphs, IM_ARRAYSIZE(graphs))) // if drop down is selected do the following
 		{
+			// assumming the user wishes to make a new graph
+
+			// clear data point vector
 			clearGraphVector();
+
+			// clear the axes notches
 			newAxes.clearLabels();
+
+			// clear the vertex buffers of the number quads
 			for (int i = 0; i < numberLables.size(); i++)
 			{
 				numberLables[i].clearQuad();
 			}
+			// clear number quad vectors
 			numberLables.clear();
 			positiveLabels.clear();
 			negativeLabels.clear();
 
+			// clear the vertex buffers of cubes
 			for (int i = 0; i < barChart.size(); i++)
 			{
 				barChart[i].clearCube();
 			}
+
+			// clear bar chart vectors
 			barChart.clear();
 			barsX.clear();
 		}
 
+		/* if prevents checkboxes from appearing in certain graphtypes i.e.bar chart */
 		if (graphType != 2)
 		{
 			ImGui::Dummy(ImVec2(0.0f, 2.f));
 
+			// checkbox for 2D drawing
 			if (ImGui::Checkbox("2D", &twoD))
 			{
-				threeD = !threeD;
+				threeD = !threeD; // change the 3D bool to its opposite
 			}
-			ImGui::SameLine();
 
+			ImGui::SameLine(); // allows next item to be on the same line
+
+			// checkbox for 3D drawing
 			if (ImGui::Checkbox("3D", &threeD))
 			{
-				twoD = !twoD;
+				twoD = !twoD; // chage the 2D bool to its opposite
 			}
 		}
 
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
 
+		/* ONLY DISPLAY WHEN GRAPH TYPE IS SCATTER PLOT */
 		if (graphType == 0) {
 
-			ImGui::SliderFloat("Point Size", &sizePoint, 5.0f, 20.f);
+			ImGui::SliderFloat("Point Size", &sizePoint, 5.0f, 20.f); // slider to edit the size of data points in a scatter graph
 			ImGui::Dummy(ImVec2(0.0f, 5.f));
 		}
 
+		/* ONLY DISPLAY WHEN GRAPH TYPE IS LINE PLOT */
 		if (graphType == 1) {
-			ImGui::Checkbox("Line Loop", &drawmode);
+			ImGui::Checkbox("Line Loop", &drawmode); // changes drawmode bool to change the drawing mode used in render loop
 			ImGui::Dummy(ImVec2(0.0f, 5.f));
 		}
 
+		/* Slider - Edits scaler which makes the whole scene larger or smaller */
 		ImGui::SliderFloat("Graph Size", &scaler, 0.01f, 1.f);
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
 
+		/* InputBox with Hint (Hint allows faded text upon startup) - Name for the X Axes (Flags allow the text to be all uppercase) */
 		ImGui::InputTextWithHint("X Axes", "INSERT NAME HERE", Xlabel, IM_ARRAYSIZE(Xlabel), ImGuiInputTextFlags_CharsUppercase);
 
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
 
+		/* InputBox with Hint (Hint allows faded text upon startup) - Name for the Y Axes (Flags allow the text to be all uppercase) */
 		ImGui::InputTextWithHint("Y Axes", "INSERT NAME HERE", Ylabel, IM_ARRAYSIZE(Ylabel), ImGuiInputTextFlags_CharsUppercase);
 
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
 
+		/* InputBox with Hint (Hint allows faded text upon startup) - Name for the Z Axes (Flags allow the text to be all uppercase) */
 		ImGui::InputTextWithHint("Z Axes", "INSERT NAME HERE", Zlabel, IM_ARRAYSIZE(Zlabel), ImGuiInputTextFlags_CharsUppercase);
 
-		if (labelCheckX != Xlabel || labelCheckY != Ylabel || labelCheckZ != Zlabel)
+		/* CHECK IF ANY LABELS HAVE BEEN ENTER INTO THE TEXTBOXES */
+		if (labelCheckX != Xlabel || labelCheckY != Ylabel || labelCheckZ != Zlabel) // since check vars were set in init function... any change will indicate they need to be updated
 		{
 			ImGui::Dummy(ImVec2(0.0f, 3.f));
-			if (ImGui::Button("UPDATE LABELS"))
+			if (ImGui::Button("UPDATE LABELS")) // add a button to update the labels
 			{
 				labelCheckX = Xlabel; // update the label and make quads regarding that
 				labelCheckY = Ylabel; // update the label and make quads regarding that
@@ -841,39 +980,50 @@ void display()
 
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
 
+		/* RESET CAMERA POSITION TO ORIGIN UPON BUTTON PRESS */
 		if (ImGui::Button("RESET POSITION"))
 		{
 			camX = 0;
 			camY = 0;
 		}
 
-		ImGui::SameLine();
+		ImGui::SameLine(); // allows next item to be on the same line
 
+		/* BUTTON TO CLEAR GRAPH DATA */
 		if (ImGui::Button("Clear Graph"))
 		{
+			// clear data point vector
 			clearGraphVector();
+
+			// clear the notches on each axes
 			newAxes.clearLabels();
 
+			// clear the vertex buffers of the number quads
 			for (int i = 0; i < numberLables.size(); i++)
 			{
 				numberLables[i].clearQuad();
 			}
 
+			// clear number quad vectors
 			numberLables.clear();
 			positiveLabels.clear();
 			negativeLabels.clear();
 
-
+			// clear the vertex buffers of cubes
 			for (int i = 0; i < barChart.size(); i++)
 			{
 				barChart[i].clearCube();
 			}
+
+			// clear bar chart vectors
 			barChart.clear();
 			barsX.clear();
 
+			// create a new axes using new largest (0) i.e. this will create the axes seen on start up
 			labels = newAxes.makeAxes(largest);
-			labelBoundary = largest;
-			makeAxesNames();
+			labelBoundary = largest; // set label boundary to largest to keep the axes names
+
+			makeAxesNames(); // recreate the axes names to reposition them
 
 		}
 
@@ -908,6 +1058,7 @@ void display()
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
+// End of Display
 
 /*
 *  Resizing window callback
@@ -1023,7 +1174,7 @@ static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 *  Read vertex positions from file returns vector of floats to be copied into dynamic array,
 *  Also finds the largest value for creating 3-D axes to fit points provided
 */
-std::vector<float> read3DData(std::string filePath)
+std::vector<float> readData(std::string filePath)
 {
 	std::vector<std::string> vertexPositions;
 	bool invalid = false;
