@@ -27,103 +27,110 @@ Cube::~Cube()
 
 
 /* Make a cube from hard-coded vertex positions and normals  */
-void Cube::makeCube()
+void Cube::makeCube(float height, int moveX, int moveZ, static float colour[4])
 {
 	/* Define vertices for a cube in 12 triangles */
+	if (height == 0)
+	{
+		height = height + 0.01;
+	}
+
 	GLfloat vertexPositions[] =
 	{
-		-0.25f, 0.25f, -0.25f,
-		-0.25f, -0.25f, -0.25f,
-		0.25f, -0.25f, -0.25f,
+		
+		-0.25f+moveX, (height), -0.25f+moveZ,
+		-0.25f+moveX, -0.25f, -0.25f+moveZ,
+		0.25f+moveX, -0.25f, -0.25f+moveZ,
 
-		0.25f, -0.25f, -0.25f,
-		0.25f, 0.25f, -0.25f,
-		-0.25f, 0.25f, -0.25f,
+		0.25f+moveX, -0.25f, -0.25f+moveZ,
+		0.25f+moveX, (height), -0.25f+moveZ,
+		-0.25f+moveX, (height), -0.25f+moveZ,
 
-		0.25f, -0.25f, -0.25f,
-		0.25f, -0.25f, 0.25f,
-		0.25f, 0.25f, -0.25f,
+		0.25f+moveX, -0.25f, -0.25f+moveZ,
+		0.25f+moveX, -0.25f, 0.25f+moveZ,
+		0.25f+moveX, (height), -0.25f+moveZ,
 
-		0.25f, -0.25f, 0.25f,
-		0.25f, 0.25f, 0.25f,
-		0.25f, 0.25f, -0.25f,
+		0.25f+moveX, -0.25f, 0.25f+moveZ,
+		0.25f+moveX, (height), 0.25f+moveZ,
+		0.25f+moveX, (height), -0.25f+moveZ,
 
-		0.25f, -0.25f, 0.25f,
-		-0.25f, -0.25f, 0.25f,
-		0.25f, 0.25f, 0.25f,
+		0.25f+moveX, -0.25f, 0.25f+moveZ,
+		-0.25f+moveX, -0.25f, 0.25f+moveZ,
+		0.25f+moveX, (height), 0.25f+moveZ,
 
-		-0.25f, -0.25f, 0.25f,
-		-0.25f, 0.25f, 0.25f,
-		0.25f, 0.25f, 0.25f,
+		-0.25f+moveX, -0.25f, 0.25f+moveZ,
+		-0.25f+moveX, (height), 0.25f+moveZ,
+		0.25f+moveX, (height), 0.25f+moveZ,
 
-		-0.25f, -0.25f, 0.25f,
-		-0.25f, -0.25f, -0.25f,
-		-0.25f, 0.25f, 0.25f,
+		-0.25f+moveX, -0.25f, 0.25f+moveZ,
+		-0.25f+moveX, -0.25f, -0.25f+moveZ,
+		-0.25f+moveX, (height), 0.25f+moveZ,
 
-		-0.25f, -0.25f, -0.25f,
-		-0.25f, 0.25f, -0.25f,
-		-0.25f, 0.25f, 0.25f,
+		-0.25f+moveX, -0.25f, -0.25f+moveZ,
+		-0.25f+moveX, (height), -0.25f+moveZ,
+		-0.25f+moveX, (height), 0.25f+moveZ,
 
-		-0.25f, -0.25f, 0.25f,
-		0.25f, -0.25f, 0.25f,
-		0.25f, -0.25f, -0.25f,
+		-0.25f+moveX, -0.25f, 0.25f+moveZ,
+		0.25f+moveX, -0.25f, 0.25f+moveZ,
+		0.25f+moveX, -0.25f, -0.25f+moveZ,
 
-		0.25f, -0.25f, -0.25f,
-		-0.25f, -0.25f, -0.25f,
-		-0.25f, -0.25f, 0.25f,
+		0.25f+moveX, -0.25f, -0.25f+moveZ,
+		-0.25f+moveX, -0.25f, -0.25f+moveZ,
+		-0.25f+moveX, -0.25f, 0.25f+moveZ,
 
-		-0.25f, 0.25f, -0.25f,
-		0.25f, 0.25f, -0.25f,
-		0.25f, 0.25f, 0.25f,
+		-0.25f+moveX, (height), -0.25f+moveZ,
+		0.25f+moveX, (height), -0.25f+moveZ,
+		0.25f+moveX, (height), 0.25f+moveZ,
 
-		0.25f, 0.25f, 0.25f,
-		-0.25f, 0.25f, 0.25f,
-		-0.25f, 0.25f, -0.25f,
+		0.25f+moveX, (height), 0.25f+moveZ,
+		-0.25f+moveX, (height), 0.25f+moveZ,
+		-0.25f+moveX, (height), -0.25f+moveZ,
 	};
 
 	/* Manually specified colours for our cube */
 	float vertexColours[] = {
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
 
-		0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f,
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
 
-		1.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 0.0f, 1.0f,
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
 
-		1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f,
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
 
-		1.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 1.0f,
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
 
-		0.0f, 1.0f, 1.0f, 1.0f,
-		0.0f, 1.0f, 1.0f, 1.0f,
-		0.0f, 1.0f, 1.0f, 1.0f,
-		0.0f, 1.0f, 1.0f, 1.0f,
-		0.0f, 1.0f, 1.0f, 1.0f,
-		0.0f, 1.0f, 1.0f, 1.0f,
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
+		colour[0], colour[1], colour[2], colour[3],
 	};
 
 	/* Manually specified normals for our cube */
@@ -163,6 +170,59 @@ void Cube::makeCube()
 
 }
 
+void Cube::editColour(static float colour[4]) 
+{
+	float vertexColours[] = {
+
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	colour[0], colour[1], colour[2], colour[3],
+	};
+
+	glGenBuffers(1, &colourObject);
+	glBindBuffer(GL_ARRAY_BUFFER, colourObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexColours), vertexColours, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
 
 /* Draw the cube by bining the VBOs and drawing triangles */
 void Cube::drawCube(int drawmode)
@@ -199,4 +259,14 @@ void Cube::drawCube(int drawmode)
 	{
 		glDrawArrays(GL_TRIANGLES, 0, numvertices * 3);
 	}
+}
+
+void Cube::clearCube() 
+{
+	std::vector<GLfloat> vertexPositions = { 0 };
+
+	glGenBuffers(1, &positionBufferObject);
+	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, vertexPositions.size() * sizeof(GLfloat), &(vertexPositions[0]), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

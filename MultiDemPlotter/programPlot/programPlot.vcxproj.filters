@@ -48,6 +48,9 @@
     <ClCompile Include="axes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="quad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\wrapper_glfw.h">
@@ -59,12 +62,21 @@
     <ClInclude Include="axes.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="quad.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\shaders\shaderFrag.frag">
       <Filter>Source Files</Filter>
     </None>
     <None Include="..\..\shaders\shaderVert.vert">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\shaders\textureVert.vert">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\shaders\textureFrag.frag">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
