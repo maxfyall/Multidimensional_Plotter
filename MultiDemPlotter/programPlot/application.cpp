@@ -11,6 +11,8 @@
 	[4] Open File using Window API Tutorial - https://www.youtube.com/watch?v=-iMGhSlvIR0
 	[5] Microsoft Documentation - https://docs.microsoft.com/en-us/answers/questions/483237/a-value-of-type-34const-char-34-cannot-be-assigned.html
 	[6] GLFW Mouse Button Callback - https://www.glfw.org/docs/3.3/input_guide.html
+	[7] GLFW Mouse Camera Control - https://learnopengl.com/Getting-started/Camera
+	[8] Split a String C++ - https://www.geeksforgeeks.org/how-to-split-a-string-in-cc-python-and-java/
 
 */
 
@@ -1029,32 +1031,38 @@ void display()
 
 		ImGui::Dummy(ImVec2(0.0f, 5.f));
 
+		/* HEADING FOR COLOUR CHANGER */
 		ImGui::Text("Data Point Colour");
-
-		ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-		if (ImGui::ColorEdit3(" ", color))
 		{
-			if (!vertexPos.empty())
-			{
-				vertexColours.clear();
+			ImGui::Dummy(ImVec2(0.0f, 5.f));
 
-				for (int i = 0; i < vertexPos.size(); i++)
+			if (ImGui::ColorEdit3(" ", color)) // ImGui Colour editor
+			{
+				if (!vertexColours.empty()) // check if colour vector is empty (prevents accessing memory that doesn't exist)
 				{
-					vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] });
+					vertexColours.clear(); // clear the colour vector (to add new colours to the vector)
+
+					// insert the RBGA value for every point in the data point vector
+					for (int i = 0; i < vertexPos.size(); i++)
+					{
+						vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] }); // vector function insert allows to insert an array of floats (add these to the end of the vector)
+					}
 				}
-			}
 
-			if (!barChart.empty())
-			{
-				for (int i = 0; i < barChart.size(); i++) 
+				if (!barChart.empty()) // colour changing for the bar chart
 				{
-					barChart[i].editColour(color);
+					// edit the colour buffer for each cube using function in cube class
+					for (int i = 0; i < barChart.size(); i++)
+					{
+						barChart[i].editColour(color); // pass in the global colour array to be used in function
+					}
 				}
 			}
 		}
 	}
-	ImGui::End();
+	ImGui::End(); // End - Signals the end of the window
+
+	// render GUI onto the screen
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
@@ -1065,34 +1073,43 @@ void display()
 */
 static void reshape(GLFWwindow* window, int w, int h)
 {
+	// resize the window
 	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+
+	// aspect ratio change
 	aspect_ratio = ((float)w / 640.f * 4.f) / ((float)h / 480.f * 3.f);
 }
 
 /*
-*  Monitor keyboard inputs
+*  Callback for Keyboard inputs
 */
 static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods)
 {
 	// close application window with ESC
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 	{
+		// print confirmation
 		std::cout << "ESC PRESSED - TERMINATING" << std::endl;
+
+		// set window close to true (breaks out of render loop)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
-	if (key == GLFW_KEY_UP)
+
+	/* CAMERA TRANSFORMATION KEYS */
+
+	if (key == GLFW_KEY_UP) // move scene up if up-arrow is pressed
 	{
 		camY -= 0.1f;
 	}
-	else if (key == GLFW_KEY_DOWN)
+	else if (key == GLFW_KEY_DOWN) // move scene down if down-arrow is pressed
 	{
 		camY += 0.1f;
 	}
-	else if (key == GLFW_KEY_RIGHT)
+	else if (key == GLFW_KEY_RIGHT) // move scene right if right-arrow is pressed
 	{
 		camX -= 0.1f;
 	}
-	else if (key == GLFW_KEY_LEFT)
+	else if (key == GLFW_KEY_LEFT) // move scene left if left-arrow is pressed
 	{
 		camX += 0.1f;
 	}
@@ -1100,27 +1117,37 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 }
 
 /*
-*  Mouse Callback function aquired from Learn OpenGL and StackOverflow
+*  Mouse Callback Function (SEE REFERENCE [7])
 */
 static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 {
+	// if bool is true (changed by pressing Mouse 3/2)
 	if (moveScene)
 	{
+		// set position variables
 		float xpos = static_cast<float>(xposIn);
 		float ypos = static_cast<float>(yposIn);
 
+		// if this is first time moving
 		if (firstMouse)
 		{
+			// set position variables
 			lastX = xpos;
 			lastY = ypos;
+
+			// change bool since first mouse is not needed
 			firstMouse = false;
 		}
 
+		// set offsets
 		double xoffset = xpos - lastX;
 		double yoffset = lastY - ypos;
+
+		// store position data
 		lastX = xpos;
 		lastY = ypos;
 
+		// change pitch and yaw to rotate the camera
 		pitch += xoffset * 0.1f;
 		yaw += yoffset * 0.1f;
 
@@ -1129,28 +1156,35 @@ static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 }
 
 /*
-*	Mouse button callback aquired from GLFW help page https://www.glfw.org/docs/3.3/input_guide.html
+*	Mouse button callback (SEE REFERENCE [6])
 */
 static void mouseButonCallback(GLFWwindow* window, int button, int action, int mods) 
 {
+	// if user presses mouse 3 or mouse 2
 	if (button == GLFW_MOUSE_BUTTON_MIDDLE || button == GLFW_MOUSE_BUTTON_2)
 	{
+		// checks for action to allow for press and hold functionality
 		if (action == GLFW_PRESS)
 		{
+			// set relevent booleans
 			moveScene = true;
 			firstMouse = true;
 		}
-		else if(action == GLFW_RELEASE)
+		else if(action == GLFW_RELEASE) // when user releases button
 		{
+			// stop scene rotations
 			moveScene = false;
 		}
 
+		// cursor settings
 		if (moveScene)
 		{
+			// if the scene is rotating, make the cursor invisible
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);			
 		}
 		else
 		{
+			// make cursor visible when not rotating the scene
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
 	}
@@ -1162,103 +1196,124 @@ static void mouseButonCallback(GLFWwindow* window, int button, int action, int m
 */
 static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	// need to edit to a scale value variable to prevent aliasing effects
+	// change fov based on scroll
 	fov -= (float)yoffset;
+
+	// stop fov from going bellow 1
 	if (fov < 1.f)
 		fov = 1.f;
+
+	// stop fov from going over 45
 	if (fov > 45.f)
 		fov = 45.f;
 }
 
 /*
-*  Read vertex positions from file returns vector of floats to be copied into dynamic array,
+*  Read vertex positions from file - returns vector of floats
 *  Also finds the largest value for creating 3-D axes to fit points provided
 */
 std::vector<float> readData(std::string filePath)
 {
+	// create a variables to use
 	std::vector<std::string> vertexPositions;
 	bool invalid = false;
-	int numberofBarsZ = 0;
+	int numberofBars = 0;
 
+	// create filestream using filepath passed in
 	std::ifstream filestream(filePath);
 
+	// if unable to find file
 	if (!filestream.is_open())
 	{
+		// Print error
 		std::cout << "Could not read data file: " << filePath << ". File does not exist. " << std::endl;
+
+		// create empty vector to pass
 		std::vector<float> empty;
-		return empty;
+		empty.push_back(0); // insert 0 to prevent memory exceptions
+		filestream.close(); // close the filestream
+		return empty; // return the empty vector
 	}
 
+	// string used in file reading process
 	std::string line;
-	while (!filestream.eof())
+	while (!filestream.eof()) // loop through the file
 	{
+		// get line from file
 		getline(filestream, line);
+
+		// add it to our vector of strings
 		vertexPositions.push_back(line);
 	}
 
+	// close the filestream when finished
 	filestream.close();
 
-	std::vector<float> plotPos;
+	std::vector<float> plotPos; // create vector of floats
 
-	// https://www.geeksforgeeks.org/how-to-split-a-string-in-cc-python-and-java/
-
+	// loop through string vector (holds data) and add each data point into float vector
 	for (int i = 0; i < vertexPositions.size(); i++)
 	{
+		// set variable to current string in vector
 		std::string temp = vertexPositions[i];
+
+		// string variable for splitting string
 		std::string num;
 
+		// create stringstream using temp string (temp string being a number of points in string format)
 		std::stringstream ss(temp);
 
-		numberofBarsZ = 0;
+		// set bar variable to zero (used to calc number of bars in the x direction)
+		numberofBars = 0;
 
-
+		// loop through the string stream to add each data point into the float vector
 		while (ss >> num)
 		{
-
-			std::cout << num << std::endl;
-
+			
+			// loop through string num to find if it contains any letters
 			for (int i = 0; i < num.length(); i++)
 			{
 				if (isalpha(num[i]))
 				{
+					// if string does contain a invalid character (i.e. a letter or symbol rather than a number)
 					invalid = true;
 					break;
 				}
 			}
 			
+			// if the string is invalid
 			if (invalid)
 			{
+				// do not add the data point
 				std::cout << "INVALID DATA POINT - REMOVING" << std::endl;
 				invalid = false;
 			}
 			else
 			{
+				// otherwise convert from string to float and add to float vector
 				plotPos.push_back(std::stof(num));
 
+				// calculate largest value
 				if (std::stof(num) > largest)
 				{
 					largest = std::stof(num);
 				}
+				// if all values in file are negative we need to check what the "smallest" value is
 				else if(-(std::stof(num)) > largest)
 				{
 					largest = -std::stof(num);
 				}
 			}
-			numberofBarsZ++;
+			// increase bar counter - (Number of values in the X direction)
+			numberofBars++;
 
 		}
-		barsX.insert(barsX.end(), numberofBarsZ);
+		// insert bar value into barchart vector
+		barsX.insert(barsX.end(), numberofBars);
 
 	}
 
-	for (int i = 0; i < barsX.size(); i++)
-	{
-		std::cout << barsX[i] << std::endl;
-	}
-
-	// if graph type == 2
-	// perform bar chart things
-
+	// label indent checks
 	if (largest < 10)
 	{
 		bump = 1;
@@ -1270,26 +1325,35 @@ std::vector<float> readData(std::string filePath)
 		addby = 2;
 	}
 
+	// clear the colour vector if it is not empty
 	if (!vertexColours.empty())
 	{
 		vertexColours.clear();
 	}
 
+	// insert an RGBA value for each data point
 	for (int i = 0; i < plotPos.size(); i++)
 	{
 		vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] });
 	}
 
+	// check if float vector is empty
 	if (plotPos.empty())
 	{
+		// set labelboundary for axes names
 		labelBoundary = largest;
+
+		// create an empty vector to return
 		std::vector<float> check;
 		check.push_back(0);
 		return check;
 	}
 	else
 	{
+		// set labelboundary for axes names
 		labelBoundary = largest;
+
+		// return float vector
 		return plotPos;
 	}
 }
@@ -1299,42 +1363,53 @@ std::vector<float> readData(std::string filePath)
 */
 void clearGraphVector() 
 {
+	// set labelboundary for axes names
 	labelBoundary = largest;
 
+	// clear data point vector
 	std::cout << "CLEAR THE GRAPH" << std::endl;
 	vertexPos.clear();
 	vertexPos.push_back(0);
 
-	//size = vertexPos.size();
+	// set size and largest variables
 	size = 0;
-
 	largest = 0;
 
+	/* CREATE DATA POINT BUFFER FROM EMPTY VECTOR */
 	glGenBuffers(1, &plotBufferObject);
 	glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
 	glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	// clear vector again to fully clear it since vector has one value (0)
 	vertexPos.clear();
 }
 
+/*
+* Splits Label Vector into 2 different Vectors
+*/
 void splitLabelVectors() 
 {
+	// loop through the label vector inserting positive numbers into one vector and negative vectors into another
 	for (int i = 0; i < labels.size(); i++)
 	{
+		// check if vector is empty to prevent memory exceptions
 		if (!labels.empty())
 		{
+			// check for negative number
 			if (std::stof(labels[i]) < 0)
 			{
+				// insert into negative vector (convert to int allows numbers to be to one decimal place i.e. 2 instead of 2.000000)
 				negativeLabels.push_back(std::to_string(std::stoi(labels[i])));
 			}
 			else
 			{
+				// insert into positive vector (convert to int allows numbers to be to one decimal place i.e. 2 instead of 2.000000)
 				positiveLabels.push_back(std::to_string(std::stoi(labels[i])));
 			}
 		}
 	}
-
+	// reverse the negtive vector due to drawing order
 	std::reverse(negativeLabels.begin(), negativeLabels.end());
 }
 
@@ -1345,136 +1420,195 @@ void splitLabelVectors()
 */
 void createNumberLabels() 
 {
+	// initialise variables used in algorithm
 	float yBump = 0;
 	int count = 0;
 	int limit = 3;
 	std::string::const_iterator test;
+	std::string number;
 
-
-	std::string jim;
+	// set temp to indent variable (bump having being set previously)
 	float temp = bump;
 
+	// loop for each axes - creating a new quads for each positive and negative label
 	for (int j = 0; j < limit; j++)
 	{
-		std::cout << bump << std::endl;
-
+		// create a quad for each positive number for current axes
 		for (int i = 0; i < positiveLabels.size(); i++)
 		{
+			// create variable to track size of number i.e. does it require more than 1 quad to draw (10)
 			float cycle = 0;
 
+			// check if vector is empty - prevents memory exceptions
 			if (!labels.empty())
 			{
-				jim = positiveLabels[i];
+				// get out first number
+				number = positiveLabels[i];
 
+				// set indentation for y axes labels
 				yBump = 0;
 
-				for (test = jim.begin(); test != jim.end(); test++)
+				// loop through the string using string iterator
+				for (test = number.begin(); test != number.end(); test++)
 				{
+					// check if we are on the Y axes
 					if (j == 1)
 					{
+						// if cycle is higher than one the number is more than one digit
 						if (cycle >= 1)
 						{
+							// increase indent by 0.1
 							yBump = yBump + 0.1f;
 						}
 					}
-					else
+					else // for x and z axes
 					{
+						// if cycle is higher than one the number is more than one digit
 						if (cycle >= 1 && j != 1) 
 						{
+							// increase indent by 0.1
 							bump = bump + 0.1f;
 						}
 					}
 
+					// insert a quad object into quad vector
 					numberLables.insert(numberLables.end(), newQuad);
+
+					// using tracker variable make a quad using variables to decide which quad to make
+					// - bump indicates where to draw the quad
+					// - 1 indicates what size of quad to draw (i.e. normal or small)
+					// - j is which axes to draw for
+					// - yBump is used for numbers on the y axes longer than one digit
 					numberLables[count].makeQuad(bump, 1, j, yBump);
 
+					// add one the counter to increase quad count
 					count++;
 
+					// increase cycle by one since we have completed a cycle
 					cycle = cycle + 1;
 
 				}
 
+				// reset indent variable back to original status i.e. status before the loop
 				if (cycle > 1 && j != 1)
 				{
+					// decrease bump by the number of cycles minus one (since an extra cycle is added on when it didn't really happen)
 					bump = bump - (0.1f * (cycle - 1));
 				}
 
+				// reset y axes indent variable
 				yBump = 0;
 
+				// move along current axes to make quads in correct location i.e. move from 1 to 2 or 2 to 4 in world space
+				// addby can either be 1 or 2 (this is due to the gap between axes notches having variable size depending on the largest value)
 				bump = bump + addby;
 
 			}
 
-		}
+		} // end of positive label loop
 	
+		// resting indent
+		// Due to the indent vaariable being at the end notch we can use this to start drawing the negative numbers if we make the indent var negative... hence the reason for reversing the order of the negative vector
 		bump = bump - addby;
 
+		// loop through negative labels
 		for (int i = 0; i < negativeLabels.size(); i++)
 		{
+			// create new cycle variable
 			float cycle2 = 0;
 
+			// check if vector is empty - prevents memory exceptions
 			if (!labels.empty())
 			{
-				jim = negativeLabels[i];
+				// get out first number
+				number = negativeLabels[i];
 
+				// set indentation for y axes labels
 				yBump = 0;
 
-				for (test = jim.begin(); test != jim.end(); test++)
+				// loop through the number string using string iterator
+				for (test = number.begin(); test != number.end(); test++)
 				{
+					// check if we are on the Y axes
 					if (j == 1)
 					{
+						// if cycle is higher than one the number is more than one digit
 						if (cycle2 >= 1)
 						{
+							// increase indent by 0.1
 							yBump = yBump + 0.1f;
 						}
 					}
-					else
+					else // for x and z axes
 					{
+						// if cycle is higher than one the number is more than one digit
 						if (cycle2 >= 1 && j != 1)
 						{
+							// increase indent by 0.1
 							bump = bump - 0.1f;
 						}
 					}
 
+					// insert a quad object into our quad vector
 					numberLables.insert(numberLables.end(), newQuad);
 
+					// check if we are at the start of the number i.e. since it is negative this will be a '-'
 					if (cycle2 == 0)
 					{
+						// since the '-' will become distored on a normal size quad we need to make a smaller one to fit it
+						// so we pass in 0 instead on 1 to make it smaller
+						// Note we pass negative bump into the function since we are on the negative side of the axes
 						numberLables[count].makeQuad(-(bump), 0, j, yBump);
 					}
 					else
 					{
+						// otherwise we have a regular number and can make a regular quad for the number
 						numberLables[count].makeQuad(-(bump), 1, j, yBump);
 					}
 
+					// add one the counter to increase quad count
 					count++;
 
+					// increase cycle by one since we have completed a cycle
 					cycle2 = cycle2 + 1;
 
 				}
 
+				// reset indent variable back to original status i.e. status before the loop
 				if (cycle2 > 1 && j!= 1)
 				{
+					// decrease bump by the number of cycles minus one (since an extra cycle is added on when it didn't really happen)
+					// NOTE - adding back to the variable since we took it away for the negative numbers
 					bump = bump + (0.1f * (cycle2 - 1));
 				}
 
+				// reset y axes indent variable
 				yBump = 0;
 
+
+				// move along current axes to make quads in correct location i.e. move from -10 to -9 or -9 to -8 in world space
+				// addby can either be 1 or 2 (this is due to the gap between axes notches having variable size depending on the largest value)
 				bump = bump - addby;
 
 			}
-		}
+		} // end of negative label loop
+
+		// reset indent variable to value before looping for each axes
 		bump = temp;
 
-	}
+	} // end of axes loop
 
-}
+} // end of function
 
+/*
+* Create Quads for the Axes names
+*/
 void makeAxesNames() 
 {
+	// check if any of the vectors are not empty
 	if (!XAxesLabel.empty() || !YAxesLabel.empty() || !ZAxesLabel.empty())
 	{
-
+		// clear the buffers for each quad inside the vectors
 		for (int x = 0; x < XAxesLabel.size(); x++)
 		{
 			XAxesLabel[x].clearQuad();
@@ -1488,102 +1622,132 @@ void makeAxesNames()
 			ZAxesLabel[z].clearQuad();
 		}
 
+		// clear the vectors
 		XAxesLabel.clear();
 		YAxesLabel.clear();
 		ZAxesLabel.clear();
 	}
 
+	// variables used for algorithm
 	std::string::const_iterator t;
 	int loop = 0;
 	float indent = 0;
 
-
+	// set indentation variable to the axes edge (Label boundary + 1.1 is just on the tip of the axes edge)
 	indent = labelBoundary + 1.1f;
 	
-
+	// using iterator, loop through the label string
 	for (t = labelCheckX.begin(); t != labelCheckX.end() ; t++)
 	{
-		labelCheckX[loop] = std::toupper(labelCheckX[loop]);
+		// Check if current letter is 'I'
+		// 'I' needs to have quad size adjusted due to it being too small
 		if (labelCheckX[loop] == 'I' )
 		{
+			// insert quad object into quad vector
 			XAxesLabel.insert(XAxesLabel.end(), newQuad);
+
+			// create newly added quad using indent and passing 2 for 'I' sized quad
+			// 0 for x axes and we dont require a y indent so again 0
 			XAxesLabel[loop].makeQuad(indent, 2, 0, 0);
+
+			// increase loop by one to move to next quad
 			loop++;
+
+			// increase indentation to move next quad for the next character
 			indent = indent + 0.1f;
 		}
-		else
+		else // for every other character besides 'I'
 		{
+			// insert quad object into quad vector
 			XAxesLabel.insert(XAxesLabel.end(), newQuad);
+
+			// create newly added quad using indent and passing 1 for normal sized quad
+			// 0 for x axes and we dont require a y indent so again 0
 			XAxesLabel[loop].makeQuad(indent, 1, 0, 0);
+
+			// increase loop by one to move to next quad
 			loop++;
+
+			// increase indentation to move next quad for the next character
 			indent = indent + 0.1f;
 		}
 	}
 
+	// reset loop and initialise y axes indentation
 	loop = 0;
 	float yIndent = 0.1f;
 
-
+	// reset indentation variable
 	indent = labelBoundary + 1.1f;
 
+	// using iterator, loop through the label string
 	for (t = labelCheckY.begin(); t != labelCheckY.end(); t++)
 	{
-		labelCheckY[loop] = std::toupper(labelCheckY[loop]);
+		// Check if current letter is 'I'
+		// 'I' needs to have quad size adjusted due to it being too small
 		if (labelCheckY[loop] == 'I')
 		{
+			// insert quad object into quad vector
 			YAxesLabel.insert(YAxesLabel.end(), newQuad);
+
+			// create newly added quad using indent and passing 2 for 'I' sized quad
+			// 1 for y axes and we do require a y indent so pass the y indent variable as well.
 			YAxesLabel[loop].makeQuad(indent, 2, 1, yIndent);
+
+			// increase loop by one to move to next quad
 			loop++;
+
+			// increase y indentation to move next quad for the next character
 			yIndent = yIndent + 0.1f;
 		}
 		else
 		{
-			labelCheckY[loop] = std::toupper(labelCheckY[loop]);
+			// insert quad object into quad vector
 			YAxesLabel.insert(YAxesLabel.end(), newQuad);
+
+			// create newly added quad using indent and passing 1 for normal sized quad
+			// 1 for y axes and we do require a y indent so pass the y indent variable as well.
 			YAxesLabel[loop].makeQuad(indent, 1, 1, yIndent);
+
+			// increase loop by one to move to next quad
 			loop++;
+
+			// increase y indentation to move next quad for the next character
 			yIndent = yIndent + 0.1f;
 		}
 	}
 
+	// reset loop and initialise new variables
+	// due to the nature of the bar chart we need to establish making the label on both sides of the z axes
 	loop = 0;
-	float nextChar = 0;
 	float labelSize = labelCheckZ.size();
 
 	if (graphType == 2)
 	{
 		indent = (-labelBoundary) - ((labelSize)/10) - 1;
-		nextChar = 0.1f;
 	}
 	else 
 	{
 		indent = labelBoundary + 1.1f;
-		nextChar = 0.1f;
 	}
 	
-	std::cout << indent << std::endl;
-
 	for (t = labelCheckZ.begin(); t != labelCheckZ.end(); t++)
 	{
-		labelCheckZ[loop] = std::toupper(labelCheckZ[loop]);
-
 		if (labelCheckZ[loop] == 'I')
 		{
 			ZAxesLabel.insert(ZAxesLabel.end(), newQuad);
 			ZAxesLabel[loop].makeQuad(indent, 2, 2, 0);
 			loop++;
-			indent = indent + nextChar;
+			indent = indent + 0.1f;
 		}
 		else
 		{
-			labelCheckZ[loop] = std::toupper(labelCheckZ[loop]);
 			ZAxesLabel.insert(ZAxesLabel.end(), newQuad);
 		
 			ZAxesLabel[loop].makeQuad(indent, 1, 2, 0);
 			
 			loop++;
-			indent = indent + nextChar;
-
+			indent = indent + 0.1f;
 		}
 	}
 
