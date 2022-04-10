@@ -319,6 +319,12 @@ void init(GLWrapper* glw)
 	viewID2 = glGetUniformLocation(textureShaders, "view");
 	projectionID2 = glGetUniformLocation(textureShaders, "projection");
 
+	/* Create Colour Buffer for data points */
+	glGenBuffers(1, &plotColourBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
+	glBufferData(GL_ARRAY_BUFFER, vertexColours.size() * sizeof(float), &(vertexColours[0]), GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 }
 
 /*
@@ -417,12 +423,6 @@ void display()
 		{
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // specify 3 components
 		}
-
-		/* Create Colour Buffer for data points */ 
-		glGenBuffers(1, &plotColourBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
-		glBufferData(GL_ARRAY_BUFFER, vertexColours.size() * sizeof(float), &(vertexColours[0]), GL_DYNAMIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		/* Bind the Colour Buffer */
 		glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
@@ -869,6 +869,14 @@ void display()
 					}
 				}
 
+				vertexColours.clear(); // clear the colour vector (to add new colours to the vector)
+
+				// insert the RBGA value for every point in the data point vector
+				for (int i = 0; i < vertexPos.size(); i++)
+				{
+					vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] }); // vector function insert allows to insert an array of floats (add these to the end of the vector)
+				}
+
 				// create our axes and set its return value (vector of strings) to labels vector.
 				labels = newAxes.makeAxes(largest);
 
@@ -885,6 +893,12 @@ void display()
 				glGenBuffers(1, &plotBufferObject);
 				glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
 				glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+				/* Create Colour Buffer for data points */
+				glGenBuffers(1, &plotColourBuffer);
+				glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
+				glBufferData(GL_ARRAY_BUFFER, vertexColours.size() * sizeof(float), &(vertexColours[0]), GL_DYNAMIC_DRAW);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 			}
 
@@ -1068,6 +1082,12 @@ void display()
 						barChart[i].editColour(color); // pass in the global colour array to be used in function
 					}
 				}
+
+				/* Create Colour Buffer for data points */
+				glGenBuffers(1, &plotColourBuffer);
+				glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
+				glBufferData(GL_ARRAY_BUFFER, vertexColours.size() * sizeof(float), &(vertexColours[0]), GL_DYNAMIC_DRAW);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
 			}
 		}
 	}
