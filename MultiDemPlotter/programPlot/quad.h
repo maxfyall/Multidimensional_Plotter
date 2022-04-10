@@ -1,3 +1,10 @@
+/*
+  Quad Class Header File - Create Quad for texturing characters onto
+
+  Max Fyall - 180011724
+  Multidimensional Plotter
+*/
+
 #pragma once
 
 
@@ -7,16 +14,19 @@
 
 #include <iostream>
 
+// Quad class
 class Quad 
 {
 public:
 	Quad();
 	~Quad();
 
+	// functions
 	void makeQuad(float bump, int small, int dir, float yBump);
 	void drawQuad();
 	void clearQuad();
 
+	// globals
 	GLuint quadBO;
 	GLuint quadColourBO;
 	GLuint quadTextBO;
