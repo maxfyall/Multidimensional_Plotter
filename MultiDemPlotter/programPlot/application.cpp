@@ -1049,7 +1049,7 @@ void display()
 
 			if (ImGui::ColorEdit3(" ", color)) // ImGui Colour editor
 			{
-				if (!vertexColours.empty()) // check if colour vector is empty (prevents accessing memory that doesn't exist)
+				if (!vertexPos.empty()) // check if position vector is empty (prevents accessing memory that doesn't exist)
 				{
 					vertexColours.clear(); // clear the colour vector (to add new colours to the vector)
 
