@@ -1,6 +1,8 @@
 /*
 	Max Fyall - 180011724
 	Multidimensional Plotter
+
+	Application Code
 */
 
 /*	REFERENCES USED:
@@ -13,6 +15,7 @@
 	[6] GLFW Mouse Button Callback - https://www.glfw.org/docs/3.3/input_guide.html
 	[7] GLFW Mouse Camera Control - https://learnopengl.com/Getting-started/Camera
 	[8] Split a String C++ - https://www.geeksforgeeks.org/how-to-split-a-string-in-cc-python-and-java/
+	[9] Freetpye Installation Guide - https://www.youtube.com/watch?v=qW_8Dyq2asc
 
 */
 
@@ -48,7 +51,7 @@
 #include <commdlg.h>
 
 
-/* Tutorial used for installing freetype library https://www.youtube.com/watch?v=qW_8Dyq2asc */
+/* Tutorial used for installing freetype library (SEE REFERENCE [9]) */
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -221,7 +224,7 @@ void init(GLWrapper* glw)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	/* FREETYPE LIBRARY INITIALISING - AQUIRED FROM LEARNOPENGL - https://learnopengl.com/In-Practice/Text-Rendering */
+	/* FREETYPE LIBRARY INITIALISING - AQUIRED FROM LEARNOPENGL - (SEE REFERENCE [1] and [2]) */
 
 	// Freetype Checks
 
@@ -510,7 +513,9 @@ void display()
 		{
 			// loop through the vector of quads (X axes)
 			for (int x = 0; x < XAxesLabel.size(); x++)
-			{
+			{	
+				/* TEXTURING QUADS WITH FREETYPE LIB - SEE REFERENCE[2] */
+				
 				// create a character struct using the characters map to identify which character to use
 				// variable label is a character struct, it is assigned values by setting it to an instance in the characters map using the string iterator as a pointer
 				// this pointer will be used as a key and the pairing character struct will be set to label.
@@ -566,6 +571,8 @@ void display()
 			// loop through the vector of quads (Y axes)
 			for (int y = 0; y < YAxesLabel.size(); y++)
 			{
+				/* TEXTURING QUADS WITH FREETYPE LIB - SEE REFERENCE[2] */
+
 				// create a character struct using the characters map to identify which character to use
 				// variable label is a character struct, it is assigned values by setting it to an instance in the characters map using the string iterator as a pointer
 				// this pointer will be used as a key and the pairing character struct will be set to label.
@@ -620,6 +627,7 @@ void display()
 			// loop through the vector of quads (Z axes)
 			for (int z = 0; z < ZAxesLabel.size(); z++)
 			{
+				/* TEXTURING QUADS WITH FREETYPE LIB - SEE REFERENCE[2] */
 
 				// create a character struct using the characters map to identify which character to use
 				// variable label is a character struct, it is assigned values by setting it to an instance in the characters map using the string iterator as a pointer
@@ -690,6 +698,7 @@ void display()
 					// loop for the length of the number given i.e. 10
 					for (q = positiveLabels[i].begin(); q != positiveLabels[i].end(); q++)
 					{
+						/* TEXTURING QUADS WITH FREETYPE LIB - SEE REFERENCE[2] */
 
 						// create a character struct using the characters map to identify which character to use
 						// variable label is a character struct, it is assigned values by setting it to an instance in the characters map using the string iterator as a pointer
@@ -731,6 +740,8 @@ void display()
 					// loop for the length of the number given i.e. -10
 					for (q = negativeLabels[i].begin(); q != negativeLabels[i].end(); q++)
 					{
+						/* TEXTURING QUADS WITH FREETYPE LIB - SEE REFERENCE[2] */
+
 						// create a character struct using the characters map to identify which character to use
 						// variable label is a character struct, it is assigned values by setting it to an instance in the characters map using the string iterator as a pointer
 						// this pointer will be used as a key and the pairing character struct will be set to label.
@@ -1700,7 +1711,7 @@ void makeAxesNames()
 			// increase y indentation to move next quad for the next character
 			yIndent = yIndent + 0.1f;
 		}
-		else
+		else  // for every other character
 		{
 			// insert quad object into quad vector
 			YAxesLabel.insert(YAxesLabel.end(), newQuad);
@@ -1722,69 +1733,102 @@ void makeAxesNames()
 	loop = 0;
 	float labelSize = labelCheckZ.size();
 
+	// if our graph type is bar chart
 	if (graphType == 2)
 	{
-		indent = (-labelBoundary) - ((labelSize)/10) - 1;
+		// calculate where the axes name should go on the left side of the z axes
+		// Since we texture the name from left to right, we calculate how far the name will go by the size of the string
+		indent = (-labelBoundary) - ((labelSize)/10) - 1.1;
 	}
-	else 
+	else // for every other graph type (scatter and line)
 	{
+		// set indendation for the right side of the z axes
 		indent = labelBoundary + 1.1f;
 	}
 	
+	// using iterator, loop through the label string
 	for (t = labelCheckZ.begin(); t != labelCheckZ.end(); t++)
 	{
+		// Check if current letter is 'I'
+		// 'I' needs to have quad size adjusted due to it being too small
 		if (labelCheckZ[loop] == 'I')
 		{
+			// insert quad object into quad vector
 			ZAxesLabel.insert(ZAxesLabel.end(), newQuad);
+
+			// create newly added quad using indent and passing 2 for 'I' sized quad
+			// 2 for z axes and we dont require a y indent so again 0
 			ZAxesLabel[loop].makeQuad(indent, 2, 2, 0);
+
+			// increase loop by one to move to next quad
 			loop++;
+
+			// increase indentation to move next quad for the next character
 			indent = indent + 0.1f;
 		}
-		else
+		else // for every other character
 		{
+			// insert quad object into quad vector
 			ZAxesLabel.insert(ZAxesLabel.end(), newQuad);
 		
+			// create newly added quad using indent and passing 1 for normal sized quad
+			// 2 for z axes and we dont require a y indent so again 0
 			ZAxesLabel[loop].makeQuad(indent, 1, 2, 0);
 			
+			// increase loop by one to move to next quad
 			loop++;
+
+			// increase indentation to move next quad for the next character
 			indent = indent + 0.1f;
 		}
 	}
-
-	// loop through each label string (Starting with X)
-	// insert a new quad object into the quad vector the quads belong to i.e. x axes name
-	// create a quad for each character in that string
-
 }
 
+/*
+* Add and create cubes for a bar chart
+*/
 void createBars() 
 {
 	// loop through bars vector for size to get number in the z
 	// loop again to get number in the x
 
+	// initialise variables
 	int q = 0;
 	int moveZ = 0;
 	int moveX = 0;
 
+	// loop for bar vector size which represents the number of bars in the Z direction (NUMBER OF ROWS)
 	for (int i = 0; i < barsX.size(); i++)
 	{
+		// initialise x indent variable, since each row starts at 0
 		moveX = 0;
 
-		if (barsX[i] == 0)
+		// the integer value in each value of the vector represents the number of bars in the X direction (NUMBER OF COLUMNS)
+		if (barsX[i] != 0)
 		{
-			std::cout << "breaking" << std::endl;
-		}
-		else 
-		{
+			// loop for the number of columns
 			for (int j = 0; j < barsX[i]; j++)
 			{
+				// insert a cube into the bar chart cube vector
 				barChart.insert(barChart.end(), testCube);
+
+				// make the cube inserted passing in correct parameters
+				// vertexPos vector - data point read in from file to dictate the height of the cube
+				// moveX float - how much to move the cube in the x direction (i.e. moving the cube to the next notch on x axes)
+				// moveZ float - how much to move the cube in the z direction (i.e. are we on the first row or the second row?)
+				// addby float - specified number, how much to move the cubes by (This is dependant on the axes configuration)
+				// colour float array - the colour to pass to the colour buffer
+				// NOTE - x and z positions are multiplied by 4 to give the desired effects in the scene
 				barChart[q].makeCube((vertexPos[q]), ((moveX + addby)) * 4, (-(moveZ + addby) * 4), color);
-				//std::cout << "BAR WITH: " << vertexPos[q] << std::endl;
+
+				// increment by one to move to the next cube
 				q++;
+
+				// increment x indentation by addby variable to move along the x axes
 				moveX = moveX + addby;
 
 			}
+			// once all bars have been drawn in the x direction, increment the z direction by addby variable to move down the z axes
 			moveZ = moveZ + addby;
 		}
 
@@ -1792,20 +1836,22 @@ void createBars()
 
 }
 
-
 /*
 *  Main Method, program control point
 */
 int main(int argc, char* argv[])
 {
+	// create instance of GLW wrapper class, specifying dimensions of the GLFW window and the Name
 	GLWrapper* glw = new GLWrapper(1024, 768, "Multidimensional Plotter");
 
+	// if functions fail to load terminate the program
 	if (!ogl_LoadFunctions())
 	{
 		fprintf(stderr, "ogl_LoadFunctions() failed, Terminating\n");
 		return 0;
 	}
 
+	// setting glfw callbacks and functions to be used in the wrapper class
 	glw->setRenderer(display);
 	glw->setKeyCallback(keyCallback);
 	glw->setMouseCallback(mouseCallback);
@@ -1814,11 +1860,13 @@ int main(int argc, char* argv[])
 	glw->setReshapeCallback(reshape);
 	glw->DisplayVersion();
 
+	// call init passing in wrapper window
 	init(glw);
 
+	// run the event loop
 	glw->eventLoop();
 
-
+	// delete wrapper window when done
 	delete(glw);
 	return 0;
 }

@@ -2,6 +2,9 @@
 wrapper_glfw.h
 Modified from the OpenGL GLFW example to provide a wrapper GLFW class
 Iain Martin August 2014
+
+EXTENDED BY Max Fyall - 180011724
+Multidimensional Plotter - 2022
 */
 #pragma once
 
@@ -17,6 +20,7 @@ Iain Martin August 2014
 #include <glload/gl_load.h>
 #include <GLFW/glfw3.h>
 
+// GLFW Class
 class GLWrapper {
 private:
 
@@ -36,6 +40,7 @@ public:
 		this->fps = fps;
 	}
 
+	// displays opengl and graphics driver versions
 	void DisplayVersion();
 
 	/* Callback registering functions */

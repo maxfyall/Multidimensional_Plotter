@@ -1,6 +1,9 @@
 /* cube.h
  Example class to create a generic cube object
  Iain Martin October 2018
+
+EXTENDED BY Max Fyall - 180011724
+Multidimensional Plotter - 2022
 */
 
 #include "cube.h"
@@ -16,7 +19,6 @@ Cube::Cube()
 {
 	attribute_v_coord = 0;
 	attribute_v_colours = 1;
-	attribute_v_normal = 2;
 	numvertices = 12;
 }
 
@@ -26,18 +28,23 @@ Cube::~Cube()
 }
 
 
-/* Make a cube from hard-coded vertex positions and normals  */
+/* Make a cube from hard-coded vertex positions */
 void Cube::makeCube(float height, int moveX, int moveZ, static float colour[4])
 {
-	/* Define vertices for a cube in 12 triangles */
+	// define height if height is 0
 	if (height == 0)
 	{
 		height = height + 0.01;
 	}
 
+	/* Define vertices for a cube in 12 triangles */
 	GLfloat vertexPositions[] =
 	{
 		
+		// each vertex is defined using variables passed in from calling the function
+		// these are used to position the cube exactly where we want it to be
+		// modifying the correct planes allows use to make the height of the cube bigger or smaller
+		// This gives us bar chart like functionality over the cubes
 		-0.25f+moveX, (height), -0.25f+moveZ,
 		-0.25f+moveX, -0.25f, -0.25f+moveZ,
 		0.25f+moveX, -0.25f, -0.25f+moveZ,
@@ -90,6 +97,8 @@ void Cube::makeCube(float height, int moveX, int moveZ, static float colour[4])
 	/* Manually specified colours for our cube */
 	float vertexColours[] = {
 
+		// each vertex in the cube will be the same colour
+		// defined by the float array past in when calling the function
 		colour[0], colour[1], colour[2], colour[3],
 		colour[0], colour[1], colour[2], colour[3],
 		colour[0], colour[1], colour[2], colour[3],
@@ -131,23 +140,6 @@ void Cube::makeCube(float height, int moveX, int moveZ, static float colour[4])
 		colour[0], colour[1], colour[2], colour[3],
 		colour[0], colour[1], colour[2], colour[3],
 		colour[0], colour[1], colour[2], colour[3],
-	};
-
-	/* Manually specified normals for our cube */
-	GLfloat normals[] =
-	{
-		0, 0, -1.f, 0, 0, -1.f, 0, 0, -1.f,
-		0, 0, -1.f, 0, 0, -1.f, 0, 0, -1.f,
-		1.f, 0, 0, 1.f, 0, 0, 1.f, 0, 0,
-		1.f, 0, 0, 1.f, 0, 0, 1.f, 0, 0,
-		0, 0, 1.f, 0, 0, 1.f, 0, 0, 1.f,
-		0, 0, 1.f, 0, 0, 1.f, 0, 0, 1.f,
-		-1.f, 0, 0, -1.f, 0, 0, -1.f, 0, 0,
-		-1.f, 0, 0, -1.f, 0, 0, -1.f, 0, 0,
-		0, -1.f, 0, 0, -1.f, 0, 0, -1.f, 0,
-		0, -1.f, 0, 0, -1.f, 0, 0, -1.f, 0,
-		0, 1.f, 0, 0, 1.f, 0, 0, 1.f, 0,
-		0, 1.f, 0, 0, 1.f, 0, 0, 1.f, 0,
 	};
 
 	/* Create the vertex buffer for the cube */
@@ -162,18 +154,16 @@ void Cube::makeCube(float height, int moveX, int moveZ, static float colour[4])
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexColours), vertexColours, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	/* Create the normals  buffer for the cube */
-	glGenBuffers(1, &normalsBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, normalsBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 }
 
+/*
+* Create new colour buffer with float array
+*/
 void Cube::editColour(static float colour[4]) 
 {
 	float vertexColours[] = {
 
+	// define vertex colours using colour array
 	colour[0], colour[1], colour[2], colour[3],
 	colour[0], colour[1], colour[2], colour[3],
 	colour[0], colour[1], colour[2], colour[3],
@@ -217,6 +207,7 @@ void Cube::editColour(static float colour[4])
 	colour[0], colour[1], colour[2], colour[3],
 	};
 
+	/* Create new colour buffer for the cube */
 	glGenBuffers(1, &colourObject);
 	glBindBuffer(GL_ARRAY_BUFFER, colourObject);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexColours), vertexColours, GL_STATIC_DRAW);
@@ -224,7 +215,7 @@ void Cube::editColour(static float colour[4])
 }
 
 
-/* Draw the cube by bining the VBOs and drawing triangles */
+/* Draw the cube by binding the VBOs and drawing triangles */
 void Cube::drawCube(int drawmode)
 {
 	/* Bind cube vertices. Note that this is in attribute index attribute_v_coord */
@@ -236,11 +227,6 @@ void Cube::drawCube(int drawmode)
 	glBindBuffer(GL_ARRAY_BUFFER, colourObject);
 	glEnableVertexAttribArray(attribute_v_colours);
 	glVertexAttribPointer(attribute_v_colours, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-	/* Bind cube normals. Note that this is in attribute index attribute_v_normal */
-	glEnableVertexAttribArray(attribute_v_normal);
-	glBindBuffer(GL_ARRAY_BUFFER, normalsBufferObject);
-	glVertexAttribPointer(attribute_v_normal, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glPointSize(3.f);
 
@@ -261,12 +247,26 @@ void Cube::drawCube(int drawmode)
 	}
 }
 
+/*
+* Clear the vertex buffers of the cube
+*/
 void Cube::clearCube() 
 {
+	// create empty vector to copy into the vertex buffer
 	std::vector<GLfloat> vertexPositions = { 0 };
 
+	/* Create the empty vertex buffer for the cube */
 	glGenBuffers(1, &positionBufferObject);
 	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
 	glBufferData(GL_ARRAY_BUFFER, vertexPositions.size() * sizeof(GLfloat), &(vertexPositions[0]), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// create empty vector to copy into the colour buffer
+	std::vector<GLfloat> vertexColours = { 0 };
+
+	/* Create the empty colour buffer for the cube */
+	glGenBuffers(1, &colourObject);
+	glBindBuffer(GL_ARRAY_BUFFER, colourObject);
+	glBufferData(GL_ARRAY_BUFFER, vertexColours.size() * sizeof(GLfloat), &(vertexColours[0]), GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

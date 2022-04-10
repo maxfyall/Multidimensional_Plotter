@@ -3,6 +3,9 @@
   Modified from the OpenGL GLFW example to provide a wrapper GLFW class
   and to include shader loader functions to include shaders as text files
   Iain Martin August 2014
+
+  EXTENDED BY Max Fyall - 180011724
+  Multidimensional Plotter - 2022
   */
 
 #include "wrapper_glfw.h"
@@ -103,6 +106,7 @@ int GLWrapper::eventLoop()
 {
 	// Main loop
 
+	// IMGUI Initialisations - initialise ImGUI for GLFW window
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -113,6 +117,7 @@ int GLWrapper::eventLoop()
 	{
 		// Call function to draw your graphics
 
+		// IMGUI rendering functions
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -124,9 +129,11 @@ int GLWrapper::eventLoop()
 		glfwPollEvents();
 	}
 
+	// IMGUI shutdown functions - close down ImGUI and destroy it.
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
+
 	glfwTerminate();
 	return 0;
 }
@@ -155,16 +162,19 @@ void GLWrapper::setKeyCallback(void(*func)(GLFWwindow* window, int key, int scan
 	glfwSetKeyCallback(window, func);
 }
 
+/* Register a callback to respond to mouse movements */
 void GLWrapper::setMouseCallback(void (*func)(GLFWwindow* window, double xpos, double ypos)) 
 {
 	glfwSetCursorPosCallback(window, func);
 }
 
+/* Register a callback to respond to mouse button events */
 void GLWrapper::setMouseButtonCallback(void (*func)(GLFWwindow* window, int button, int action, int mods)) 
 {
 	glfwSetMouseButtonCallback(window, func);
 }
 
+/* Register a callback to respond to scroll wheel events */
 void GLWrapper::setScrollCallback(void (*func)(GLFWwindow* window, double xoffset, double yoffset)) 
 {
 	glfwSetScrollCallback(window, func);
