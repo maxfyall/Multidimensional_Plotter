@@ -782,314 +782,493 @@ void display()
 	// Begin - push a window
 	ImGui::Begin("MULTIDIMENSIONAL PLOTTER");
 	{
-		// welcome text
-		ImGui::Text("Welcome to Multidimensional Plotter");
-
-		ImGui::Dummy(ImVec2(0.0f, 10.f)); // padding
-
-		// Open a file (using file dialog box) to read in using windows.h api (SEE REFERENCE [4], [5])
-		if (ImGui::Button("Open File")) // if button is triggered perform tasks
+		// Tab bar at top of window
+		if (ImGui::BeginTabBar("TAB BAR", ImGuiTabBarFlags_None))
 		{
-			// create open file structure
-			OPENFILENAME ofn;
-
-			// variables used as elements when setting up ofn struct
-			wchar_t file_name[MAX_PATH];
-			const wchar_t spec[] = L"Text Files\0*.TXT\0";
-
-			// set all elements to 0
-			ZeroMemory(&ofn, sizeof(OPENFILENAME));
-
-			/* Initialising elements of ofn struct */
-
-			ofn.lStructSize = sizeof(OPENFILENAME); // specify size of ofn struct
-			ofn.hwndOwner = GetFocus(); // get our window
-			ofn.lpstrFile = file_name; // file name set to our wchar_t var file_name
-			ofn.lpstrFile[0] = '\0'; // set first char in file name to '\0', mean there is no default file (prevents unexpected results)
-			ofn.nMaxFile = MAX_PATH; // set maximum file buffer length of file to be read
-			ofn.lpstrFilter = spec; // filter for type of files that can be selected (Right now only text files are allowed but this can be changed to include CSV, JSON etc)
-			ofn.nFilterIndex = 1; // which item in filter to select by default, since we have 1 file type we can only select one
-
-			// opens file dialog box and returns file selected in ofn struct
-			GetOpenFileName(&ofn);
-
-			// convert the wchar_t to a wstring - to using the file path to read in data
-			std::wstring convert(ofn.lpstrFile);
-
-			// another conversion from wstring to string
-			std::string path(convert.begin(), convert.end());
-
-			//std::cout << path << std::endl;
-
-			// check if the path is empty i.e. have we read a file in?
-			if (!path.empty())
+			// Menu tab
+			if (ImGui::BeginTabItem("HOME"))
 			{
-				// clear data from bar chart vectors is there are not empty
-				if (!barChart.empty())
+				ImGui::Dummy(ImVec2(0.0f, 10.f)); // padding
+
+				// Open a file (using file dialog box) to read in using windows.h api (SEE REFERENCE [4], [5])
+				if (ImGui::Button("Open File")) // if button is triggered perform tasks
 				{
-					// loop through all the created cubes and clear the vertex buffers to free up some memory
+					// create open file structure
+					OPENFILENAME ofn;
+
+					// variables used as elements when setting up ofn struct
+					wchar_t file_name[MAX_PATH];
+					const wchar_t spec[] = L"Text Files\0*.TXT\0";
+
+					// set all elements to 0
+					ZeroMemory(&ofn, sizeof(OPENFILENAME));
+
+					/* Initialising elements of ofn struct */
+
+					ofn.lStructSize = sizeof(OPENFILENAME); // specify size of ofn struct
+					ofn.hwndOwner = GetFocus(); // get our window
+					ofn.lpstrFile = file_name; // file name set to our wchar_t var file_name
+					ofn.lpstrFile[0] = '\0'; // set first char in file name to '\0', mean there is no default file (prevents unexpected results)
+					ofn.nMaxFile = MAX_PATH; // set maximum file buffer length of file to be read
+					ofn.lpstrFilter = spec; // filter for type of files that can be selected (Right now only text files are allowed but this can be changed to include CSV, JSON etc)
+					ofn.nFilterIndex = 1; // which item in filter to select by default, since we have 1 file type we can only select one
+
+					// opens file dialog box and returns file selected in ofn struct
+					GetOpenFileName(&ofn);
+
+					// convert the wchar_t to a wstring - to using the file path to read in data
+					std::wstring convert(ofn.lpstrFile);
+
+					// another conversion from wstring to string
+					std::string path(convert.begin(), convert.end());
+
+					//std::cout << path << std::endl;
+
+					// check if the path is empty i.e. have we read a file in?
+					if (!path.empty())
+					{
+						// clear data from bar chart vectors is there are not empty
+						if (!barChart.empty())
+						{
+							// loop through all the created cubes and clear the vertex buffers to free up some memory
+							for (int i = 0; i < barChart.size(); i++)
+							{
+								barChart[i].clearCube();
+							}
+							// clear the vectors
+							barChart.clear();
+							barsX.clear();
+						}
+
+						// clear the data point vector (one which stores scatter plot and line plot points)
+						vertexPos.clear();
+
+						// set our plotting vector to the return value of read3DData which is a vector of floats
+						vertexPos = readData(path);
+
+						// size variable - determines how many points we need to draw
+						size = barsX.size(); // set size to number of bars in Z direction since this matches the number of points present in the file
+
+						// clear number labels vector
+						for (int i = 0; i < numberLables.size(); i++)
+						{
+							numberLables[i].clearQuad();
+						}
+
+						// clear appropriate vectors
+						numberLables.clear();
+						positiveLabels.clear();
+						negativeLabels.clear();
+
+						// if graph type is bar chart
+						if (graphType == 2)
+						{
+							// call function to create cubes and store them in a vector
+							createBars();
+							if (largest < barsX.size()) // largest data point may be smaller than the number of bars in a certain direction... if this is the case make largest var this value
+							{
+								largest = (barsX.size());
+								labelBoundary = largest; // set global boundary variable for use in axes name function
+							}
+						}
+
+						vertexColours.clear(); // clear the colour vector (to add new colours to the vector)
+
+						// insert the RBGA value for every point in the data point vector
+						for (int i = 0; i < vertexPos.size(); i++)
+						{
+							vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] }); // vector function insert allows to insert an array of floats (add these to the end of the vector)
+						}
+
+						// create our axes and set its return value (vector of strings) to labels vector.
+						labels = newAxes.makeAxes(largest);
+
+						// call function to split "labels" vector into two different vectors (Positive and Negative)
+						splitLabelVectors();
+
+						// call function to create the quads neccessary for the numbers on the axes... store these in the neccessary vector
+						createNumberLabels();
+
+						// call function to create the quads neccessary for the axes names and store the quads in vector
+						makeAxesNames();
+
+						/* Create Point Buffer for data points */
+						glGenBuffers(1, &plotBufferObject);
+						glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
+						glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
+						glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+						/* Create Colour Buffer for data points */
+						glGenBuffers(1, &plotColourBuffer);
+						glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
+						glBufferData(GL_ARRAY_BUFFER, vertexColours.size() * sizeof(float), &(vertexColours[0]), GL_DYNAMIC_DRAW);
+						glBindBuffer(GL_ARRAY_BUFFER, 0);
+					}
+
+				}
+
+				ImGui::Dummy(ImVec2(0.0f, 5.f)); // padding function
+
+				/* DROP DOWN MENU FOR GRAPH SELECTION */
+				if (ImGui::Combo("Graph", &graphType, graphs, IM_ARRAYSIZE(graphs))) // if drop down is selected do the following
+				{
+					// assumming the user wishes to make a new graph
+
+					// clear data point vector
+					clearGraphVector();
+
+					// clear the axes notches
+					newAxes.clearLabels();
+
+					// clear the vertex buffers of the number quads
+					for (int i = 0; i < numberLables.size(); i++)
+					{
+						numberLables[i].clearQuad();
+					}
+					// clear number quad vectors
+					numberLables.clear();
+					positiveLabels.clear();
+					negativeLabels.clear();
+
+					// clear the vertex buffers of cubes
 					for (int i = 0; i < barChart.size(); i++)
 					{
 						barChart[i].clearCube();
 					}
-					// clear the vectors
+
+					// clear bar chart vectors
 					barChart.clear();
 					barsX.clear();
+
+					// create a new axes using new largest (0) i.e. this will create the axes seen on start up
+					labels = newAxes.makeAxes(largest);
+					labelBoundary = largest; // set label boundary to largest to keep the axes names
+
+					makeAxesNames(); // recreate the axes names to reposition them
 				}
 
-				// clear the data point vector (one which stores scatter plot and line plot points)
-				vertexPos.clear();
-
-				// set our plotting vector to the return value of read3DData which is a vector of floats
-				vertexPos = readData(path);
-
-				// size variable - determines how many points we need to draw
-				size = barsX.size(); // set size to number of bars in Z direction since this matches the number of points present in the file
-
-				// clear number labels vector
-				for (int i = 0; i < numberLables.size(); i++)
+				/* if prevents checkboxes from appearing in certain graphtypes i.e.bar chart */
+				if (graphType != 2)
 				{
-					numberLables[i].clearQuad();
-				}
+					ImGui::Dummy(ImVec2(0.0f, 2.f));
 
-				// clear appropriate vectors
-				numberLables.clear();
-				positiveLabels.clear();
-				negativeLabels.clear();
-
-				// if graph type is bar chart
-				if (graphType == 2)
-				{
-					// call function to create cubes and store them in a vector
-					createBars();
-					if (largest < barsX.size()) // largest data point may be smaller than the number of bars in a certain direction... if this is the case make largest var this value
+					// checkbox for 2D drawing
+					if (ImGui::Checkbox("2D", &twoD))
 					{
-						largest = (barsX.size());
-						labelBoundary = largest; // set global boundary variable for use in axes name function
+						threeD = !threeD; // change the 3D bool to its opposite
+					}
+
+					ImGui::SameLine(); // allows next item to be on the same line
+
+					// checkbox for 3D drawing
+					if (ImGui::Checkbox("3D", &threeD))
+					{
+						twoD = !twoD; // chage the 2D bool to its opposite
 					}
 				}
 
-				vertexColours.clear(); // clear the colour vector (to add new colours to the vector)
+				ImGui::Dummy(ImVec2(0.0f, 5.f));
 
-				// insert the RBGA value for every point in the data point vector
-				for (int i = 0; i < vertexPos.size(); i++)
-				{
-					vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] }); // vector function insert allows to insert an array of floats (add these to the end of the vector)
+				/* ONLY DISPLAY WHEN GRAPH TYPE IS SCATTER PLOT */
+				if (graphType == 0) {
+
+					ImGui::SliderFloat("Point Size", &sizePoint, 5.0f, 20.f); // slider to edit the size of data points in a scatter graph
+					ImGui::Dummy(ImVec2(0.0f, 5.f));
 				}
 
-				// create our axes and set its return value (vector of strings) to labels vector.
-				labels = newAxes.makeAxes(largest);
+				/* ONLY DISPLAY WHEN GRAPH TYPE IS LINE PLOT */
+				if (graphType == 1) {
+					ImGui::Checkbox("Line Loop", &drawmode); // changes drawmode bool to change the drawing mode used in render loop
+					ImGui::Dummy(ImVec2(0.0f, 5.f));
+				}
 
-				// call function to split "labels" vector into two different vectors (Positive and Negative)
-				splitLabelVectors();
+				/* Slider - Edits scaler which makes the whole scene larger or smaller */
+				ImGui::SliderFloat("Graph Size", &scaler, 0.01f, 1.f);
+				ImGui::Dummy(ImVec2(0.0f, 5.f));
 
-				// call function to create the quads neccessary for the numbers on the axes... store these in the neccessary vector
-				createNumberLabels();
+				/* InputBox with Hint (Hint allows faded text upon startup) - Name for the X Axes (Flags allow the text to be all uppercase) */
+				ImGui::InputTextWithHint("X Axes", "INSERT NAME HERE", Xlabel, IM_ARRAYSIZE(Xlabel), ImGuiInputTextFlags_CharsUppercase);
 
-				// call function to create the quads neccessary for the axes names and store the quads in vector
-				makeAxesNames();
+				ImGui::Dummy(ImVec2(0.0f, 5.f));
 
-				/* Create Point Buffer for data points */
-				glGenBuffers(1, &plotBufferObject);
-				glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
-				glBufferData(GL_ARRAY_BUFFER, vertexPos.size() * sizeof(float), &(vertexPos[0]), GL_DYNAMIC_DRAW);
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				/* InputBox with Hint (Hint allows faded text upon startup) - Name for the Y Axes (Flags allow the text to be all uppercase) */
+				ImGui::InputTextWithHint("Y Axes", "INSERT NAME HERE", Ylabel, IM_ARRAYSIZE(Ylabel), ImGuiInputTextFlags_CharsUppercase);
 
-				/* Create Colour Buffer for data points */
-				glGenBuffers(1, &plotColourBuffer);
-				glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
-				glBufferData(GL_ARRAY_BUFFER, vertexColours.size() * sizeof(float), &(vertexColours[0]), GL_DYNAMIC_DRAW);
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
-			}
+				ImGui::Dummy(ImVec2(0.0f, 5.f));
 
-		}
+				/* InputBox with Hint (Hint allows faded text upon startup) - Name for the Z Axes (Flags allow the text to be all uppercase) */
+				ImGui::InputTextWithHint("Z Axes", "INSERT NAME HERE", Zlabel, IM_ARRAYSIZE(Zlabel), ImGuiInputTextFlags_CharsUppercase);
 
-		ImGui::Dummy(ImVec2(0.0f, 5.f)); // padding function
-
-		/* DROP DOWN MENU FOR GRAPH SELECTION */
-		if (ImGui::Combo("Graph", &graphType, graphs, IM_ARRAYSIZE(graphs))) // if drop down is selected do the following
-		{
-			// assumming the user wishes to make a new graph
-
-			// clear data point vector
-			clearGraphVector();
-
-			// clear the axes notches
-			newAxes.clearLabels();
-
-			// clear the vertex buffers of the number quads
-			for (int i = 0; i < numberLables.size(); i++)
-			{
-				numberLables[i].clearQuad();
-			}
-			// clear number quad vectors
-			numberLables.clear();
-			positiveLabels.clear();
-			negativeLabels.clear();
-
-			// clear the vertex buffers of cubes
-			for (int i = 0; i < barChart.size(); i++)
-			{
-				barChart[i].clearCube();
-			}
-
-			// clear bar chart vectors
-			barChart.clear();
-			barsX.clear();
-		}
-
-		/* if prevents checkboxes from appearing in certain graphtypes i.e.bar chart */
-		if (graphType != 2)
-		{
-			ImGui::Dummy(ImVec2(0.0f, 2.f));
-
-			// checkbox for 2D drawing
-			if (ImGui::Checkbox("2D", &twoD))
-			{
-				threeD = !threeD; // change the 3D bool to its opposite
-			}
-
-			ImGui::SameLine(); // allows next item to be on the same line
-
-			// checkbox for 3D drawing
-			if (ImGui::Checkbox("3D", &threeD))
-			{
-				twoD = !twoD; // chage the 2D bool to its opposite
-			}
-		}
-
-		ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-		/* ONLY DISPLAY WHEN GRAPH TYPE IS SCATTER PLOT */
-		if (graphType == 0) {
-
-			ImGui::SliderFloat("Point Size", &sizePoint, 5.0f, 20.f); // slider to edit the size of data points in a scatter graph
-			ImGui::Dummy(ImVec2(0.0f, 5.f));
-		}
-
-		/* ONLY DISPLAY WHEN GRAPH TYPE IS LINE PLOT */
-		if (graphType == 1) {
-			ImGui::Checkbox("Line Loop", &drawmode); // changes drawmode bool to change the drawing mode used in render loop
-			ImGui::Dummy(ImVec2(0.0f, 5.f));
-		}
-
-		/* Slider - Edits scaler which makes the whole scene larger or smaller */
-		ImGui::SliderFloat("Graph Size", &scaler, 0.01f, 1.f);
-		ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-		/* InputBox with Hint (Hint allows faded text upon startup) - Name for the X Axes (Flags allow the text to be all uppercase) */
-		ImGui::InputTextWithHint("X Axes", "INSERT NAME HERE", Xlabel, IM_ARRAYSIZE(Xlabel), ImGuiInputTextFlags_CharsUppercase);
-
-		ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-		/* InputBox with Hint (Hint allows faded text upon startup) - Name for the Y Axes (Flags allow the text to be all uppercase) */
-		ImGui::InputTextWithHint("Y Axes", "INSERT NAME HERE", Ylabel, IM_ARRAYSIZE(Ylabel), ImGuiInputTextFlags_CharsUppercase);
-
-		ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-		/* InputBox with Hint (Hint allows faded text upon startup) - Name for the Z Axes (Flags allow the text to be all uppercase) */
-		ImGui::InputTextWithHint("Z Axes", "INSERT NAME HERE", Zlabel, IM_ARRAYSIZE(Zlabel), ImGuiInputTextFlags_CharsUppercase);
-
-		/* CHECK IF ANY LABELS HAVE BEEN ENTER INTO THE TEXTBOXES */
-		if (labelCheckX != Xlabel || labelCheckY != Ylabel || labelCheckZ != Zlabel) // since check vars were set in init function... any change will indicate they need to be updated
-		{
-			ImGui::Dummy(ImVec2(0.0f, 3.f));
-			if (ImGui::Button("UPDATE LABELS")) // add a button to update the labels
-			{
-				labelCheckX = Xlabel; // update the label and make quads regarding that
-				labelCheckY = Ylabel; // update the label and make quads regarding that
-				labelCheckZ = Zlabel; // update the label and make quads regarding that
-				makeAxesNames();
-				// make new quads for this label
-			}
-
-		}
-
-		ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-		/* RESET CAMERA POSITION TO ORIGIN UPON BUTTON PRESS */
-		if (ImGui::Button("RESET POSITION"))
-		{
-			camX = 0;
-			camY = 0;
-		}
-
-		ImGui::SameLine(); // allows next item to be on the same line
-
-		/* BUTTON TO CLEAR GRAPH DATA */
-		if (ImGui::Button("Clear Graph"))
-		{
-			// clear data point vector
-			clearGraphVector();
-
-			// clear the notches on each axes
-			newAxes.clearLabels();
-
-			// clear the vertex buffers of the number quads
-			for (int i = 0; i < numberLables.size(); i++)
-			{
-				numberLables[i].clearQuad();
-			}
-
-			// clear number quad vectors
-			numberLables.clear();
-			positiveLabels.clear();
-			negativeLabels.clear();
-
-			// clear the vertex buffers of cubes
-			for (int i = 0; i < barChart.size(); i++)
-			{
-				barChart[i].clearCube();
-			}
-
-			// clear bar chart vectors
-			barChart.clear();
-			barsX.clear();
-
-			// create a new axes using new largest (0) i.e. this will create the axes seen on start up
-			labels = newAxes.makeAxes(largest);
-			labelBoundary = largest; // set label boundary to largest to keep the axes names
-
-			makeAxesNames(); // recreate the axes names to reposition them
-
-		}
-
-		ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-		/* HEADING FOR COLOUR CHANGER */
-		ImGui::Text("Data Point Colour");
-		{
-			ImGui::Dummy(ImVec2(0.0f, 5.f));
-
-			if (ImGui::ColorEdit3(" ", color)) // ImGui Colour editor
-			{
-				if (!vertexPos.empty()) // check if position vector is empty (prevents accessing memory that doesn't exist)
+				/* CHECK IF ANY LABELS HAVE BEEN ENTER INTO THE TEXTBOXES */
+				if (labelCheckX != Xlabel || labelCheckY != Ylabel || labelCheckZ != Zlabel) // since check vars were set in init function... any change will indicate they need to be updated
 				{
-					vertexColours.clear(); // clear the colour vector (to add new colours to the vector)
-
-					// insert the RBGA value for every point in the data point vector
-					for (int i = 0; i < vertexPos.size(); i++)
+					ImGui::Dummy(ImVec2(0.0f, 3.f));
+					if (ImGui::Button("UPDATE LABELS")) // add a button to update the labels
 					{
-						vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] }); // vector function insert allows to insert an array of floats (add these to the end of the vector)
+						labelCheckX = Xlabel; // update the label and make quads regarding that
+						labelCheckY = Ylabel; // update the label and make quads regarding that
+						labelCheckZ = Zlabel; // update the label and make quads regarding that
+						makeAxesNames();
+						// make new quads for this label
 					}
+
 				}
 
-				if (!barChart.empty()) // colour changing for the bar chart
+				ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+				/* RESET CAMERA POSITION TO ORIGIN UPON BUTTON PRESS */
+				if (ImGui::Button("RESET POSITION"))
 				{
-					// edit the colour buffer for each cube using function in cube class
+					camX = 0;
+					camY = 0;
+				}
+
+				ImGui::SameLine(); // allows next item to be on the same line
+
+				/* BUTTON TO CLEAR GRAPH DATA */
+				if (ImGui::Button("Clear Graph"))
+				{
+					// clear data point vector
+					clearGraphVector();
+
+					// clear the notches on each axes
+					newAxes.clearLabels();
+
+					// clear the vertex buffers of the number quads
+					for (int i = 0; i < numberLables.size(); i++)
+					{
+						numberLables[i].clearQuad();
+					}
+
+					// clear number quad vectors
+					numberLables.clear();
+					positiveLabels.clear();
+					negativeLabels.clear();
+
+					// clear the vertex buffers of cubes
 					for (int i = 0; i < barChart.size(); i++)
 					{
-						barChart[i].editColour(color); // pass in the global colour array to be used in function
+						barChart[i].clearCube();
 					}
+
+					// clear bar chart vectors
+					barChart.clear();
+					barsX.clear();
+
+					// create a new axes using new largest (0) i.e. this will create the axes seen on start up
+					labels = newAxes.makeAxes(largest);
+					labelBoundary = largest; // set label boundary to largest to keep the axes names
+
+					makeAxesNames(); // recreate the axes names to reposition them
+
 				}
 
-				/* Create Colour Buffer for data points */
-				glGenBuffers(1, &plotColourBuffer);
-				glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
-				glBufferData(GL_ARRAY_BUFFER, vertexColours.size() * sizeof(float), &(vertexColours[0]), GL_DYNAMIC_DRAW);
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+				/* HEADING FOR COLOUR CHANGER */
+				ImGui::Text("Data Point Colour");
+				{
+					ImGui::Dummy(ImVec2(0.0f, 5.f));
+
+					if (ImGui::ColorEdit3(" ", color)) // ImGui Colour editor
+					{
+						if (!vertexPos.empty()) // check if position vector is empty (prevents accessing memory that doesn't exist)
+						{
+							vertexColours.clear(); // clear the colour vector (to add new colours to the vector)
+
+							// insert the RBGA value for every point in the data point vector
+							for (int i = 0; i < vertexPos.size(); i++)
+							{
+								vertexColours.insert(vertexColours.end(), { color[0] , color[1] , color[2] , color[3] }); // vector function insert allows to insert an array of floats (add these to the end of the vector)
+							}
+						}
+
+						if (!barChart.empty()) // colour changing for the bar chart
+						{
+							// edit the colour buffer for each cube using function in cube class
+							for (int i = 0; i < barChart.size(); i++)
+							{
+								barChart[i].editColour(color); // pass in the global colour array to be used in function
+							}
+						}
+
+						/* Create Colour Buffer for data points */
+						glGenBuffers(1, &plotColourBuffer);
+						glBindBuffer(GL_ARRAY_BUFFER, plotColourBuffer);
+						glBufferData(GL_ARRAY_BUFFER, vertexColours.size() * sizeof(float), &(vertexColours[0]), GL_DYNAMIC_DRAW);
+						glBindBuffer(GL_ARRAY_BUFFER, 0);
+					}
+				}
+				ImGui::EndTabItem(); // signal end of menu tab
+			}
+
+			// new tab HELP (DISPLAYS USER CONTROLS AND GENERAL ADVICE)
+			if (ImGui::BeginTabItem("HELP"))
+			{
+				ImGui::Dummy(ImVec2(0.0f, 5.f)); // padding
+
+				// welcome text
+				ImGui::TextColored(ImVec4(0,1,1,1), "WELCOME TO MULTIDIMENSIONAL PLOTTER!");
+
+				ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+				// sub heading
+				ImGui::TextWrapped("A PLOTTING PROGRAM CREATE IN OPENGL (C++) BY MAX FYALL");
+
+				ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+				ImGui::Unindent(10); // unindent the upcoming bullet points
+
+				// Instruction Node
+				if (ImGui::TreeNode("HOW DOES IT WORK?"))
+				{
+					ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+					ImGui::Unindent(10); // unindent the upcoming bullet points
+
+					// instructions for moving around
+					if (ImGui::TreeNode("MOVING AROUND"))
+					{
+						ImGui::Unindent(10); // unindent the upcoming bullet points
+
+						// Use bullet points for controls using \n to go to a new line (Wrapped text allows for text to adjust to window size)
+						ImGui::Bullet(); ImGui::TextWrapped("HOLDING DOWN MOUSE 3 (ALTERNATIVLY MOUSE 2) AND MOVING THE MOUSE, YOU CAN ROTATE THE GRAPH TO GET A DIFFERENT VIEW");
+
+						ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+						// Use bullet points for controls using \n to go to a new line (Wrapped text allows for text to adjust to window size)
+						ImGui::Bullet(); ImGui::TextWrapped("USE THE SCROLL WHEEL TO ZOOM IN AND OUT TO GET A BETTER VIEW. ALTERNATIVELY, YOU CAN CHANGE THE SIZE OF THE GRAPH USING THE 'GRAPH SIZE' SLIDER");
+
+						ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+						// Use bullet points for controls using \n to go to a new line (Wrapped text allows for text to adjust to window size)
+						ImGui::Bullet(); ImGui::TextWrapped("USING THE ARROW KEYS WILL ALLOW YOU TO MOVE TO GRAPH IN THE DESIRED DIRECTION. PRESSING THE 'RESET POSITION' BUTTON WILL RETURN THE GRAPH TO THE CENTRE");
+
+						ImGui::TreePop(); // declare end of tree node
+					}
+					ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+					if (ImGui::TreeNode("PLOTTING"))
+					{
+						ImGui::Unindent(10); // unindent the upcoming bullet points
+
+						// Use bullet points (Wrapped text allows for text to adjust to window size)
+						ImGui::Bullet(); ImGui::TextWrapped("TO START PLOTTING, VISIT THE HOME TAB AND START BY SELECTING THE GRAPH YOU WANT TO PLOT. YOU CAN ALSO CHOOSE A 2D OR 3D TYPE OF GRAPH VIA THE CHECKBOXES");
+
+						ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+						// Use bullet points (Wrapped text allows for text to adjust to window size)
+						ImGui::Bullet(); ImGui::TextWrapped("CLICKING THE 'OPEN FILE' BUTTON WILL PROMPT A FILE DIALOG BOX, FOR WHICH YOU CAN SELECT A TEXT FILE TO PLOT WITH. UPON OPENING, YOUR GRAPH WILL BE PLOTTED");
+
+						ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+						// Use bullet points (Wrapped text allows for text to adjust to window size)
+						ImGui::Bullet(); ImGui::TextWrapped("PRESSING THE 'CLEAR GRAPH' BUTTON WILL CLEAR PLOTTED GRAPHS (RETURNING TO THE DEFAULT STATE BUT KEEPING ANY AXES LABELS)");
+
+						ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+						// Use bullet points (Wrapped text allows for text to adjust to window size)
+						ImGui::Bullet(); ImGui::TextWrapped("IT MUST BE NOTED THAT ATTEMPTING TO CHANGE GRAPH TYPE WHEN A GRAPH IS ALREADY PLOTTED WILL RESULT IN THE CURRENT GRAPH BEING CLEARED");
+
+						ImGui::TreePop(); // declare end of tree node
+					}
+					ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+					if (ImGui::TreeNode("DATA POINTS"))
+					{
+						// Use bullet points (Wrapped text allows for text to adjust to window size)
+						ImGui::Bullet(); ImGui::TextWrapped("WHEN PLOTTING USING SCATTER PLOT, YOU CAN CHANGE THE SIZE OF THE DATA POINTS TO SUIT YOUR LIKING");
+
+						ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+						// Use bullet points (Wrapped text allows for text to adjust to window size)
+						ImGui::Bullet(); ImGui::TextWrapped("WHEN PLOTTING USING LINE GRAPH, YOU CAN TOGGLE 'LINE LOOP'. THIS LINKS ALL THE LINES TOGETHER");
+
+						ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+						// Use bullet points (Wrapped text allows for text to adjust to window size)
+						ImGui::Bullet(); ImGui::TextWrapped("IT ALSO POSSIBLE TO USE THE COLOUR PICKER TO CHANGE THE COLOUR OF THE DATA POINTS TO YOU LIKING (THIS IS POSSIBLE ON ALL GRAPH TYPES)");
+
+						ImGui::TreePop(); // declare end of tree node
+					}
+					ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+					if (ImGui::TreeNode("AXES LABELS"))
+					{
+						// Use bullet points (Wrapped text allows for text to adjust to window size)
+						ImGui::Bullet(); ImGui::TextWrapped("TO AN AXES NAME, TYPE THE NAME INTO THE RELEVENT BOX.");
+
+						ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+						// Use bullet points (Wrapped text allows for text to adjust to window size)
+						ImGui::Bullet(); ImGui::TextWrapped("DOING THIS WILL CAUSE THE 'UPDATE' BUTTON TO APPEAR. CLICKING THIS WILL ADD YOUR NAME TO THE RELEVENT AXES");
+
+						ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+						// Use bullet points (Wrapped text allows for text to adjust to window size)
+						ImGui::Bullet(); ImGui::TextWrapped("YOU CAN CHANGE THE NAMES BY SIMPLY REPEATING THIS PROCESS");
+
+						ImGui::TreePop(); // declare end of tree node
+					}
+
+					ImGui::TreePop(); // declare end of tree node
+
+				}
+
+				ImGui::Dummy(ImVec2(0.0f, 2.f)); // padding
+
+				// User controls node
+				if (ImGui::TreeNode("USER CONTROLS")) 
+				{
+
+					ImGui::Unindent(10); // unindent the upcoming bullet points
+
+					ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+					// Use bullet points for controls using \n to go to a new line (Wrapped text allows for text to adjust to window size)
+					ImGui::Bullet(); ImGui::TextWrapped("ESCAPE (ESC)\n(TERMINATE PROGRAM)");
+
+					ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+					// Use bullet points for controls using \n to go to a new line (Wrapped text allows for text to adjust to window size)
+					ImGui::Bullet(); ImGui::TextWrapped("MOUSE 3 (ALT - MOUSE 2)\n(Press and hold to unlock graph rotation)");
+
+					ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+					// Use bullet points for controls using \n to go to a new line (Wrapped text allows for text to adjust to window size)
+					ImGui::Bullet(); ImGui::TextWrapped("SCROLL UP\n(Zoom in)");
+
+					ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+					// Use bullet points for controls using \n to go to a new line (Wrapped text allows for text to adjust to window size)
+					ImGui::Bullet(); ImGui::TextWrapped("SCROLL DOWN\n(Zoom out)");
+
+					ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+					// Use bullet points for controls using \n to go to a new line (Wrapped text allows for text to adjust to window size)
+					ImGui::Bullet(); ImGui::TextWrapped("UP ARROW\n(Move graph up)");
+
+					ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+					// Use bullet points for controls using \n to go to a new line (Wrapped text allows for text to adjust to window size)
+					ImGui::Bullet(); ImGui::TextWrapped("DOWN ARROW\n(Move graph down)");
+
+					ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+					// Use bullet points for controls using \n to go to a new line (Wrapped text allows for text to adjust to window size)
+					ImGui::Bullet(); ImGui::TextWrapped("LEFT ARROW\n(Move graph left)");
+
+					ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
+
+					// Use bullet points for controls using \n to go to a new line (Wrapped text allows for text to adjust to window size)
+					ImGui::Bullet(); ImGui::TextWrapped("RIGHT ARROW\n(Move graph right)");
+
+					ImGui::TreePop(); // declare end of tree node
+				}
+
+				ImGui::EndTabItem(); // signal end of help tab
 			}
 		}
+		ImGui::EndTabBar(); // signal end of Tab bar itself
 	}
 	ImGui::End(); // End - Signals the end of the window
 
@@ -1130,19 +1309,19 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 
 	if (key == GLFW_KEY_UP) // move scene up if up-arrow is pressed
 	{
-		camY -= 0.1f;
+		camY += 0.1f;
 	}
 	else if (key == GLFW_KEY_DOWN) // move scene down if down-arrow is pressed
 	{
-		camY += 0.1f;
+		camY -= 0.1f;
 	}
 	else if (key == GLFW_KEY_RIGHT) // move scene right if right-arrow is pressed
 	{
-		camX -= 0.1f;
+		camX += 0.1f;
 	}
 	else if (key == GLFW_KEY_LEFT) // move scene left if left-arrow is pressed
 	{
-		camX += 0.1f;
+		camX -= 0.1f;
 	}
 
 }
@@ -1334,13 +1513,18 @@ std::vector<float> readData(std::string filePath)
 				{
 					largest = -std::stof(num);
 				}
+
+				// increase bar counter - (Number of values in the X direction)
+				numberofBars++;
 			}
-			// increase bar counter - (Number of values in the X direction)
-			numberofBars++;
 
 		}
-		// insert bar value into barchart vector
-		barsX.insert(barsX.end(), numberofBars);
+		// if number of bars is 0 nothing was in that line of the file
+		if (numberofBars != 0)
+		{
+			// insert bar value into barchart vector
+			barsX.insert(barsX.end(), numberofBars);
+		}
 
 	}
 
