@@ -3,45 +3,45 @@ C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\pro
 C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp : message : see previous definition of 'UNICODE'
 C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\common\cube.h(24,74): warning C4042: 'colour': has bad storage class
 C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\common\cube.h(25,40): warning C4042: 'colour': has bad storage class
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(301,28): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(473,23): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(515,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(572,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(628,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(689,16): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(692,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(734,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(834,26): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(853,25): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(870,30): warning C4244: '=': conversion from 'unsigned int' to 'float', possible loss of data
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(878,25): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(884,33): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(924,24): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(934,24): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(944,32): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1038,24): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(312,28): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(484,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(526,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(583,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(639,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(700,16): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(703,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(745,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(845,26): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(864,25): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(881,30): warning C4244: '=': conversion from 'unsigned int' to 'float', possible loss of data
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(889,25): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(895,33): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(935,24): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(945,24): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(955,32): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
 C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1049,24): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1059,32): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1080,26): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1089,26): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1361,26): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1362,24): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1465,20): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1484,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1550,20): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1609,20): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1652,21): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1730,21): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1827,21): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1831,21): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1835,21): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1938,18): warning C4244: 'initializing': conversion from 'unsigned int' to 'float', possible loss of data
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1945,48): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(2005,20): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(2026,83): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(2026,60): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(2032,19): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(2036,18): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1060,24): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1070,32): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1091,26): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1100,26): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1372,26): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1373,24): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1476,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1495,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1561,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1620,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1663,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1741,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1838,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1842,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1846,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1949,18): warning C4244: 'initializing': conversion from 'unsigned int' to 'float', possible loss of data
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(1956,48): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(2016,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(2037,83): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(2037,60): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(2043,19): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(2047,18): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xstring(2575,23): warning C4244: 'argument': conversion from 'wchar_t' to 'const _Elem', possible loss of data
           with
           [
@@ -67,14 +67,14 @@ C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.2
           [
               _Iter=wchar_t *
           ]
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(823): message : see reference to function template instantiation 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)' being compiled
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(834): message : see reference to function template instantiation 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)' being compiled
           with
           [
               _Elem=wchar_t,
               _Iter=std::_String_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
               _Alloc=std::allocator<char>
           ]
-C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(823): message : see reference to function template instantiation 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)' being compiled
+C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\programPlot\application.cpp(834): message : see reference to function template instantiation 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)' being compiled
           with
           [
               _Elem=wchar_t,

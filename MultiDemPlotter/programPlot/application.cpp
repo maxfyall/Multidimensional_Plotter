@@ -22,8 +22,19 @@
 #define UNICODE
 #pragma comment(lib, "user32.lib")
 
-/* Static Library Links */
+/* Static Library Links - DEBUG MODE */
 #ifdef _DEBUG
+#pragma comment(lib, "glfw3D.lib")
+#pragma comment(lib, "glloadD.lib")
+#else
+#pragma comment(lib, "glfw3.lib")
+#pragma comment(lib, "glload.lib")
+#endif
+#pragma comment(lib, "opengl32.lib")
+#pragma comment(lib, "freetype.lib")
+
+/* Static Library Links - RELEASE MODE */
+#ifdef _RELEASE
 #pragma comment(lib, "glfw3D.lib")
 #pragma comment(lib, "glloadD.lib")
 #else
