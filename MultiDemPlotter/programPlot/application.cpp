@@ -1119,7 +1119,7 @@ void display()
 				ImGui::Dummy(ImVec2(0.0f, 5.f)); // padding
 
 				// welcome text
-				ImGui::TextColored(ImVec4(0,1,1,1), "WELCOME TO MULTIDIMENSIONAL PLOTTER!");
+				ImGui::TextWrapped("WELCOME TO MULTIDIMENSIONAL PLOTTER!");
 
 				ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
 
@@ -1134,7 +1134,6 @@ void display()
 				if (ImGui::TreeNode("HOW DOES IT WORK?"))
 				{
 					ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
-					ImGui::Unindent(10); // unindent the upcoming bullet points
 
 					// instructions for moving around
 					if (ImGui::TreeNode("MOVING AROUND"))
@@ -1142,7 +1141,7 @@ void display()
 						ImGui::Unindent(10); // unindent the upcoming bullet points
 
 						// Use bullet points for controls using \n to go to a new line (Wrapped text allows for text to adjust to window size)
-						ImGui::Bullet(); ImGui::TextWrapped("HOLDING DOWN MOUSE 3 (ALTERNATIVLY MOUSE 2) AND MOVING THE MOUSE, YOU CAN ROTATE THE GRAPH TO GET A DIFFERENT VIEW");
+						ImGui::Bullet(); ImGui::TextWrapped("BY HOLDING DOWN MOUSE 3 (ALTERNATIVLY MOUSE 2) AND MOVING THE MOUSE, YOU CAN ROTATE THE GRAPH TO GET A DIFFERENT VIEW");
 
 						ImGui::Dummy(ImVec2(0.0f, 1.f)); // padding
 

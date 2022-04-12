@@ -82,8 +82,8 @@ C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\pro
               _Alloc=std::allocator<char>
           ]
   Generating code
-  0 of 2605 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+  1 of 2605 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    33 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   programPlot.vcxproj -> C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\MultiDemPlotter\Release\programPlot.exe
