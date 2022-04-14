@@ -91,6 +91,7 @@ float fov = 45.f;
 float scaler = 0.5f;
 float camY = 0;
 float camX = 0;
+float camZ = 0;
 
 int size; // check up on this
 
@@ -218,8 +219,6 @@ void init(GLWrapper* glw)
 		exit(0); // exit program
 	}
 
-	//glEnable(GL_CULL_FACE);
-
 	// enable blending
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -298,7 +297,7 @@ void init(GLWrapper* glw)
 	FT_Done_FreeType(ft);
 
 	// create axes with the largest number from data set.
-	labels = newAxes.makeAxes(largest); // make axes returns vector of floats containing the labels required for x y z axes
+	labels = newAxes.makeAxes(largest, 0); // make axes returns vector of floats containing the labels required for x y z axes
 
 	splitLabelVectors(); // split "labels" vector into positive and negative vectors
 
@@ -366,17 +365,25 @@ void display()
 	);
 
 	// checks for updating label bump variables (corresponds to marks on each axes)
-	if (largest < 9)
+	if (graphType == 2)
 	{
-		// set label variables to one (since distance between each axes mark is 1)
 		bump = 1;
 		addby = 1;
 	}
 	else
 	{
-		// set label variables to two (since distance between each axes mark is 2)
-		bump = 2;
-		addby = 2;
+		if (largest < 9)
+		{
+			// set label variables to one (since distance between each axes mark is 1)
+			bump = 1;
+			addby = 1;
+		}
+		else
+		{
+			// set label variables to two (since distance between each axes mark is 2)
+			bump = 2;
+			addby = 2;
+		}
 	}
 
 	// send the uniform matricies to the vertex shader (used in model-view-projection calculation)
@@ -385,7 +392,7 @@ void display()
 
 	// apply transformations to the whole scene
 	model.top() = glm::scale(model.top(), glm::vec3(scaler, scaler, scaler)); // scale the scene using the variable editted by ImGui
-	model.top() = glm::translate(model.top(), glm::vec3(camX, camY, 0)); // apply a translate using variable update by the user (using the arrow keys)
+	model.top() = glm::translate(model.top(), glm::vec3(camX, camY, camZ)); // apply a translate using variable update by the user (using the arrow keys)
 
 	/* SCENE ROTATIONS */
 	model.top() = glm::rotate(model.top(), glm::radians(yaw), glm::vec3(1, 0.0f, 0.0f)); // mouse rotation X
@@ -881,7 +888,16 @@ void display()
 						}
 
 						// create our axes and set its return value (vector of strings) to labels vector.
-						labels = newAxes.makeAxes(largest);
+						if (graphType == 2)
+						{
+							labels = newAxes.makeAxes(largest, 1);
+
+						}
+						else 
+						{
+
+							labels = newAxes.makeAxes(largest, 0);
+						}						
 
 						// call function to split "labels" vector into two different vectors (Positive and Negative)
 						splitLabelVectors();
@@ -941,7 +957,7 @@ void display()
 					barsX.clear();
 
 					// create a new axes using new largest (0) i.e. this will create the axes seen on start up
-					labels = newAxes.makeAxes(largest);
+					labels = newAxes.makeAxes(largest, 0);
 					labelBoundary = largest; // set label boundary to largest to keep the axes names
 
 					makeAxesNames(); // recreate the axes names to reposition them
@@ -1056,7 +1072,7 @@ void display()
 					barsX.clear();
 
 					// create a new axes using new largest (0) i.e. this will create the axes seen on start up
-					labels = newAxes.makeAxes(largest);
+					labels = newAxes.makeAxes(largest, 0);
 					labelBoundary = largest; // set label boundary to largest to keep the axes names
 
 					makeAxesNames(); // recreate the axes names to reposition them
@@ -1405,16 +1421,16 @@ static void mouseButonCallback(GLFWwindow* window, int button, int action, int m
 */
 static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	// change fov based on scroll
-	fov -= (float)yoffset;
+	// change camera position based on scroll
+	camZ += (float)yoffset;
 
-	// stop fov from going bellow 1
-	if (fov < 1.f)
-		fov = 1.f;
+	// stop camera from going bellow 20 (HOW FAR OUT IT ZOOMS)
+	if (camZ < -20.f)
+		camZ = -20.f;
 
-	// stop fov from going over 45
-	if (fov > 45.f)
-		fov = 45.f;
+	// stop camera from going over 4 (HOW CLOSE IN IT ZOOMS)
+	if (camZ > 4.f)
+		camZ = 4.f;
 }
 
 /*
@@ -1527,18 +1543,6 @@ std::vector<float> readData(std::string filePath)
 
 	}
 
-	// label indent checks
-	if (largest < 10)
-	{
-		bump = 1;
-		addby = 1;
-	}
-	else
-	{
-		bump = 2;
-		addby = 2;
-	}
-
 	// clear the colour vector if it is not empty
 	if (!vertexColours.empty())
 	{
@@ -1643,6 +1647,8 @@ void createNumberLabels()
 
 	// set temp to indent variable (bump having being set previously)
 	float temp = bump;
+
+	std::cout << bump << std::endl;
 
 	// loop for each axes - creating a new quads for each positive and negative label
 	for (int j = 0; j < limit; j++)
@@ -2022,17 +2028,17 @@ void createBars()
 				// addby float - specified number, how much to move the cubes by (This is dependant on the axes configuration)
 				// colour float array - the colour to pass to the colour buffer
 				// NOTE - x and z positions are multiplied by 4 to give the desired effects in the scene
-				barChart[q].makeCube((vertexPos[q]), ((moveX + addby)) * 4, (-(moveZ + addby) * 4), color);
+				barChart[q].makeCube((vertexPos[q]), ((moveX + 1)) * 4, (-(moveZ + 1) * 4), color);
 
 				// increment by one to move to the next cube
 				q++;
 
 				// increment x indentation by addby variable to move along the x axes
-				moveX = moveX + addby;
+				moveX = moveX + 1;
 
 			}
 			// once all bars have been drawn in the x direction, increment the z direction by addby variable to move down the z axes
-			moveZ = moveZ + addby;
+			moveZ = moveZ + 1;
 		}
 
 	}
