@@ -38,11 +38,13 @@ GLWrapper::GLWrapper(int width, int height, const char *title) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef DEBUG
+
+	#ifdef DEBUG
 	glfwOpenWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-#endif
+	#endif
 
 	window = glfwCreateWindow(width, height, title, 0, 0);
+
 	if (!window){
 		cout << "Could not open GLFW window." << endl;
 		glfwTerminate();

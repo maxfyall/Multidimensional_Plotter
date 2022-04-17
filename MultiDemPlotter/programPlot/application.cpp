@@ -830,8 +830,6 @@ void display()
 					// another conversion from wstring to string
 					std::string path(convert.begin(), convert.end());
 
-					//std::cout << path << std::endl;
-
 					// check if the path is empty i.e. have we read a file in?
 					if (!path.empty())
 					{
@@ -1049,6 +1047,7 @@ void display()
 				{
 					camX = 0;
 					camY = 0;
+					camZ = 0;
 				}
 
 				ImGui::SameLine(); // allows next item to be on the same line
@@ -1082,6 +1081,11 @@ void display()
 					// clear bar chart vectors
 					barChart.clear();
 					barsX.clear();
+
+					// reset the camera position
+					camX = 0;
+					camY = 0;
+					camZ = 0;
 
 					// create a new axes using new largest (0) i.e. this will create the axes seen on start up
 					labels = newAxes.makeAxes(largest, 0);
@@ -1659,8 +1663,6 @@ void createNumberLabels()
 
 	// set temp to indent variable (bump having being set previously)
 	float temp = bump;
-
-	std::cout << bump << std::endl;
 
 	// loop for each axes - creating a new quads for each positive and negative label
 	for (int j = 0; j < limit; j++)
