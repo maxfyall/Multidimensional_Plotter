@@ -5,17 +5,19 @@
 	Application Code
 */
 
-/*	REFERENCES USED:
+/*	
+	REFERENCES USED:
 
 	[1] Freetype Code Reference - https://learnopengl.com/In-Practice/Text-Rendering
 	[2] Freetype Library - https://freetype.org/
 	[3] ImGui Documentatation - https://pthom.github.io/imgui_manual_online/manual/imgui_manual.html
-	[4] Open File using Window API Tutorial - https://www.youtube.com/watch?v=-iMGhSlvIR0
-	[5] Microsoft Documentation - https://docs.microsoft.com/en-us/answers/questions/483237/a-value-of-type-34const-char-34-cannot-be-assigned.html
-	[6] GLFW Mouse Button Callback - https://www.glfw.org/docs/3.3/input_guide.html
-	[7] GLFW Mouse Camera Control - https://learnopengl.com/Getting-started/Camera
-	[8] Split a String C++ - https://www.geeksforgeeks.org/how-to-split-a-string-in-cc-python-and-java/
-	[9] Freetpye Installation Guide - https://www.youtube.com/watch?v=qW_8Dyq2asc
+	[4] ImGui Setup Guide - https://www.youtube.com/watch?v=VRwhNKoxUtk
+	[5] Open File using Window API Tutorial - https://www.youtube.com/watch?v=-iMGhSlvIR0
+	[6] Microsoft Documentation - https://docs.microsoft.com/en-us/answers/questions/483237/a-value-of-type-34const-char-34-cannot-be-assigned.html
+	[7] GLFW Mouse Button Callback - https://www.glfw.org/docs/3.3/input_guide.html
+	[8] GLFW Mouse Camera Control - https://learnopengl.com/Getting-started/Camera
+	[9] Split a String C++ - https://www.geeksforgeeks.org/how-to-split-a-string-in-cc-python-and-java/
+	[10] Freetpye Installation Guide - https://www.youtube.com/watch?v=qW_8Dyq2asc
 
 */
 
@@ -52,7 +54,7 @@
 #include <commdlg.h>
 
 
-/* Tutorial used for installing freetype library (SEE REFERENCE [9]) */
+/* Tutorial used for installing freetype library (SEE REFERENCE [10]) */
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -349,7 +351,7 @@ void display()
 	// bind our first shader program i.e. make it current
 	glUseProgram(program);
 
-	// create a stack of 4D matrices (used in transformations)
+	// create a stack of matrices (used in transformations)
 	std::stack<glm::mat4> model;
 
 	// push an indentity matrix onto the top of the stack
@@ -785,7 +787,7 @@ void display()
 	model.pop();
 
 
-	/* IMGUI CODE - CREATION OF IMGUI FEATURES AND FUNCTIONALITY  (SEE REFERENCE [3]) */
+	/* IMGUI CODE - CREATION OF IMGUI FEATURES AND FUNCTIONALITY  (SEE REFERENCE [3], [4]) */
 
 	// Begin - push a window
 	ImGui::Begin("MULTIDIMENSIONAL PLOTTER");
@@ -798,7 +800,7 @@ void display()
 			{
 				ImGui::Dummy(ImVec2(0.0f, 10.f)); // padding
 
-				// Open a file (using file dialog box) to read in using windows.h api (SEE REFERENCE [4], [5])
+				// Open a file (using file dialog box) to read in using windows.h api (SEE REFERENCE [5], [6])
 				if (ImGui::Button("Open File")) // if button is triggered perform tasks
 				{
 					// create open file structure
@@ -1358,7 +1360,7 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 }
 
 /*
-*  Mouse Callback Function (SEE REFERENCE [7])
+*  Mouse Callback Function (SEE REFERENCE [8])
 */
 static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 {
@@ -1397,7 +1399,7 @@ static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 }
 
 /*
-*	Mouse button callback (SEE REFERENCE [6])
+*	Mouse button callback (SEE REFERENCE [7])
 */
 static void mouseButonCallback(GLFWwindow* window, int button, int action, int mods) 
 {
@@ -1497,6 +1499,8 @@ std::vector<float> readData(std::string filePath)
 	{
 		// set variable to current string in vector
 		std::string temp = vertexPositions[i];
+
+		/* Splitting string using string stream(SEE REFERENCE [9]) */
 
 		// string variable for splitting string
 		std::string num;
