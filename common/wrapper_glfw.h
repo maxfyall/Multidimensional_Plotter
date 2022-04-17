@@ -1,10 +1,10 @@
 /**
-wrapper_glfw.h
-Modified from the OpenGL GLFW example to provide a wrapper GLFW class
-Iain Martin August 2014
+	wrapper_glfw.h
+	Modified from the OpenGL GLFW example to provide a wrapper GLFW class
+	Iain Martin August 2014
 
-EXTENDED BY Max Fyall - 180011724
-Multidimensional Plotter - 2022
+	EXTENDED BY Max Fyall - 180011724
+	Multidimensional Plotter - 2022
 */
 #pragma once
 
@@ -16,8 +16,10 @@ Multidimensional Plotter - 2022
 #include "imgui_impl_opengl3.h"
 
 /* Inlcude GL_Load and GLFW */
-#include <glload/gl_4_0.h>
-#include <glload/gl_load.h>
+//#include <glload/gl_4_0.h>
+//#include <glload/gl_load.h>
+
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 // GLFW Class

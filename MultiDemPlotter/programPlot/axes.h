@@ -22,7 +22,7 @@ public:
 	~ThreeDAxes();
 
 	// functions
-	std::vector<std::string> makeAxes(int boundaries);
+	std::vector<std::string> makeAxes(int boundaries, int bar);
 	void drawAxes();
 	void clearLabels();
 

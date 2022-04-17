@@ -24,13 +24,13 @@ ThreeDAxes::~ThreeDAxes()
 * - Calculates labels required and notchs for where they should go
 * - Returns labels required as a vector of strings
 */
-std::vector<std::string> ThreeDAxes::makeAxes(int boundaries)
+std::vector<std::string> ThreeDAxes::makeAxes(int boundaries, int bar)
 {
 
-	// check if highest value is negative one (this will cause the axes to not draw since the vertex position will be 0)
-	if (boundaries == -1)
+	// check if highest value is less than 0 (this could cause the axes to not draw since the vertex position will be 0)
+	if (boundaries < 0 )
 	{
-		boundaries = 1;
+		boundaries = abs(boundaries);
 	}
 
 	// define vertex positions for the x axes using passed in variable (highest number from data)
@@ -87,7 +87,8 @@ std::vector<std::string> ThreeDAxes::makeAxes(int boundaries)
 
 	// I set it up so that if the largest value (Boundaries) is bigger than 10, then each axes notch would be in increments of 2 rather than 1
 	// However if the largest value is less then 10, then axes notches would be in increments of 1
-	if (boundaries < 10)
+
+	if (bar == 1)
 	{
 		// the number of notches requried is the same as out highest value
 		numOfLines = boundaries;
@@ -96,24 +97,37 @@ std::vector<std::string> ThreeDAxes::makeAxes(int boundaries)
 		multiple = 1;
 		addBY = 1;
 	}
-	else if ((boundaries + 1) % 2) // check if largest value is even
+	else 
 	{
-		// set the number of notches to be drawn
-		numOfLines = (boundaries + 1) / 2;
+		if (boundaries < 10)
+		{
+			// the number of notches requried is the same as out highest value
+			numOfLines = boundaries;
 
-		// set local variables for later use
-		multiple = 2;
-		addBY = 2;
-	}
-	else // otherwise largest value is odd
-	{
-		// set the number of notches to be drawn
-		numOfLines = (boundaries - 1) / 2;
+			// set local variables for later use
+			multiple = 1;
+			addBY = 1;
+		}
+		else if ((boundaries + 1) % 2) // check if largest value is even
+		{
+			// set the number of notches to be drawn
+			numOfLines = (boundaries + 1) / 2;
 
-		// set local variables for later use
-		multiple = 2;
-		addBY = 2;
+			// set local variables for later use
+			multiple = 2;
+			addBY = 2;
+		}
+		else // otherwise largest value is odd
+		{
+			// set the number of notches to be drawn
+			numOfLines = (boundaries - 1) / 2;
+
+			// set local variables for later use
+			multiple = 2;
+			addBY = 2;
+		}
 	}
+	
 
 	// create float vector for label colours
 	std::vector<float> labelColour;
