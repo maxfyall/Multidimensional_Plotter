@@ -22,13 +22,14 @@
 #define UNICODE
 #pragma comment(lib, "user32.lib")
 
-/* Static Library Links - DEBUG MODE */
+/* Static Library Links - DEBUG/RELEASE MODE */
 #ifdef _DEBUG
 #pragma comment(lib, "glfw3D.lib")
 #pragma comment(lib, "glloadD.lib")
 #else
-#pragma comment(lib, "glfw3.lib")
-#pragma comment(lib, "glload.lib")
+#define GLEW_STATIC
+#pragma comment(lib, "glfw3_mt.lib")
+#pragma comment(lib, "glew32s.lib")
 #endif
 #pragma comment(lib, "opengl32.lib")
 #pragma comment(lib, "freetype.lib")
@@ -895,7 +896,18 @@ void display()
 						}
 						else 
 						{
-
+							if (largest < 9)
+							{
+								// set label variables to one (since distance between each axes mark is 1)
+								bump = 1;
+								addby = 1;
+							}
+							else
+							{
+								// set label variables to two (since distance between each axes mark is 2)
+								bump = 2;
+								addby = 2;
+							}
 							labels = newAxes.makeAxes(largest, 0);
 						}						
 
@@ -1510,7 +1522,7 @@ std::vector<float> readData(std::string filePath)
 			if (invalid)
 			{
 				// do not add the data point
-				std::cout << "INVALID DATA POINT - REMOVING" << std::endl;
+				std::cout << "INVALID DATA POINT - REMOVING: " << num << std::endl;
 				invalid = false;
 			}
 			else
@@ -2054,7 +2066,7 @@ int main(int argc, char* argv[])
 	GLWrapper* glw = new GLWrapper(1024, 768, "Multidimensional Plotter");
 
 	// if functions fail to load terminate the program
-	if (!ogl_LoadFunctions())
+	if (glewInit() != GLEW_OK)
 	{
 		fprintf(stderr, "ogl_LoadFunctions() failed, Terminating\n");
 		return 0;

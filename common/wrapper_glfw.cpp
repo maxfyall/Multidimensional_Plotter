@@ -53,7 +53,7 @@ GLWrapper::GLWrapper(int width, int height, const char *title) {
 	glfwMakeContextCurrent(window);
 
 	/* Initialise GLLoad library. You must have obtained a current OpenGL */
-	if (!ogl_LoadFunctions())
+	if (glewInit() != GLEW_OK)
 	{
 		cerr << "oglLoadFunctions() failed. Exiting" << endl;
 		glfwTerminate();

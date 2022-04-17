@@ -22,7 +22,7 @@ public:
 	~Quad();
 
 	// functions
-	void makeQuad(float bump, int small, int dir, float yBump);
+	void makeQuad(float bump, int isSmall, int dir, float yBump);
 	void drawQuad();
 	void clearQuad();
 

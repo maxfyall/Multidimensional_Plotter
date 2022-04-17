@@ -24,7 +24,7 @@ Quad::~Quad()
 /*
 * Create vertex buffers from vertex positions made with passed in variables
 */
-void Quad::makeQuad(float bump, int small, int dir, float yBump)
+void Quad::makeQuad(float bump, int isSmall, int dir, float yBump)
 {
 	// clear the vertex position vector (it may contain one value to prevent memory access exceptions)
 	quad.clear();
@@ -35,7 +35,7 @@ void Quad::makeQuad(float bump, int small, int dir, float yBump)
 	{
 		// variable small allows us to make a quad to fit certain characters, mainly the letter 'I' and symbol '-'
 		// in this case, we make a quad for '-' for negative numbers
-		if (small == 1)
+		if (isSmall == 1)
 		{
 			// create vertex positions by inserting quad coordinates (modified by indent variable on the x axes) into vertex position vector
 			quad.insert(quad.end(), { (0.0f + bump), 0.1f, 0.f });
@@ -44,7 +44,7 @@ void Quad::makeQuad(float bump, int small, int dir, float yBump)
 			quad.insert(quad.end(), { (0.0f + bump), 0.3f, 0.f });
 		}
 		// in this case, we make a quad for the letter 'I'
-		else if (small == 2)
+		else if (isSmall == 2)
 		{
 			// create vertex positions by inserting quad coordinates (modified by indent variable on the x axes) into vertex position vector
 			quad.insert(quad.end(), { (0.07f + bump-0.03f), 0.1f, 0.f });
@@ -67,7 +67,7 @@ void Quad::makeQuad(float bump, int small, int dir, float yBump)
 	{
 		// variable small allows us to make a quad to fit certain characters, mainly the letter 'I' and symbol '-'
 		// in this case, we make a quad for '-' for negative numbers
-		if (small == 1)
+		if (isSmall == 1)
 		{
 			// create vertex positions by inserting quad coordinates (modified by indent variables on the y and x axes, to make multiple characters work on the same line) into vertex position vector
 			quad.insert(quad.end(), { (0.09f+yBump), (0.2f+bump), 0.f });
@@ -76,7 +76,7 @@ void Quad::makeQuad(float bump, int small, int dir, float yBump)
 			quad.insert(quad.end(), { (0.09f+yBump), (0.4f+bump), 0.f });
 		}
 		// in this case, we make a quad for the letter 'I'
-		else if (small == 2)
+		else if (isSmall == 2)
 		{
 			// create vertex positions by inserting quad coordinates (modified by indent variables on the y and x axes, to make multiple characters work on the same line) into vertex position vector
 			quad.insert(quad.end(), { (0.16f + yBump-0.03f), (0.2f + bump), 0.f });
@@ -99,7 +99,7 @@ void Quad::makeQuad(float bump, int small, int dir, float yBump)
 	{
 		// variable small allows us to make a quad to fit certain characters, mainly the letter 'I' and symbol '-'
 		// in this case, we make a quad for '-' for negative numbers
-		if (small == 1)
+		if (isSmall == 1)
 		{
 			// create vertex positions by inserting quad coordinates (modified by indent variable on the z axes) into vertex position vector
 			quad.insert(quad.end(), { 0.0f, 0.1f, (0.f + bump) });
@@ -108,7 +108,7 @@ void Quad::makeQuad(float bump, int small, int dir, float yBump)
 			quad.insert(quad.end(), { 0.0f, 0.3f, (0.f + bump) });
 		}
 		// in this case, we make a quad for the letter 'I'
-		else if (small == 2)
+		else if (isSmall == 2)
 		{
 			// create vertex positions by inserting quad coordinates (modified by indent variable on the z axes) into vertex position vector
 			quad.insert(quad.end(), { 0.0f, 0.1f, (0.07f + bump - 0.03f) });
