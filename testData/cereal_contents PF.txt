@@ -1,0 +1,78 @@
+name		protein	fat
+100% Bran	4	1
+100% Natural Bran	3	5
+All-Bran	4	1
+All-Bran with Extra Fiber	4	0
+Almond Delight	2	2
+Apple Cinnamon Cheerios	2	2
+Apple Jacks	2	0
+Basic 4	3	2
+Bran Chex	2	1
+Bran Flakes	3	0
+Cap'n'Crunch	1	2
+Cheerios	6	2
+Cinnamon Toast Crunch	1	3
+Clusters	3	2
+Cocoa Puffs	1	1
+Corn Chex	2	0
+Corn Flakes	2	0
+Corn Pops	1	0
+Count Chocula	1	1
+Cracklin' Oat Bran	3	3
+Cream of Wheat (Quick)	3	0
+Crispix	2	0
+Crispy Wheat & Raisins	2	1
+Double Chex	2	0
+Froot Loops	2	1
+Frosted Flakes	1	0
+Frosted Mini-Wheats	3	0
+Fruit & Fibre Dates; Walnuts; and Oats	3	2
+Fruitful Bran	3	0
+Fruity Pebbles	1	1
+Golden Crisp	2	0
+Golden Grahams	1	1
+Grape Nuts Flakes	3	1
+Grape-Nuts	3	0
+Great Grains Pecan	3	3
+Honey Graham Ohs	1	2
+Honey Nut Cheerios	3	1
+Honey-comb	1	0
+Just Right Crunchy  Nuggets	2	1
+Just Right Fruit & Nut	3	1
+Kix	2	1
+Life	4	2
+Lucky Charms	2	1
+Maypo	4	1
+Muesli Raisins; Dates; & Almonds	4	3
+Muesli Raisins; Peaches; & Pecans	4	3
+Mueslix Crispy Blend	3	2
+Multi-Grain Cheerios	2	1
+Nut&Honey Crunch	2	1
+Nutri-Grain Almond-Raisin	3	2
+Nutri-grain Wheat	3	0
+Oatmeal Raisin Crisp	3	2
+Post Nat. Raisin Bran	3	1
+Product 19	3	0
+Puffed Rice	1	0
+Puffed Wheat	2	0
+Quaker Oat Squares	4	1
+Quaker Oatmeal	5	2
+Raisin Bran	3	1
+Raisin Nut Bran	3	2
+Raisin Squares	2	0
+Rice Chex	1	0
+Rice Krispies	2	0
+Shredded Wheat	2	0
+Shredded Wheat 'n'Bran	3	0
+Shredded Wheat spoon size	3	0
+Smacks	2	1
+Special K	6	0
+Strawberry Fruit Wheats	2	0
+Total Corn Flakes	2	1
+Total Raisin Bran	3	1
+Total Whole Grain	3	1
+Triples	2	1
+Trix	1	1
+Wheat Chex	3	1
+Wheaties	3	1
+Wheaties Honey Gold	2	1

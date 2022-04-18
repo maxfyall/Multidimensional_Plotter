@@ -375,7 +375,7 @@ void display()
 	}
 	else
 	{
-		if (largest < 9)
+		if (largest < 10)
 		{
 			// set label variables to one (since distance between each axes mark is 1)
 			bump = 1;
@@ -424,12 +424,19 @@ void display()
 		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
 		glEnableVertexAttribArray(0);
 
-		// check for 2D or 3D drawing
-		if (twoD)
+		// check for 2D or 3D drawing (FOR SCATTER PLOT ONLY)
+		if (graphType == 0)
 		{
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0); // specify 2 components
+			if (twoD)
+			{
+				glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0); // specify 2 components
+			}
+			else if (threeD)
+			{
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // specify 3 components
+			}
 		}
-		else if (threeD)
+		else // else we want to draw a line plot
 		{
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // specify 3 components
 		}
@@ -835,6 +842,7 @@ void display()
 					// check if the path is empty i.e. have we read a file in?
 					if (!path.empty())
 					{
+
 						// clear data from bar chart vectors is there are not empty
 						if (!barChart.empty())
 						{
@@ -896,7 +904,7 @@ void display()
 						}
 						else 
 						{
-							if (largest < 9)
+							if (largest < 10)
 							{
 								// set label variables to one (since distance between each axes mark is 1)
 								bump = 1;
@@ -976,7 +984,7 @@ void display()
 				}
 
 				/* if prevents checkboxes from appearing in certain graphtypes i.e.bar chart */
-				if (graphType != 2)
+				if (graphType == 0)
 				{
 					ImGui::Dummy(ImVec2(0.0f, 2.f));
 
@@ -1518,7 +1526,8 @@ std::vector<float> readData(std::string filePath)
 			// loop through string num to find if it contains any letters
 			for (int i = 0; i < num.length(); i++)
 			{
-				if (isalpha(num[i]))
+				// check if char is letter, or is not a special character that is not '-' or '.'
+				if (isalpha(num[i]) || (!isalpha(num[i]) && !isdigit(num[i]) && num[i] != '-' && num[i] != '.'))
 				{
 					// if string does contain a invalid character (i.e. a letter or symbol rather than a number)
 					invalid = true;
@@ -1530,7 +1539,7 @@ std::vector<float> readData(std::string filePath)
 			if (invalid)
 			{
 				// do not add the data point
-				std::cout << "INVALID DATA POINT - REMOVING: " << num << std::endl;
+				//std::cout << "INVALID DATA POINT - REMOVING: " << num << std::endl;
 				invalid = false;
 			}
 			else
