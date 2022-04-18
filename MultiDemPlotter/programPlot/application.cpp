@@ -801,7 +801,7 @@ void display()
 				ImGui::Dummy(ImVec2(0.0f, 10.f)); // padding
 
 				// Open a file (using file dialog box) to read in using windows.h api (SEE REFERENCE [5], [6])
-				if (ImGui::Button("Open File")) // if button is triggered perform tasks
+				if (ImGui::Button("PLOT")) // if button is triggered perform tasks
 				{
 					// create open file structure
 					OPENFILENAME ofn;
