@@ -48,11 +48,9 @@
 #include <sstream>
 #include <algorithm>
 #include <vector>
-#include <algorithm>
 #include <map>
 #include <windows.h>
 #include <commdlg.h>
-
 
 /* Tutorial used for installing freetype library (SEE REFERENCE [10]) */
 #include <ft2build.h>
@@ -885,6 +883,7 @@ void display()
 							{
 								largest = (barsX.size());
 								labelBoundary = largest; // set global boundary variable for use in axes name function
+
 							}
 						}
 
