@@ -39,7 +39,7 @@
     <ClCompile Include="..\..\imgui\imgui_widgets.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="axes.cpp">
+    <ClCompile Include="axis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="quad.cpp">
@@ -53,7 +53,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="axes.h">
+    <ClInclude Include="axis.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="quad.h">
@@ -79,5 +79,6 @@
     <None Include="..\..\shaders\textureFrag.frag">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

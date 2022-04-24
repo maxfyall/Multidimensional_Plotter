@@ -19,6 +19,8 @@
 	[9] Split a String C++ - https://www.geeksforgeeks.org/how-to-split-a-string-in-cc-python-and-java/
 	[10] Freetpye Installation Guide - https://www.youtube.com/watch?v=qW_8Dyq2asc
 
+	NOTE: REALISATION - INCORRECT SPELLING OF AXIS IS USED A LOT. MOST OF THE TIME IT IS SPELT AXES INSTEAD OF AXIS. APOLOGIES FOR ANY CONFUSION
+
 */
 
 #define UNICODE
@@ -29,7 +31,7 @@
 #pragma comment(lib, "glfw3D.lib")
 #pragma comment(lib, "glloadD.lib")
 #else
-#define GLEW_STATIC
+#define GLEW_STATIC // GLEW_Static require for running GLEW in static mode
 #pragma comment(lib, "glfw3_mt.lib")
 #pragma comment(lib, "glew32s.lib")
 #endif
@@ -57,7 +59,7 @@
 #include FT_FREETYPE_H
 
 /* Include Header Files of required classes */
-#include "axes.h"
+#include "axis.h"
 #include "quad.h"
 #include "cube.h"
 
@@ -115,7 +117,7 @@ float addby; // keeps track of how much to move label by
 std::vector<int> barsX;
 
 /* Class Objects */
-ThreeDAxes newAxes; // Axes class instance, draws the X, Y, Z axes
+ThreeDAxis newAxes; // Axes class instance, draws the X, Y, Z axes
 Quad newQuad; // Quad class instance, used to make and draw quads for labels
 Cube testCube; // Cube class instance, used to make and draw cubes (rectangles for bar chart)
 
@@ -298,7 +300,7 @@ void init(GLWrapper* glw)
 	FT_Done_FreeType(ft);
 
 	// create axes with the largest number from data set.
-	labels = newAxes.makeAxes(largest, 0); // make axes returns vector of floats containing the labels required for x y z axes
+	labels = newAxes.makeAxis(largest, 0); // make axes returns vector of floats containing the labels required for x y z axes
 
 	splitLabelVectors(); // split "labels" vector into positive and negative vectors
 
@@ -406,7 +408,7 @@ void display()
 		glUniformMatrix4fv(modelID1, 1, GL_FALSE, &model.top()[0][0]);
 
 		// draw the 3D axes using the axes class instance
-		newAxes.drawAxes();
+		newAxes.drawAxis();
 
 	}
 	model.pop(); // pop from the stack
@@ -898,7 +900,7 @@ void display()
 						// create our axes and set its return value (vector of strings) to labels vector.
 						if (graphType == 2)
 						{
-							labels = newAxes.makeAxes(largest, 1);
+							labels = newAxes.makeAxis(largest, 1);
 
 						}
 						else 
@@ -915,7 +917,7 @@ void display()
 								bump = 2;
 								addby = 2;
 							}
-							labels = newAxes.makeAxes(largest, 0);
+							labels = newAxes.makeAxis(largest, 0);
 						}						
 
 						// call function to split "labels" vector into two different vectors (Positive and Negative)
@@ -976,7 +978,7 @@ void display()
 					barsX.clear();
 
 					// create a new axes using new largest (0) i.e. this will create the axes seen on start up
-					labels = newAxes.makeAxes(largest, 0);
+					labels = newAxes.makeAxis(largest, 0);
 					labelBoundary = largest; // set label boundary to largest to keep the axes names
 
 					makeAxesNames(); // recreate the axes names to reposition them
@@ -1097,7 +1099,7 @@ void display()
 					camZ = 0;
 
 					// create a new axes using new largest (0) i.e. this will create the axes seen on start up
-					labels = newAxes.makeAxes(largest, 0);
+					labels = newAxes.makeAxis(largest, 0);
 					labelBoundary = largest; // set label boundary to largest to keep the axes names
 
 					makeAxesNames(); // recreate the axes names to reposition them
