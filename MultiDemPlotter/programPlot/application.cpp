@@ -1671,7 +1671,6 @@ void createNumberLabels()
 	// initialise variables used in algorithm
 	float yBump = 0;
 	int count = 0;
-	int limit = 3;
 	std::string::const_iterator test;
 	std::string number;
 
@@ -1679,7 +1678,7 @@ void createNumberLabels()
 	float temp = bump;
 
 	// loop for each axes - creating a new quads for each positive and negative label
-	for (int j = 0; j < limit; j++)
+	for (int j = 0; j < 3; j++)
 	{
 		// create a quad for each positive number for current axes
 		for (int i = 0; i < positiveLabels.size(); i++)
