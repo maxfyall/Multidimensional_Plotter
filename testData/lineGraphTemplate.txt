@@ -1,0 +1,7 @@
+X  Y  Z
+-1 -1 -1
+-1 0 1
+1 1 1
+1 2 -1
+
+(FEEL FREE TO ADD MORE DATA POINTS)

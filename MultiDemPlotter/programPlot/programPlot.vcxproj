@@ -167,13 +167,13 @@
     <ClCompile Include="..\..\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\..\imgui\imgui_widgets.cpp" />
     <ClCompile Include="application.cpp" />
-    <ClCompile Include="axes.cpp" />
+    <ClCompile Include="axis.cpp" />
     <ClCompile Include="quad.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\cube.h" />
     <ClInclude Include="..\..\common\wrapper_glfw.h" />
-    <ClInclude Include="axes.h" />
+    <ClInclude Include="axis.h" />
     <ClInclude Include="quad.h" />
   </ItemGroup>
   <ItemGroup>
@@ -181,6 +181,7 @@
     <None Include="..\..\shaders\shaderVert.vert" />
     <None Include="..\..\shaders\textureFrag.frag" />
     <None Include="..\..\shaders\textureVert.vert" />
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

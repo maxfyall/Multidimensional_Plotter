@@ -5,17 +5,21 @@
 	Application Code
 */
 
-/*	REFERENCES USED:
+/*	
+	REFERENCES USED:
 
 	[1] Freetype Code Reference - https://learnopengl.com/In-Practice/Text-Rendering
 	[2] Freetype Library - https://freetype.org/
 	[3] ImGui Documentatation - https://pthom.github.io/imgui_manual_online/manual/imgui_manual.html
-	[4] Open File using Window API Tutorial - https://www.youtube.com/watch?v=-iMGhSlvIR0
-	[5] Microsoft Documentation - https://docs.microsoft.com/en-us/answers/questions/483237/a-value-of-type-34const-char-34-cannot-be-assigned.html
-	[6] GLFW Mouse Button Callback - https://www.glfw.org/docs/3.3/input_guide.html
-	[7] GLFW Mouse Camera Control - https://learnopengl.com/Getting-started/Camera
-	[8] Split a String C++ - https://www.geeksforgeeks.org/how-to-split-a-string-in-cc-python-and-java/
-	[9] Freetpye Installation Guide - https://www.youtube.com/watch?v=qW_8Dyq2asc
+	[4] ImGui Setup Guide - https://www.youtube.com/watch?v=VRwhNKoxUtk
+	[5] Open File using Window API Tutorial - https://www.youtube.com/watch?v=-iMGhSlvIR0
+	[6] Microsoft Documentation - https://docs.microsoft.com/en-us/answers/questions/483237/a-value-of-type-34const-char-34-cannot-be-assigned.html
+	[7] GLFW Mouse Button Callback - https://www.glfw.org/docs/3.3/input_guide.html
+	[8] GLFW Mouse Camera Control - https://learnopengl.com/Getting-started/Camera
+	[9] Split a String C++ - https://www.geeksforgeeks.org/how-to-split-a-string-in-cc-python-and-java/
+	[10] Freetpye Installation Guide - https://www.youtube.com/watch?v=qW_8Dyq2asc
+
+	NOTE: REALISATION - INCORRECT SPELLING OF AXIS IS USED A LOT. MOST OF THE TIME IT IS SPELT AXES INSTEAD OF AXIS. APOLOGIES FOR ANY CONFUSION
 
 */
 
@@ -27,7 +31,7 @@
 #pragma comment(lib, "glfw3D.lib")
 #pragma comment(lib, "glloadD.lib")
 #else
-#define GLEW_STATIC
+#define GLEW_STATIC // GLEW_Static require for running GLEW in static mode
 #pragma comment(lib, "glfw3_mt.lib")
 #pragma comment(lib, "glew32s.lib")
 #endif
@@ -46,18 +50,16 @@
 #include <sstream>
 #include <algorithm>
 #include <vector>
-#include <algorithm>
 #include <map>
 #include <windows.h>
 #include <commdlg.h>
 
-
-/* Tutorial used for installing freetype library (SEE REFERENCE [9]) */
+/* Tutorial used for installing freetype library (SEE REFERENCE [10]) */
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
 /* Include Header Files of required classes */
-#include "axes.h"
+#include "axis.h"
 #include "quad.h"
 #include "cube.h"
 
@@ -115,7 +117,7 @@ float addby; // keeps track of how much to move label by
 std::vector<int> barsX;
 
 /* Class Objects */
-ThreeDAxes newAxes; // Axes class instance, draws the X, Y, Z axes
+ThreeDAxis newAxes; // Axes class instance, draws the X, Y, Z axes
 Quad newQuad; // Quad class instance, used to make and draw quads for labels
 Cube testCube; // Cube class instance, used to make and draw cubes (rectangles for bar chart)
 
@@ -298,7 +300,7 @@ void init(GLWrapper* glw)
 	FT_Done_FreeType(ft);
 
 	// create axes with the largest number from data set.
-	labels = newAxes.makeAxes(largest, 0); // make axes returns vector of floats containing the labels required for x y z axes
+	labels = newAxes.makeAxis(largest, 0); // make axes returns vector of floats containing the labels required for x y z axes
 
 	splitLabelVectors(); // split "labels" vector into positive and negative vectors
 
@@ -349,7 +351,7 @@ void display()
 	// bind our first shader program i.e. make it current
 	glUseProgram(program);
 
-	// create a stack of 4D matrices (used in transformations)
+	// create a stack of matrices (used in transformations)
 	std::stack<glm::mat4> model;
 
 	// push an indentity matrix onto the top of the stack
@@ -373,7 +375,7 @@ void display()
 	}
 	else
 	{
-		if (largest < 9)
+		if (largest < 10)
 		{
 			// set label variables to one (since distance between each axes mark is 1)
 			bump = 1;
@@ -406,7 +408,7 @@ void display()
 		glUniformMatrix4fv(modelID1, 1, GL_FALSE, &model.top()[0][0]);
 
 		// draw the 3D axes using the axes class instance
-		newAxes.drawAxes();
+		newAxes.drawAxis();
 
 	}
 	model.pop(); // pop from the stack
@@ -422,12 +424,19 @@ void display()
 		glBindBuffer(GL_ARRAY_BUFFER, plotBufferObject);
 		glEnableVertexAttribArray(0);
 
-		// check for 2D or 3D drawing
-		if (twoD)
+		// check for 2D or 3D drawing (FOR SCATTER PLOT ONLY)
+		if (graphType == 0)
 		{
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0); // specify 2 components
+			if (twoD)
+			{
+				glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0); // specify 2 components
+			}
+			else if (threeD)
+			{
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // specify 3 components
+			}
 		}
-		else if (threeD)
+		else // else we want to draw a line plot
 		{
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // specify 3 components
 		}
@@ -785,7 +794,7 @@ void display()
 	model.pop();
 
 
-	/* IMGUI CODE - CREATION OF IMGUI FEATURES AND FUNCTIONALITY  (SEE REFERENCE [3]) */
+	/* IMGUI CODE - CREATION OF IMGUI FEATURES AND FUNCTIONALITY  (SEE REFERENCE [3], [4]) */
 
 	// Begin - push a window
 	ImGui::Begin("MULTIDIMENSIONAL PLOTTER");
@@ -798,8 +807,8 @@ void display()
 			{
 				ImGui::Dummy(ImVec2(0.0f, 10.f)); // padding
 
-				// Open a file (using file dialog box) to read in using windows.h api (SEE REFERENCE [4], [5])
-				if (ImGui::Button("Open File")) // if button is triggered perform tasks
+				// Open a file (using file dialog box) to read in using windows.h api (SEE REFERENCE [5], [6])
+				if (ImGui::Button("PLOT")) // if button is triggered perform tasks
 				{
 					// create open file structure
 					OPENFILENAME ofn;
@@ -833,6 +842,7 @@ void display()
 					// check if the path is empty i.e. have we read a file in?
 					if (!path.empty())
 					{
+
 						// clear data from bar chart vectors is there are not empty
 						if (!barChart.empty())
 						{
@@ -875,6 +885,7 @@ void display()
 							{
 								largest = (barsX.size());
 								labelBoundary = largest; // set global boundary variable for use in axes name function
+
 							}
 						}
 
@@ -889,12 +900,12 @@ void display()
 						// create our axes and set its return value (vector of strings) to labels vector.
 						if (graphType == 2)
 						{
-							labels = newAxes.makeAxes(largest, 1);
+							labels = newAxes.makeAxis(largest, 1);
 
 						}
 						else 
 						{
-							if (largest < 9)
+							if (largest < 10)
 							{
 								// set label variables to one (since distance between each axes mark is 1)
 								bump = 1;
@@ -906,7 +917,7 @@ void display()
 								bump = 2;
 								addby = 2;
 							}
-							labels = newAxes.makeAxes(largest, 0);
+							labels = newAxes.makeAxis(largest, 0);
 						}						
 
 						// call function to split "labels" vector into two different vectors (Positive and Negative)
@@ -967,14 +978,14 @@ void display()
 					barsX.clear();
 
 					// create a new axes using new largest (0) i.e. this will create the axes seen on start up
-					labels = newAxes.makeAxes(largest, 0);
+					labels = newAxes.makeAxis(largest, 0);
 					labelBoundary = largest; // set label boundary to largest to keep the axes names
 
 					makeAxesNames(); // recreate the axes names to reposition them
 				}
 
 				/* if prevents checkboxes from appearing in certain graphtypes i.e.bar chart */
-				if (graphType != 2)
+				if (graphType == 0)
 				{
 					ImGui::Dummy(ImVec2(0.0f, 2.f));
 
@@ -1088,7 +1099,7 @@ void display()
 					camZ = 0;
 
 					// create a new axes using new largest (0) i.e. this will create the axes seen on start up
-					labels = newAxes.makeAxes(largest, 0);
+					labels = newAxes.makeAxis(largest, 0);
 					labelBoundary = largest; // set label boundary to largest to keep the axes names
 
 					makeAxesNames(); // recreate the axes names to reposition them
@@ -1358,7 +1369,7 @@ static void keyCallback(GLFWwindow* window, int key, int s, int action, int mods
 }
 
 /*
-*  Mouse Callback Function (SEE REFERENCE [7])
+*  Mouse Callback Function (SEE REFERENCE [8])
 */
 static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 {
@@ -1397,7 +1408,7 @@ static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 }
 
 /*
-*	Mouse button callback (SEE REFERENCE [6])
+*	Mouse button callback (SEE REFERENCE [7])
 */
 static void mouseButonCallback(GLFWwindow* window, int button, int action, int mods) 
 {
@@ -1498,6 +1509,8 @@ std::vector<float> readData(std::string filePath)
 		// set variable to current string in vector
 		std::string temp = vertexPositions[i];
 
+		/* Splitting string using string stream(SEE REFERENCE [9]) */
+
 		// string variable for splitting string
 		std::string num;
 
@@ -1514,7 +1527,8 @@ std::vector<float> readData(std::string filePath)
 			// loop through string num to find if it contains any letters
 			for (int i = 0; i < num.length(); i++)
 			{
-				if (isalpha(num[i]))
+				// check if char is letter, or is not a special character that is not '-' or '.'
+				if (isalpha(num[i]) || (!isalpha(num[i]) && !isdigit(num[i]) && num[i] != '-' && num[i] != '.'))
 				{
 					// if string does contain a invalid character (i.e. a letter or symbol rather than a number)
 					invalid = true;
@@ -1526,7 +1540,7 @@ std::vector<float> readData(std::string filePath)
 			if (invalid)
 			{
 				// do not add the data point
-				std::cout << "INVALID DATA POINT - REMOVING: " << num << std::endl;
+				//std::cout << "INVALID DATA POINT - REMOVING: " << num << std::endl;
 				invalid = false;
 			}
 			else
@@ -1657,7 +1671,6 @@ void createNumberLabels()
 	// initialise variables used in algorithm
 	float yBump = 0;
 	int count = 0;
-	int limit = 3;
 	std::string::const_iterator test;
 	std::string number;
 
@@ -1665,7 +1678,7 @@ void createNumberLabels()
 	float temp = bump;
 
 	// loop for each axes - creating a new quads for each positive and negative label
-	for (int j = 0; j < limit; j++)
+	for (int j = 0; j < 3; j++)
 	{
 		// create a quad for each positive number for current axes
 		for (int i = 0; i < positiveLabels.size(); i++)

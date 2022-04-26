@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Cube">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIGAAAAgAAAIAAAAAAAAAgACAACAAAARAAgAQAAAAAA=</HashCode>
+      <FileName>C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\common\cube.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GLWrapper">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AMAAAABCRAACEAQAQwgQIAAAgAgAKAAIABAAAAACgAA=</HashCode>
+      <FileName>C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\common\wrapper_glfw.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ThreeDAxis">
+    <Position X="5.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAQAAAAAYAAAAAEAAAAAAQAAEBEEAAABAQQAAIgE=</HashCode>
+      <FileName>axis.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Quad">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAgBAIAACAAAAAAAAUAAAABAAAAwQAQAEAAAA=</HashCode>
+      <FileName>quad.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="Character" Collapsed="true">
+    <Position X="7.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIIAAAAgAAAAAAAAAAAEAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>application.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="ImGuiStyleVarInfo" Collapsed="true">
+    <Position X="7.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAQAAAAAAgAA=</HashCode>
+      <FileName>C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\imgui\imgui.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="ImGuiResizeGripDef" Collapsed="true">
+    <Position X="12.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAABAAAAAiAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\imgui\imgui.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="ImGuiResizeBorderDef" Collapsed="true">
+    <Position X="11" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAIAAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\imgui\imgui.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="ImFontBuildSrcData" Collapsed="true">
+    <Position X="11" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAQABAAAAGAAAAAAAAAAAAAAAgIAAAAAACAAAoAAA=</HashCode>
+      <FileName>C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\imgui\imgui_draw.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="ImFontBuildDstData" Collapsed="true">
+    <Position X="9.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAACAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAA=</HashCode>
+      <FileName>C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\imgui\imgui_draw.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="ImGui_ImplGlfw_Data" Collapsed="true">
+    <Position X="12.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgBDAAYAAAAAAAAAAQgAAAAAAAgAAAIAAAACAAAJQA=</HashCode>
+      <FileName>C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\imgui\imgui_impl_glfw.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="ImGui_ImplOpenGL3_Data" Collapsed="true">
+    <Position X="7.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAABAAAAAAgAAAkCAAAASAgQAAAAgAAABAIE=</HashCode>
+      <FileName>C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\imgui\imgui_impl_opengl3.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="ImGuiPlotArrayGetterData" Collapsed="true">
+    <Position X="9.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAAAAAAQAAAAAgAAAAAAA=</HashCode>
+      <FileName>C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\imgui\imgui_widgets.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="ImGuiTabBarSection" Collapsed="true">
+    <Position X="9.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAAAAAAAAAAAIAAEAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\imgui\imgui_widgets.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Enum Name="GlfwClientApi" Collapsed="true">
+    <Position X="7.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAQAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAIAAAA=</HashCode>
+      <FileName>C:\Users\Max Fyall\Documents\Github\Multidimensional_Plotter\imgui\imgui_impl_glfw.cpp</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
